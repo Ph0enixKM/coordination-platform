@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef } from "react";
-import styles from "./page.module.css";
+import styles from "./Header.module.css";
 
 export default function Header() {
   const mobileMenu = useRef<HTMLDetailsElement>(null);

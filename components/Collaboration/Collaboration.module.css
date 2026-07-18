@@ -1,0 +1,10 @@
+.collaboration { padding: 100px max(4vw, 28px); color: var(--navy); background: #fff; }
+.collaborationLine { width: min(1180px, 100%); height: 95px; margin: 0 auto 36px; object-fit: contain; }
+.threeColumns { display: grid; width: min(1180px, 100%); margin: 0 auto; border-top: 1px solid #cad2da; border-bottom: 1px solid #cad2da; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.threeColumns article { padding: 42px; border-right: 1px solid #cad2da; }
+.threeColumns article:last-child { border-right: 0; }
+.threeColumns span { color: var(--orange); font-family: "Poppins", sans-serif; font-size: 15px; font-weight: 600; }
+.threeColumns h3 { margin: 13px 0 14px; font-family: "Poppins", sans-serif; font-size: 26px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.23; }
+.threeColumns p { color: #586575; }
+@media (max-width: 860px) { .collaboration { padding-top: 76px; padding-bottom: 76px; } .threeColumns { grid-template-columns: 1fr; } .threeColumns article { border-right: 0; border-bottom: 1px solid #cad2da; } .threeColumns article:last-child { border-bottom: 0; } }
+@media (max-width: 620px) { .collaborationLine { height: 55px; } .threeColumns article { padding: 34px 28px; } }

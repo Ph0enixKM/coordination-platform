@@ -1,0 +1,9 @@
+.start { padding: 100px max(4vw, 28px); color: var(--navy); background: #fff; }
+.startGrid { display: grid; width: min(1000px, 100%); margin: 0 auto; grid-template-columns: 1fr 1fr; }
+.startGrid article { padding: 50px; color: #fff; background: var(--navy); }
+.startGrid article:last-child { color: var(--navy); border: 1px solid #d7dfe6; background: var(--soft); }
+.startGrid b { color: var(--orange); font-family: "Poppins", sans-serif; font-size: 54px; }
+.startGrid h3 { margin: 13px 0 14px; font-family: "Poppins", sans-serif; font-size: 25px; font-weight: 700; letter-spacing: -0.025em; line-height: 1.23; }
+.centerNote { width: min(800px, 100%); margin: 44px auto 0; text-align: center; color: #596575; }
+@media (max-width: 860px) { .start { padding-top: 76px; padding-bottom: 76px; } }
+@media (max-width: 620px) { .startGrid { grid-template-columns: 1fr; } .startGrid article { padding: 34px 28px; } }
