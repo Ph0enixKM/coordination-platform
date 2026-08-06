@@ -9,10 +9,12 @@
     "lint": "tsc --noEmit"
   },
   "dependencies": {
+    "@types/three": "^0.185.4",
     "lucide-react": "^1.25.0",
     "next": "^15.2.4",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "three": "^0.185.1"
   },
   "devDependencies": {
     "@types/node": "^22.13.10",

@@ -1,0 +1,184 @@
+.page {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background-color: black;
+}
+
+.intro {
+  position: relative;
+  width: min(96vw, 1100px);
+  height: clamp(310px, 46vw, 510px);
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+}
+
+.brandLine {
+  position: absolute;
+  inset: 0;
+  transform-origin: center;
+}
+
+.logoWrap {
+  --offset-x: -290px;
+  --offset-y: 0px;
+  --width: 280px;
+  --top-offset: 0px;
+  --make-room-scale: 0.8;
+  position: absolute;
+  top: calc(50% - var(--top-offset));
+  left: 50%;
+  width: var(--width);
+  aspect-ratio: 1;
+  opacity: 0;
+  z-index: 100;
+  transform: translate(-50%, -50%) scale(0.82);
+  will-change: opacity, transform;
+  background-image: url("/assets/logo-overlay.svg");
+  background-size: var(--width);
+  background-repeat: no-repeat;
+  background-position: 0 68%;
+  animation:
+    logo-arrive 0.5s 0.08s cubic-bezier(0.22, 1, 0.36, 1) forwards,
+    logo-make-room 0.86s 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.logoCanvas,
+.logoFallback {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.logoCanvas {
+  outline: none;
+  pointer-events: none;
+}
+
+.logoCanvas.isHidden {
+  display: none;
+}
+
+.logoFallback {
+  object-fit: contain;
+  padding: 12%;
+  filter: brightness(0) invert(1);
+}
+
+.titleClip {
+  --offset: 110px;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  overflow: hidden;
+  padding: 0.14em 0.08em 0.18em 0;
+  transform: translateY(-50%) translateX(calc(-100px - 50%));
+  will-change: opacity, clip-path;
+  animation: reveal-title 0.78s 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.title {
+  margin: 0;
+  color: #ffffff;
+  font-family: "Poppins", sans-serif;
+  font-size: 5.5rem;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.055em;
+  white-space: nowrap;
+  clip-path: inset(0 0 0 100%);
+  animation: title-drift 0.78s 0.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes logo-arrive {
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes logo-make-room {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%) translateX(var(--offset-x)) translateY(var(--offset-y)) scale(var(--make-room-scale));
+  }
+}
+
+@keyframes reveal-title {
+  to {
+    transform: translateY(-50%) translateX(calc(-50% + var(--offset)));
+  }
+}
+
+@keyframes title-drift {
+  40% {
+    clip-path: inset(0 0 0 0);
+  }
+  100% {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+@media (max-width: 800px) {
+  .intro {
+    width: 100vw;
+    height: 360px;
+  }
+
+  .title {
+    font-size: 4rem;
+  }
+
+  .titleClip {
+    --offset: 70px;
+  }
+
+  .logoWrap {
+    --width: 170px;
+    --offset-x: -210px;
+    --offset-y: 0px;
+    --top-offset: 0px;
+  }
+}
+
+@media (max-width: 580px) {
+  .intro {
+    width: 100vw;
+    height: 360px;
+  }
+
+  .title {
+    font-size: 3rem;
+    letter-spacing: -0.06em;
+    clip-path: inset(100% 0 0 0);
+  }
+
+  .titleClip {
+    --offset: 0%;
+    transform: translateY(calc(50px - 50%)) translateX(-50%);
+  }
+
+  .logoWrap {
+    --make-room-scale: 0.5;
+    --width: 280px;
+    --offset-x: 0%;
+    --offset-y: -100px;
+    --top-offset: 0px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brandLine,
+  .logoWrap,
+  .titleClip,
+  .title {
+    animation-duration: 0.01ms;
+    animation-delay: 0ms;
+  }
+}
