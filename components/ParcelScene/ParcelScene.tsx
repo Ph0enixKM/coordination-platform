@@ -78,12 +78,16 @@ const FOG_PATCH = /* glsl */ `
 /* --- camera --------------------------------------------------------------- */
 
 /** Scroll 0: the whole process read from above. */
-const CAM_TOP = new THREE.Vector3(2.7, 16, 22.4);
-const CAM_TOP_LOOK = new THREE.Vector3(FOG_FOCUS.x, 0, 2.5);
+// const CAM_TOP = new THREE.Vector3(2.7, 16, 22.4);
+const CAM_TOP = new THREE.Vector3(40, 20, 0);
+const CAM_TOP_LOOK = new THREE.Vector3(FOG_FOCUS.x, 0, 0);
 
 /** Scroll 1: down at belt height, watching parcels take the junction. */
 const CAM_LOW = new THREE.Vector3(1.7, 6.7, 11.8);
 const CAM_LOW_LOOK = new THREE.Vector3(12, 0.9, -0.5);
+
+/** Tightens the low shot enough to keep conveyor joins outside the frame. */
+const CAM_LOW_ZOOM = 1.3;
 
 /** Bows the descent out over the belts instead of cutting through them. */
 const CAM_BOW = new THREE.Vector3(0, 11, 17.5);
@@ -659,6 +663,8 @@ export default function ParcelScene() {
 
       camPath.getPoint(eased, camera.position);
       camLook.lerpVectors(CAM_TOP_LOOK, CAM_LOW_LOOK, eased);
+      camera.zoom = THREE.MathUtils.lerp(1, CAM_LOW_ZOOM, eased);
+      camera.updateProjectionMatrix();
 
       // Backing off along the shot's own sight line keeps its angle intact.
       if (dolly !== 1) {

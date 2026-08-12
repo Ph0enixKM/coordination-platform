@@ -1,21 +1,19 @@
-/*
- * Two and a half screens of scroll: the viewport below stays pinned for all of
- * it, and the distance travelled is what walks the camera down onto the belts.
- */
+/* A compact scroll chapter: long enough to move the camera, short enough to
+ * hand the page on without making the opening feel like a full-screen app. */
 .hero {
   position: relative;
-  height: 250svh;
+  height: 175svh;
   background-color: var(--paper);
 }
 
 .viewport {
   position: sticky;
-  top: 0;
+  top: clamp(18px, 5svh, 48px);
   display: flex;
   flex-direction: column;
   align-items: center;
-  height: 100svh;
-  padding: clamp(28px, 5.5svh, 62px) 24px 0;
+  width: 100%;
+  padding: clamp(20px, 3.5svh, 38px) clamp(16px, 3vw, 48px) 0;
   overflow: hidden;
 }
 
@@ -80,7 +78,7 @@
 .headline {
   position: relative;
   z-index: 1;
-  margin: clamp(42px, 7svh, 84px) 0 clamp(4px, 1.5svh, 18px);
+  margin: clamp(28px, 4svh, 52px) 0 clamp(4px, 1.2svh, 14px);
   max-width: 24ch;
   opacity: 0;
   color: var(--ink);
@@ -195,12 +193,21 @@
 }
 
 @media (max-width: 560px) {
+  .hero {
+    height: 160svh;
+  }
+
+  .viewport {
+    top: clamp(14px, 4svh, 32px);
+    padding-top: clamp(16px, 2.8svh, 24px);
+  }
+
   .row {
     --mark-size: clamp(52px, 15vw, 72px);
   }
 
   .headline {
-    margin-top: clamp(32px, 6svh, 60px);
+    margin-top: clamp(24px, 3.5svh, 34px);
     max-width: 16ch;
     font-size: clamp(1.5rem, 6.4vw, 2rem);
   }
