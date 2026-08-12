@@ -17,14 +17,6 @@
   height: 100svh;
   padding: clamp(28px, 5.5svh, 62px) 24px 0;
   overflow: hidden;
-  /* Barely-there wash — enough to keep the top from reading as flat paper. */
-  background-image: linear-gradient(
-    180deg,
-    rgba(1, 33, 65, 0.05) 0%,
-    rgba(1, 33, 65, 0.035) 20%,
-    rgba(1, 33, 65, 0.012) 34%,
-    rgba(1, 33, 65, 0) 46%
-  );
 }
 
 /* Covers the page until the mark has landed. */

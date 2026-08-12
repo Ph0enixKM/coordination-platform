@@ -13,6 +13,7 @@
   height: 100%;
   opacity: 0;
   transition: opacity 0.9s ease-out;
+  /*box-shadow: 0 0 10rem #f5f6f7 inset;*/
 }
 
 .stage[data-ready="true"] .canvas {
@@ -29,6 +30,7 @@
   inset: 0;
   pointer-events: none;
   background:
-    linear-gradient(90deg, #fff 0%, rgb(255 255 255 / 0%) 9%, rgb(255 255 255 / 0%) 91%, #fff 100%),
-    linear-gradient(180deg, #fff 0%, rgb(255 255 255 / 0%) 12%, rgb(255 255 255 / 0%) 88%, #fff 100%);
+    linear-gradient(90deg, var(--paper) 0%, rgb(255 255 255 / 0%) 9%, rgb(255 255 255 / 0%) 91%, var(--paper) 100%),
+    linear-gradient(180deg, var(--paper) 0%, rgb(255 255 255 / 0%) 12%, rgb(255 255 255 / 0%) 88%, var(--paper) 100%);
+  /*background-image: radial-gradient(ellipse 55% 55% at center, transparent 70%, var(--paper) 90%, var(--paper));*/
 }

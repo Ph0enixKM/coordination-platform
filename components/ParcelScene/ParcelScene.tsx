@@ -260,11 +260,13 @@ export default function ParcelScene() {
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1;
+    renderer.toneMappingExposure = 0.3;
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
     const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0xffffff);
-    scene.fog = new THREE.Fog(0xffffff, FOG_NEAR, FOG_FAR);
+    scene.background = new THREE.Color(0xf5f6f8);
+    scene.fog = new THREE.Fog(0xf5f6f8, FOG_NEAR, FOG_FAR);
 
     let environment: THREE.WebGLRenderTarget | null = null;
 
@@ -288,15 +290,36 @@ export default function ParcelScene() {
 
     buildEnvironment();
 
-    const key = new THREE.DirectionalLight(0xffffff, 1.55);
-    key.position.set(9, 14, 7);
+    // Kept low (~30°) so parcels throw their shadow along the belt rather than
+    // straight down into the gap between rollers, where it would not read.
+    const key = new THREE.DirectionalLight(0xf5f6f8, 20);
+    key.position.set(14, 8, 9);
+    key.castShadow = true;
+    key.shadow.mapSize.set(2048, 2048);
+    key.shadow.camera.near = 1;
+    key.shadow.camera.far = 60;
+    // Wide enough to hold the whole line; past the fog nothing is visible anyway.
+    key.shadow.camera.left = -24;
+    key.shadow.camera.right = 24;
+    key.shadow.camera.top = 22;
+    key.shadow.camera.bottom = -22;
+    // DirectionalLightShadow never rebuilds this itself, so without it the
+    // frustum stays at its default ±5 and almost nothing casts.
+    key.shadow.camera.updateProjectionMatrix();
+    // Rollers are round and tightly packed, which is exactly where acne shows.
+    key.shadow.normalBias = 0.06;
+    key.shadow.bias = -0.0004;
+    key.target.position.set(FOG_FOCUS.x, 0, FOG_FOCUS.y);
     scene.add(key);
+    scene.add(key.target);
 
-    const rim = new THREE.DirectionalLight(0xffffff, 0.55);
+    // Fill is kept low on purpose: a shadow is only ever as dark as the light
+    // that reaches into it, so the ambient rig is what sets shadow depth here.
+    const rim = new THREE.DirectionalLight(0xf5f6f8, 0.3);
     rim.position.set(-8, 6, -9);
     scene.add(rim);
 
-    scene.add(new THREE.HemisphereLight(0xffffff, 0xc9d4e0, 0.85));
+    scene.add(new THREE.HemisphereLight(0xf5f6f8, 0xb4c2d2, 0.45));
 
     const camera = new THREE.PerspectiveCamera(BASE_FOV, 1, 0.5, 200);
     camera.position.copy(CAM_TOP);
@@ -374,7 +397,7 @@ export default function ParcelScene() {
 
     const dressMaterial = (material: THREE.Material) => {
       if (material instanceof THREE.MeshStandardMaterial) {
-        material.envMapIntensity = 0.7;
+        material.envMapIntensity = 0.45;
       }
 
       material.onBeforeCompile = (shader) => {
@@ -402,6 +425,8 @@ export default function ParcelScene() {
       row.position.copy(source.position);
       row.quaternion.copy(source.quaternion);
       row.scale.copy(source.scale);
+      row.castShadow = true;
+      row.receiveShadow = true;
       // The row reaches far past the single roller's bounds.
       row.frustumCulled = false;
 
@@ -675,6 +700,10 @@ export default function ParcelScene() {
           : [object.material];
 
         materials.forEach(dressMaterial);
+
+        // Set before the parcel pool is cloned, so the clones inherit it.
+        object.castShadow = true;
+        object.receiveShadow = true;
 
         if (object.name.startsWith("Cylinder")) cylinders.push(object);
       });
