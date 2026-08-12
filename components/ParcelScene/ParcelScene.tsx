@@ -77,14 +77,19 @@ const FOG_PATCH = /* glsl */ `
 
 /* --- camera --------------------------------------------------------------- */
 
-/** Scroll 0: the whole process read from above. */
+/** Where the flight opens: the whole process read from above. */
 // const CAM_TOP = new THREE.Vector3(2.7, 16, 22.4);
 const CAM_TOP = new THREE.Vector3(5, 50, 0);
 const CAM_TOP_LOOK = new THREE.Vector3(FOG_FOCUS.x, 0, 0);
 
-/** Scroll 1: down at belt height, watching parcels take the junction. */
+/** Where it lands: down at belt height, watching parcels take the junction. */
 const CAM_LOW = new THREE.Vector3(40, 15, 0);
-const CAM_LOW_LOOK = new THREE.Vector3(FOG_FOCUS.x, 0, 0);
+
+/**
+ * Aimed under the belt line: the sorter is the only thing in frame worth
+ * looking at, and tilting down lifts it out of the dead sky above it.
+ */
+const CAM_LOW_LOOK = new THREE.Vector3(FOG_FOCUS.x, -1.5, 0);
 
 /** Tightens the low shot enough to keep conveyor joins outside the frame. */
 const CAM_LOW_ZOOM = 1.3;
@@ -102,14 +107,30 @@ const FRAME_ASPECT = 2.2;
  * angles the shots were built on, so it goes first; the lens only widens for
  * what is left over, and both stop before the view turns into a fisheye.
  */
-const MAX_DOLLY = 1.9;
+const MAX_DOLLY = 1.2;
 const MAX_LENS = 1.35;
+
+/* --- flight --------------------------------------------------------------- */
+
+/** Seconds the camera takes to travel from the top shot down to the low one. */
+const FLIGHT_DURATION = 4.2;
+
+/**
+ * Steeper than a cubic ease on purpose: the flight has to creep out of the top
+ * shot, cross the middle in one committed move, then brake hard into the low
+ * one and settle. Anything gentler reads as a plain glide.
+ */
+const FLIGHT_POWER = 7;
 
 const UNIT = new THREE.Vector3(1, 1, 1);
 
 const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
 
-const smoothstep = (t: number) => t * t * (3 - 2 * t);
+/** Symmetric power ease: flat at both ends, all of its speed in the middle. */
+const flightEase = (t: number) =>
+  t < 0.5
+    ? Math.pow(2 * t, FLIGHT_POWER) / 2
+    : 1 - Math.pow(2 - 2 * t, FLIGHT_POWER) / 2;
 
 const easeInOut = (t: number) =>
   t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
@@ -227,9 +248,18 @@ const findDivertFraction = (curve: THREE.CatmullRomCurve3) => {
   return 0.75;
 };
 
-export default function ParcelScene() {
+/**
+ * `play` starts the camera flight. The hero flips it once its own opening is
+ * over, so the two never run on top of each other.
+ */
+export default function ParcelScene({ play = false }: { play?: boolean }) {
   const stageRef = useRef<HTMLDivElement>(null);
   const [ready, setReady] = useState(false);
+
+  // Read by the frame loop, so arming the flight never restarts the scene.
+  const playRef = useRef(play);
+
+  playRef.current = play;
 
   useEffect(() => {
     const stage = stageRef.current;
@@ -331,28 +361,10 @@ export default function ParcelScene() {
     const camPath = new THREE.QuadraticBezierCurve3(CAM_TOP, CAM_BOW, CAM_LOW);
     const camLook = new THREE.Vector3().copy(CAM_TOP_LOOK);
 
-    /* --- scroll ---------------------------------------------------------- */
+    /* --- flight ---------------------------------------------------------- */
 
-    const driver = stage.closest<HTMLElement>("[data-scroll-stage]");
-    let scrollTarget = 0;
-    let scrollShown = 0;
-
-    const readScroll = () => {
-      if (!driver) {
-        scrollTarget = 0;
-        return;
-      }
-
-      const rect = driver.getBoundingClientRect();
-      const travel = rect.height - window.innerHeight;
-
-      scrollTarget = travel > 1 ? clamp01(-rect.top / travel) : 0;
-    };
-
-    readScroll();
-    scrollShown = scrollTarget;
-
-    window.addEventListener("scroll", readScroll, { passive: true });
+    /** Seconds into the flight; it only advances once the scene is armed. */
+    let flightTime = 0;
 
     /* --- sizing ---------------------------------------------------------- */
 
@@ -382,10 +394,7 @@ export default function ParcelScene() {
 
     resize();
 
-    const observer = new ResizeObserver(() => {
-      resize();
-      readScroll();
-    });
+    const observer = new ResizeObserver(resize);
     observer.observe(stage);
 
     /* --- model ----------------------------------------------------------- */
@@ -398,6 +407,7 @@ export default function ParcelScene() {
     let model: THREE.Object3D | null = null;
     let switcher: THREE.Object3D | null = null;
     let disposed = false;
+    let loaded = false;
 
     const dressMaterial = (material: THREE.Material) => {
       if (material instanceof THREE.MeshStandardMaterial) {
@@ -657,9 +667,15 @@ export default function ParcelScene() {
       const delta = Math.min(timer.getDelta(), 0.1);
       const step = reduceMotion ? 0 : delta;
 
-      scrollShown += (scrollTarget - scrollShown) * Math.min(1, delta * 5);
+      // The flight is held back until the hero arms it and the model is in —
+      // the canvas fades in over the top shot, and only then does it move.
+      if (reduceMotion) {
+        flightTime = FLIGHT_DURATION;
+      } else if (playRef.current && loaded) {
+        flightTime = Math.min(FLIGHT_DURATION, flightTime + delta);
+      }
 
-      const eased = smoothstep(scrollShown);
+      const eased = flightEase(clamp01(flightTime / FLIGHT_DURATION));
 
       camPath.getPoint(eased, camera.position);
       camLook.lerpVectors(CAM_TOP_LOOK, CAM_LOW_LOOK, eased);
@@ -788,6 +804,7 @@ export default function ParcelScene() {
       }
 
       scene.add(root);
+      loaded = true;
       setReady(true);
     });
 
@@ -796,7 +813,6 @@ export default function ParcelScene() {
     return () => {
       disposed = true;
       window.cancelAnimationFrame(frame);
-      window.removeEventListener("scroll", readScroll);
       canvas.removeEventListener("webglcontextlost", onContextLost);
       canvas.removeEventListener("webglcontextrestored", onContextRestored);
       observer.disconnect();

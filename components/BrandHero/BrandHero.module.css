@@ -1,18 +1,16 @@
-/* A compact scroll chapter: long enough to move the camera, short enough to
- * hand the page on without making the opening feel like a full-screen app. */
+/* The camera now runs on its own clock, so the hero is just as tall as what it
+ * holds — no scroll chapter to pin. */
 .hero {
   position: relative;
-  height: 175svh;
   background-color: var(--paper);
 }
 
 .viewport {
-  position: sticky;
-  top: clamp(18px, 5svh, 48px);
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
+  margin-top: clamp(18px, 5svh, 48px);
   padding: clamp(20px, 3.5svh, 38px) clamp(16px, 3vw, 48px) 0;
   overflow: hidden;
 }
@@ -193,12 +191,8 @@
 }
 
 @media (max-width: 560px) {
-  .hero {
-    height: 160svh;
-  }
-
   .viewport {
-    top: clamp(14px, 4svh, 32px);
+    margin-top: clamp(14px, 4svh, 32px);
     padding-top: clamp(16px, 2.8svh, 24px);
   }
 

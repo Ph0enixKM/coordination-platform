@@ -17,6 +17,13 @@ const SPLASH_WIDTH_RATIO = 0.86;
 /** Splash size of the logo box, matching the original full-screen intro. */
 const SPLASH_MARK_SIZE = 224;
 
+/**
+ * How long after the page settles the camera flight is armed. The splash needs
+ * the black to be off the screen first; a refresh only waits for the fade.
+ */
+const FLIGHT_CUE = 1000;
+const FLIGHT_CUE_FADE = 650;
+
 type Phase = "pending" | "intro" | "settled";
 
 const hasPlayed = () => {
@@ -38,6 +45,7 @@ const markPlayed = () => {
 export default function BrandHero() {
   const [phase, setPhase] = useState<Phase>("pending");
   const [introPlayed, setIntroPlayed] = useState(false);
+  const [flying, setFlying] = useState(false);
   const brandRef = useRef<HTMLDivElement>(null);
   const flightRef = useRef<HTMLDivElement>(null);
   const rowRef = useRef<HTMLDivElement>(null);
@@ -124,18 +132,28 @@ export default function BrandHero() {
     };
   }, [phase, measureSplash]);
 
+  // The sorter takes over the moment the opening is done with the screen.
+  useEffect(() => {
+    if (phase !== "settled") return;
+
+    const timer = window.setTimeout(
+      () => setFlying(true),
+      introPlayed ? FLIGHT_CUE : FLIGHT_CUE_FADE,
+    );
+
+    return () => window.clearTimeout(timer);
+  }, [phase, introPlayed]);
+
   return (
     <section
       className={styles.hero}
       data-phase={phase}
       data-intro={introPlayed ? "true" : undefined}
-      data-scroll-stage=""
     >
       <noscript>
         <style>{`.${styles.backdrop}{opacity:0}.${styles.brand},.${styles.headline}{opacity:1}.${styles.wordmark}{-webkit-text-fill-color:#012141}`}</style>
       </noscript>
 
-      {/* Pinned for the length of the stage, so the scroll drives the sorter. */}
       <div className={styles.viewport}>
         {/*
           Sticky positioning makes the viewport its own stacking context, so the
@@ -157,7 +175,7 @@ export default function BrandHero() {
 
         <h1 className={styles.headline}>Rozwój firmy zaczyna się od dobrych decyzji</h1>
 
-        <ParcelScene />
+        <ParcelScene play={flying} />
       </div>
     </section>
   );
