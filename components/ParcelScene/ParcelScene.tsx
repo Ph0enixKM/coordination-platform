@@ -79,18 +79,18 @@ const FOG_PATCH = /* glsl */ `
 
 /** Scroll 0: the whole process read from above. */
 // const CAM_TOP = new THREE.Vector3(2.7, 16, 22.4);
-const CAM_TOP = new THREE.Vector3(40, 20, 0);
+const CAM_TOP = new THREE.Vector3(5, 50, 0);
 const CAM_TOP_LOOK = new THREE.Vector3(FOG_FOCUS.x, 0, 0);
 
 /** Scroll 1: down at belt height, watching parcels take the junction. */
-const CAM_LOW = new THREE.Vector3(1.7, 6.7, 11.8);
-const CAM_LOW_LOOK = new THREE.Vector3(12, 0.9, -0.5);
+const CAM_LOW = new THREE.Vector3(40, 15, 0);
+const CAM_LOW_LOOK = new THREE.Vector3(FOG_FOCUS.x, 0, 0);
 
 /** Tightens the low shot enough to keep conveyor joins outside the frame. */
 const CAM_LOW_ZOOM = 1.3;
 
 /** Bows the descent out over the belts instead of cutting through them. */
-const CAM_BOW = new THREE.Vector3(0, 11, 17.5);
+const CAM_BOW = new THREE.Vector3(20, 20, 0);
 
 const BASE_FOV = 33;
 
