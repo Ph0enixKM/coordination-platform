@@ -79,7 +79,7 @@ const FOG_PATCH = /* glsl */ `
 
 /** Scroll 0: the whole process read from above. */
 const CAM_TOP = new THREE.Vector3(2.7, 16, 22.4);
-const CAM_TOP_LOOK = new THREE.Vector3(7, 0, 2.5);
+const CAM_TOP_LOOK = new THREE.Vector3(FOG_FOCUS.x, 0, 2.5);
 
 /** Scroll 1: down at belt height, watching parcels take the junction. */
 const CAM_LOW = new THREE.Vector3(1.7, 6.7, 11.8);
