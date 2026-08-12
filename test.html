@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Cave of Whispers</title>
+<style>
+  body { background: #050510; color: #ccc; font-family: 'Courier New', monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
+  canvas { border: 2px solid #333; image-rendering: pixelated; cursor: default; }
+  #log { width: 640px; height: 80px; color: #aaa; font-size: 13px; margin-top: 10px; overflow-y: auto; border-left: 2px solid #333; padding-left: 10px; }
+</style>
+</head>
+<body>
+
+<canvas id="game" width="64" height="80"></canvas>
+<div id="log"></div>
+
+<script>
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+const logDiv = document.getElementById('log');
+
+// --- CONFIGURATION ---
+const COLS = 64; // width in characters
+const ROWS = 80; // height in characters
+const FLOOR_CHAR = ' ';
+const WALL_CHAR = '#';
+const PLAYER_CHAR = '@';
+const ENEMY_CHAR = 'g';
+const DOOR_CHAR = '+';
+const CHEST_CHAR = '$';
+
+// --- STATE ---
+let map, player, enemies, items, exits, logLines, turn;
+
+function init() {
+  // Generate Dungeon Map (Simple cellular-style rooms)
+  map = createMap(COLS, ROWS);
+
+  player = { x: 3, y: 3, hp: 20, maxHp: 20, atk: 4 };
+  enemies = [];
+  items = [];
+  logLines = [];
+  turn = 1;
+
+  // Create Exit (North-East corner)
+  exits = [{ x: COLS - 3, y: 3 }];
+
+  // Generate Enemies and Items
+  for(let i=0; i<6; i++) enemies.push(spawnEntity());
+  for(let i=0; i<2; i++) items.push({type:'potion', x:Math.floor(Math.random()*COLS-4)+4, y:Math.floor(Math.random()*(ROWS/2))+3, color: '#a0f'});
+
+  log("Welcome to the Cave of Whispers.", true);
+  updateUI();
+  draw();
+}
+
+// --- MAP GENERATION (BSP-lite: Random Rooms) ---
+function createMap(w, h) {
+  // Initialize all walls
+  let grid = Array.from({length:h}, () => new Array(w).fill('#'));
+
+  const roomW = 5, roomH = 6;
+  function addRoom(x,y) {
+    const rw = Math.floor(Math.random()*4)+roomW;
+    const rh = Math.floor(Math.random()*3)+roomH;
+    const rx = Math.max(0, x-Math.floor(rw/2));
+    const ry = Math.max(0, y-Math.floor(rh/2));
+
+    for(let i=ry;i<ry+rh;i++) {
+      for(let j=rx;j<rx+rw;j++) grid[i][j] = ' ';
+    }
+    return [Math.floor(rx+rw/2), Math.floor(ry+rh/2)];
+  }
+
+  const rooms = [];
+  let cx=Math.floor(w/3), cy=Math.floor(h/3);
+
+  for(let r=0; r<4; r++) {
+    // Ensure rooms aren't overlapping too much with random jitter
+    const [rx, ry] = addRoom(cx, cy);
+    cx = rx + (Math.random()>0.5?2:-1);
+    cy = ry + (Math.random()>0.5?2:-1);
+
+    // Connect current room to previous one via a simple corridor
+    if(rooms.length > 0) {
+      const prev = rooms[rooms.length-1];
+      const [px, py] = addRoom(cx, cy);
+
+      // Simple L-corridor
+      let cx_t=prev.x, cy_t=prev.y;
+      for(let i=cx_t;i<cx; i++) grid[cy][i]=FLOOR_CHAR; // horizontal
+      for(let i=cy_t;i<cy; i++) grid[i][cx]=FLOOR_CHAR; // vertical
+
+      // Recalculate coords for the new "center"
+      cx = Math.floor((rx+px)/2); cy = Math.floor((ry+py)/2);
+      rooms.push([Math.min(rx,px), Math.max(rx,px), Math.min(ry,py), Math.max(ry,py)]); // Store bounds for collision
+    } else {
+       cx=rx; cy=ry;
+       rooms.push([Math.floor(w/3), Math.floor(h/3), roomW, roomH]);
+    }
+  }
+
+  return grid;
+}
+
+function spawnEntity() {
+  let pos;
+  do {
+    pos = { x: Math.floor(Math.random()*COLS-8)+4, y: Math.floor(Math.random()*(ROWS/2))+3 };
+  } while (map[pos.y][pos.x] !== ' ' || getDist(pos, player) < 5);
+
+  const typeRoll = Math.random();
+  if(typeRoll > 0.7) return { type:'slime', hp:10, maxHp:10, atk:2, name:'Slime' };
+  else if (typeRoll > 0.4) return { type:'goblin', hp:8, maxHp:8, atk:3, name:'Goblin' };
+  else return { type:'skeleton', hp:15, maxHp:15, atk:6, name:'Skeleton' };
+}
+
+function getDist(a,b) { return Math.abs(a.x-b.x)+Math.abs(a.y-b.y); }
+
+// --- INPUT & LOGIC ---
+window.addEventListener('keydown', (e) => {
+  if(!map || map[player.y][player.x] === WALL_CHAR) return; // dead
+
+  let dx=0, dy=0;
+  const dir = document.getElementById('dir');
+
+  switch(e.key) {
+    case 'ArrowUp': case 'w': case 'W': dy=-1; break;
+    case 'ArrowDown': case 's': case 'S': dy=1; break;
+    case 'ArrowLeft': case 'a': case 'A': dx=-1; break;
+    case 'ArrowRight': case 'd': case 'D': dx=1; break;
+    case 'Enter': action(); return; // Combat menu toggle
+  }
+
+  if(dir) dir.value = e.key;
+
+  let nx = player.x+dx, ny = player.y+dy;
+
+  // Check Wall Collision
+  if(map[ny][nx] === WALL_CHAR || items.some(i => i.x===nx && i.y===ny)) return;
+
+  // Move Player
+  const oldX = player.x, oldY = player.y;
+  player.x = nx; player.y = ny;
+
+  // Check Items
+  const itemIndex = items.findIndex(i => i.x === nx && i.y === ny);
+  if(itemIndex !== -1) {
+    const it = items[itemIndex];
+    log(`Picked up ${it.color} <${it.type}>`);
+    items.splice(itemIndex, 1);
+    if(it.type === 'potion') { player.hp = Math.min(player.maxHp, player.hp+5); }
+    updateUI(); draw(); return; // Turn consumed by picking up item? Or allow enemy action? Simple: turn consumed.
+  }
+
+  // Check Combat
+  const adjEnemy = enemies.find(en => en.x === nx && en.y === ny);
+  if(adjEnemy) {
+    log(`Attacking ${adjEnemy.name} for ${player.atk} dmg!`);
+    draw(); return; // Wait for Enter to resolve combat turn
+  }
+
+  draw();
+
+  if(adjEnemy) return; // If attacking, wait.
+
+  // Enemy Turn
+  enemies.forEach(en => {
+    let edx = en.x - player.x;
+    let edy = en.y - player.y;
+
+    // Simple pathing: move towards player
+    if(Math.abs(edx)+Math.abs(edy) > 1 && map[en.y+dy][en.x+dx] === ' ') {
+       edx *= 2; edy *= 2;
+    } else {
+      edx=0; edy=0;
+    }
+
+    if(en.x !== player.x || en.y !== player.y) {
+       // Moving through player
+       const dx_p = player.x - en.x;
+       const dy_p = player.y - en.y;
+
+       // Attack Player logic
+       const dmg = Math.max(1, Math.floor(Math.random()*en.atk));
+       player.hp -= dmg;
+       log(`${en.name} hits you for ${dmg}!`);
+    } else {
+      // Hit adjacent or same
+      const dx_p = 0; const dy_p = 0;
+      const dmg = Math.max(1, Math.floor(Math.random()*en.atk));
+      player.hp -= dmg;
+    }
+  });
+
+  updateUI();
+  if(player.hp <= 0) gameOver();
+});
+
+function action() {
+  // Check adjacency for combat menu
+  let adjEnemy = enemies.find(e => getDist(e, player) === 1);
+
+  if(!adjEnemy) {
+    log("Nothing to attack!"); return;
+  }
+
+  // If we are in a "menu" mode (handled simply here by checking hp/damage immediately)
+  const dmg = Math.max(0, adjEnemy.hp - player.atk);
+  adjEnemy.hp -= player.atk;
+
+  log(`You hit ${adjEnemy.name} for ${player.atk}!`);
+  if(adjEnemy.hp <= 0) {
+    log(`${adjEnemy.name} defeated!`);
+    enemies = enemies.filter(e => e !== adjEnemy);
+
+    // Loot chance
+    if(Math.random() > 0.5 && items.length < 3) {
+       const type = Math.random() > 0.5 ? 'potion' : 'gold';
+       items.push({type:type, x:player.x+1, y:player.y, color: '#f0a'});
+       log(`Loot dropped!`);
+    }
+  }
+
+  updateUI(); draw();
+}
+
+function updateUI() {
+  const bar = Math.max(0, Math.min(100, (player.hp / player.maxHp) * 100));
+  ctx.fillStyle = '#500';
+  ctx.font = '8px monospace';
+  ctx.fillText(`HP: [${'#'.repeat(bar)}${'.'.repeat(100-bar)}]`, 2, 12);
+
+  let atkDisplay = `ATK: ${player.atk}`;
+  if(items.some(i => i.type === 'sword')) atkDisplay += " (Sword!)";
+
+  ctx.fillText(atkDisplay, 64-80, 12);
+
+  // Scroll log
+  const msg = document.createElement('div');
+  msg.textContent = '> ' + logLines[logLines.length-1] || '';
+  msg.style.marginTop = '-20px';
+  msg.style.color = '#f88';
+  logDiv.appendChild(msg);
+}
+
+function log(msg, clear) {
+  if(clear) logLines = [];
+  const span = document.createElement('span');
+  span.textContent = msg;
+  logDiv.prepend(span); // prepend to show newest at top (visual trick)
+  logLines.push(msg);
+  if(logLines.length > 50) {
+    while(logLines.length < 1) logLines.pop();
+  }
+}
+
+// --- DRAWING ---
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Map Background
+  ctx.fillStyle = '#0a0a0a';
+  ctx.fillRect(0, 0, COLS, ROWS);
+
+  for(let y=2; y<ROWS-2; y++) {
+    for(let x=1; x<COLS-1; x++) {
+      const c = map[y][x];
+      if(c !== FLOOR_CHAR) ctx.fillStyle = '#2a2'; // Walls green/dark
+      else ctx.fillStyle = '#000'; // Floor black
+
+      // Highlight exit area
+      if(x === exits[0].x && y === exits[0].y) ctx.fillStyle = '#335';
+
+      if(c !== WALL_CHAR || (c === FLOOR_CHAR && map[y][x] === ' ')) {
+         ctx.fillRect(x, y, 1, 1);
+
+         // Draw characters on top of floor
+         const ch = (map[y][x] === FLOOR_CHAR) ? '.' : '#';
+         ctx.fillStyle = c === WALL_CHAR ? '#335' : '#0a2'; // faint grid lines
+         ctx.font = '6px monospace';
+         ctx.fillText(ch, x+0.2, y+0.7);
+      }
+    }
+  }
+
+  // Draw Items & Enemies on top of floor
+  enemies.forEach(e => {
+     if(map[e.y][e.x] === FLOOR_CHAR) {
+       ctx.fillStyle = '#f55';
+       ctx.font = '6px monospace';
+       ctx.fillText(ENEMY_CHAR, e.x+0.2, e.y+0.7);
+     } else {
+        // Draw on wall (simple offset)
+        ctx.fillStyle = '#f55';
+        ctx.fillText('>', e.x+1, e.y-1);
+     }
+  });
+
+  items.forEach(i => {
+    if(map[i.y][i.x] === FLOOR_CHAR) {
+      ctx.fillStyle = i.color;
+      ctx.font = '6px monospace';
+      ctx.fillText(CHEST_CHAR, i.x+0.2, i.y+0.7);
+    } else {
+       ctx.fillStyle = i.color;
+       ctx.fillText('>', i.x+1, i.y-1);
+    }
+  });
+
+  // Exit Glow
+  if(map[exits[0].y][exits[0].x] === FLOOR_CHAR) {
+     ctx.font = '6px monospace';
+     ctx.fillText(DOOR_CHAR, exits[0]+0.2, exits[0].y+0.7);
+     ctx.fillStyle='white';
+  }
+
+  // Player
+  ctx.fillStyle = '#ff0';
+  ctx.font = '6px monospace';
+  ctx.fillText(PLAYER_CHAR, player.x+0.2, player.y+0.7);
+}
+
+function gameOver() {
+  draw();
+  logLines.push("YOU DIED.");
+  updateUI();
+
+  // Overlay text manually
+  ctx.fillStyle = 'rgba(0,0,0,0.85)';
+  ctx.fillRect(0,0,canvas.width, canvas.height);
+  ctx.fillStyle='red';
+  ctx.font = '16px monospace';
+  ctx.fillText("GAME OVER", canvas/2-30, canvas/2 - 10);
+
+  logDiv.innerHTML = "";
+  const span = document.createElement('div');
+  span.textContent = "> Press F5 to restart.";
+  span.style.color = "red";
+  logDiv.appendChild(span);
+}
+
+init();
+</script>
+</body>
+</html>

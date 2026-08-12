@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import LogoMark from "@/components/LogoMark/LogoMark";
 import type { LogoTone } from "@/components/LogoMark/LogoMark";
+import ParcelScene from "@/components/ParcelScene/ParcelScene";
 import styles from "./BrandHero.module.css";
 
 const SESSION_KEY = "coordination:intro-played";
@@ -128,25 +129,36 @@ export default function BrandHero() {
       className={styles.hero}
       data-phase={phase}
       data-intro={introPlayed ? "true" : undefined}
+      data-scroll-stage=""
     >
       <noscript>
         <style>{`.${styles.backdrop}{opacity:0}.${styles.brand},.${styles.headline}{opacity:1}.${styles.wordmark}{-webkit-text-fill-color:#012141}`}</style>
       </noscript>
 
-      <div className={styles.backdrop} aria-hidden="true" />
+      {/* Pinned for the length of the stage, so the scroll drives the sorter. */}
+      <div className={styles.viewport}>
+        {/*
+          Sticky positioning makes the viewport its own stacking context, so the
+          backdrop has to live inside it to stay under the brand during the
+          splash — from outside, its z-index would cover the whole hero.
+        */}
+        <div className={styles.backdrop} aria-hidden="true" />
 
-      <div className={styles.brand} ref={brandRef}>
-        <div className={styles.flight} ref={flightRef}>
-          <div className={styles.row} ref={rowRef}>
-            <div className={styles.mark} ref={markRef}>
-              <LogoMark tone={tone} />
+        <div className={styles.brand} ref={brandRef}>
+          <div className={styles.flight} ref={flightRef}>
+            <div className={styles.row} ref={rowRef}>
+              <div className={styles.mark} ref={markRef}>
+                <LogoMark tone={tone} />
+              </div>
+              <span className={styles.wordmark}>Coordination</span>
             </div>
-            <span className={styles.wordmark}>Coordination</span>
           </div>
         </div>
-      </div>
 
-      <h1 className={styles.headline}>Rozwój firmy zaczyna się od dobrych decyzji</h1>
+        <h1 className={styles.headline}>Rozwój firmy zaczyna się od dobrych decyzji</h1>
+
+        <ParcelScene />
+      </div>
     </section>
   );
 }
