@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import LogoMark from "@/components/LogoMark/LogoMark";
 import type { LogoTone } from "@/components/LogoMark/LogoMark";
+import ParcelScene from "@/components/ParcelScene/ParcelScene";
 import styles from "./BrandHero.module.css";
 
 const SESSION_KEY = "coordination:intro-played";
@@ -15,6 +16,13 @@ const SPLASH_WIDTH_RATIO = 0.86;
 
 /** Splash size of the logo box, matching the original full-screen intro. */
 const SPLASH_MARK_SIZE = 224;
+
+/**
+ * How long after the page settles the camera flight is armed. The splash needs
+ * the black to be off the screen first; a refresh only waits for the fade.
+ */
+const FLIGHT_CUE = 1000;
+const FLIGHT_CUE_FADE = 650;
 
 type Phase = "pending" | "intro" | "settled";
 
@@ -37,6 +45,7 @@ const markPlayed = () => {
 export default function BrandHero() {
   const [phase, setPhase] = useState<Phase>("pending");
   const [introPlayed, setIntroPlayed] = useState(false);
+  const [flying, setFlying] = useState(false);
   const brandRef = useRef<HTMLDivElement>(null);
   const flightRef = useRef<HTMLDivElement>(null);
   const rowRef = useRef<HTMLDivElement>(null);
@@ -123,6 +132,18 @@ export default function BrandHero() {
     };
   }, [phase, measureSplash]);
 
+  // The sorter takes over the moment the opening is done with the screen.
+  useEffect(() => {
+    if (phase !== "settled") return;
+
+    const timer = window.setTimeout(
+      () => setFlying(true),
+      introPlayed ? FLIGHT_CUE : FLIGHT_CUE_FADE,
+    );
+
+    return () => window.clearTimeout(timer);
+  }, [phase, introPlayed]);
+
   return (
     <section
       className={styles.hero}
@@ -133,20 +154,29 @@ export default function BrandHero() {
         <style>{`.${styles.backdrop}{opacity:0}.${styles.brand},.${styles.headline}{opacity:1}.${styles.wordmark}{-webkit-text-fill-color:#012141}`}</style>
       </noscript>
 
-      <div className={styles.backdrop} aria-hidden="true" />
+      <div className={styles.viewport}>
+        {/*
+          Sticky positioning makes the viewport its own stacking context, so the
+          backdrop has to live inside it to stay under the brand during the
+          splash — from outside, its z-index would cover the whole hero.
+        */}
+        <div className={styles.backdrop} aria-hidden="true" />
 
-      <div className={styles.brand} ref={brandRef}>
-        <div className={styles.flight} ref={flightRef}>
-          <div className={styles.row} ref={rowRef}>
-            <div className={styles.mark} ref={markRef}>
-              <LogoMark tone={tone} />
+        <div className={styles.brand} ref={brandRef}>
+          <div className={styles.flight} ref={flightRef}>
+            <div className={styles.row} ref={rowRef}>
+              <div className={styles.mark} ref={markRef}>
+                <LogoMark tone={tone} />
+              </div>
+              <span className={styles.wordmark}>Coordination</span>
             </div>
-            <span className={styles.wordmark}>Coordination</span>
           </div>
         </div>
-      </div>
 
-      <h1 className={styles.headline}>Rozwój firmy zaczyna się od dobrych decyzji</h1>
+        <h1 className={styles.headline}>Rozwój firmy zaczyna się od dobrych decyzji</h1>
+
+        <ParcelScene play={flying} />
+      </div>
     </section>
   );
 }

@@ -40,12 +40,19 @@ export default function LogoMark({ tone = "light" }: { tone?: LogoTone }) {
     fallbackCamera.lookAt(0, 0, 0);
     let activeCamera: THREE.Camera = fallbackCamera;
 
-    const renderer = new THREE.WebGLRenderer({
-      canvas,
-      alpha: true,
-      antialias: true,
-      powerPreference: "high-performance",
-    });
+    // A browser that has run out of WebGL contexts returns one that is already
+    // lost, and three throws reading its capabilities — fall back to the SVG.
+    let renderer: THREE.WebGLRenderer;
+
+    try {
+      // No powerPreference on purpose — see ParcelScene: asking for the discrete
+      // GPU costs every context already on the page.
+      renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
+    } catch {
+      setModelFailed(true);
+      return;
+    }
+
     renderer.setClearColor(0x000000, 0);
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -61,7 +68,8 @@ export default function LogoMark({ tone = "light" }: { tone?: LogoTone }) {
     const planeStartScale = new THREE.Vector3(1, 1, 1);
     let frame = 0;
     let disposed = false;
-    const clock = new THREE.Clock();
+    const timer = new THREE.Timer();
+    timer.connect(document);
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
     // Tone is eased rather than swapped, so it can ride along with the settle.
@@ -69,7 +77,6 @@ export default function LogoMark({ tone = "light" }: { tone?: LogoTone }) {
     const keyLights: THREE.PointLight[] = [];
     const shownColor = TONES[toneRef.current].color.clone();
     let shownIntensity = TONES[toneRef.current].intensity;
-    let lastElapsed = 0;
 
     const applyTone = (delta: number) => {
       const target = TONES[toneRef.current];
@@ -87,9 +94,10 @@ export default function LogoMark({ tone = "light" }: { tone?: LogoTone }) {
     const render = () => {
       if (disposed) return;
 
-      const elapsed = clock.getElapsedTime();
-      const delta = Math.min(elapsed - lastElapsed, 0.1);
-      lastElapsed = elapsed;
+      timer.update();
+
+      const elapsed = timer.getElapsed();
+      const delta = Math.min(timer.getDelta(), 0.1);
 
       applyTone(delta);
 
@@ -185,6 +193,7 @@ export default function LogoMark({ tone = "light" }: { tone?: LogoTone }) {
     return () => {
       disposed = true;
       window.cancelAnimationFrame(frame);
+      timer.disconnect();
 
       loadedRoot?.traverse((object) => {
         if (!(object instanceof THREE.Mesh)) return;
