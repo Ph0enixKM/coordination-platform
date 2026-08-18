@@ -1,346 +1,815 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pl">
 <head>
-<meta charset="UTF-8">
-<title>Cave of Whispers</title>
-<style>
-  body { background: #050510; color: #ccc; font-family: 'Courier New', monospace; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; margin: 0; }
-  canvas { border: 2px solid #333; image-rendering: pixelated; cursor: default; }
-  #log { width: 640px; height: 80px; color: #aaa; font-size: 13px; margin-top: 10px; overflow-y: auto; border-left: 2px solid #333; padding-left: 10px; }
-</style>
+    <meta charset="UTF-8">
+    <title>Wioska w Lesie - RTS</title>
+    <style>
+        body { margin: 0; background: #222; font-family: 'Courier New', monospace; overflow: hidden; }
+        canvas { display: block; cursor: crosshair; }
+        #ui {
+            position: absolute; top: 10px; left: 10px; color: white;
+            background: rgba(0,0,0,0.7); padding: 15px; border-radius: 8px;
+            pointer-events: none; user-select: none; line-height: 1.6; min-width: 200px;
+        }
+        #ui span { font-weight: bold; color: #ffd700; }
+        .hp-bar-container { width: 150px; height: 8px; background: #555; border-radius: 4px; margin-top: 2px; display: inline-block; vertical-align: middle;}
+        .hp-bar-fill { height: 100%; border-radius: 4px; transition: width 0.3s; }
+    </style>
 </head>
 <body>
 
-<canvas id="game" width="64" height="80"></canvas>
-<div id="log"></div>
+<div id="ui">
+    <div><span>DREWNO:</span> <span id="res-wood">50</span></div>
+    <div><span>JAGODY:</span> <span id="res-berry">50</span></div>
+    <div><span>WOJOWNICY:</span> <span id="unit-warrior">0</span></div>
+    <hr style="border-color:#444;">
+    <div id="build-costs"></div>
+    <div id="game-msg" style="color: #ff6b6b; font-size: 12px; display:none;"></div>
+</div>
+
+<canvas id="game"></canvas>
 
 <script>
+// ==========================================
+// KONFIGURACJA I STANY GRY
+// ==========================================
 const canvas = document.getElementById('game');
 const ctx = canvas.getContext('2d');
-const logDiv = document.getElementById('log');
 
-// --- CONFIGURATION ---
-const COLS = 64; // width in characters
-const ROWS = 80; // height in characters
-const FLOOR_CHAR = ' ';
-const WALL_CHAR = '#';
-const PLAYER_CHAR = '@';
-const ENEMY_CHAR = 'g';
-const DOOR_CHAR = '+';
-const CHEST_CHAR = '$';
+let W, H;
+function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
+window.addEventListener('resize', resize);
+resize();
 
-// --- STATE ---
-let map, player, enemies, items, exits, logLines, turn;
+// Map Size
+const MAP_W = 3000;
+const MAP_H = 3000;
+canvas.width = Math.max(W, MAP_W); // scroll logic handled later or fixed view? Let's do fixed camera for RTS feel.
+canvas.height = Math.max(H, MAP_H);
 
-function init() {
-  // Generate Dungeon Map (Simple cellular-style rooms)
-  map = createMap(COLS, ROWS);
+// Camera
+let camX = (MAP_W - W) / 2;
+let camY = (MAP_H - H) / 2;
 
-  player = { x: 3, y: 3, hp: 20, maxHp: 20, atk: 4 };
-  enemies = [];
-  items = [];
-  logLines = [];
-  turn = 1;
+const TILE = 40;
+const COLS = Math.ceil(MAP_W / TILE);
+const ROWS = Math.ceil(MAP_H / TILE);
 
-  // Create Exit (North-East corner)
-  exits = [{ x: COLS - 3, y: 3 }];
+// Resource Map Generation
+const mapData = []; // 0: grass, 1: forest, 2: bushes
+for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+        const x = c * TILE + Math.random() * TILE;
+        const y = r * TILE + Math.random() * TILE;
 
-  // Generate Enemies and Items
-  for(let i=0; i<6; i++) enemies.push(spawnEntity());
-  for(let i=0; i<2; i++) items.push({type:'potion', x:Math.floor(Math.random()*COLS-4)+4, y:Math.floor(Math.random()*(ROWS/2))+3, color: '#a0f'});
+        // Center is cleared for player base
+        if (Math.abs(x - MAP_W/2) < 100 && Math.abs(y - MAP_H/4) < 150) { mapData.push({x, y, type: 0}); continue; }
 
-  log("Welcome to the Cave of Whispers.", true);
-  updateUI();
-  draw();
+        const r = Math.random();
+        if (r < 0.3) { // Forest
+            mapData.push({x, y, type: 1, resource: 'wood', amount: 25});
+        } else if (r < 0.6) { // Bushes
+            mapData.push({x, y, type: 2, resource: 'berry', amount: 20});
+        } else { // Grass
+            mapData.push({x, y, type: 0});
+        }
+    }
 }
 
-// --- MAP GENERATION (BSP-lite: Random Rooms) ---
-function createMap(w, h) {
-  // Initialize all walls
-  let grid = Array.from({length:h}, () => new Array(w).fill('#'));
+// Game State
+const state = {
+    wood: 60, berry: 60,
+    villagers: [], warriors: [], enemies: [], buildings: [], particles: [],
+    selectedUnit: null, actionMode: 'idle', // idle, gather_wood, gather_berry, build_market, build_hut, build_barracks, send_warrior
+    gameOver: false, timeAlive: 0
+};
 
-  const roomW = 5, roomH = 6;
-  function addRoom(x,y) {
-    const rw = Math.floor(Math.random()*4)+roomW;
-    const rh = Math.floor(Math.random()*3)+roomH;
-    const rx = Math.max(0, x-Math.floor(rw/2));
-    const ry = Math.max(0, y-Math.floor(rh/2));
+// Building Templates
+const BUILDING_TYPES = {
+    market: { name: "Rynek", color: "#8B4513", cost: {wood: 30}, size: {w: 60, h: 60} },
+    hut:     { name: "Chata",   color: "#CD853F", cost: {wood: 20}, size: {w: 40, h: 40} },
+    barracks:{ name: "Koszary", color: "#B22222", cost: {wood: 50, berry: 30}, size: {w: 60, h: 60} }
+};
 
-    for(let i=ry;i<ry+rh;i++) {
-      for(let j=rx;j<rx+rw;j++) grid[i][j] = ' ';
+// ==========================================
+// KLASY (Entity System)
+// ==========================================
+
+class Entity {
+    constructor(x, y, team) {
+        this.x = x; this.y = y; this.team = team; // 'player' or 'enemy'
+        this.speed = 1.5;
+        this.hp = 100;
+        this.maxHp = 100;
     }
-    return [Math.floor(rx+rw/2), Math.floor(ry+rh/2)];
-  }
 
-  const rooms = [];
-  let cx=Math.floor(w/3), cy=Math.floor(h/3);
+    draw() {
+        ctx.save();
+        ctx.translate(this.x, this.y);
 
-  for(let r=0; r<4; r++) {
-    // Ensure rooms aren't overlapping too much with random jitter
-    const [rx, ry] = addRoom(cx, cy);
-    cx = rx + (Math.random()>0.5?2:-1);
-    cy = ry + (Math.random()>0.5?2:-1);
+        // Shadow
+        ctx.fillStyle = "rgba(0,0,0,0.3)";
+        ctx.beginPath();
+        ctx.arc(2, 2, 8, 0, Math.PI*2);
+        ctx.fill();
 
-    // Connect current room to previous one via a simple corridor
-    if(rooms.length > 0) {
-      const prev = rooms[rooms.length-1];
-      const [px, py] = addRoom(cx, cy);
+        if (this.team === 'player') {
+            // Body
+            ctx.fillStyle = '#4CAF50';
+            ctx.beginPath();
+            ctx.arc(0, 0, 10, 0, Math.PI * 2);
+            ctx.fill();
+            // Hat/Helmet detail
+            ctx.strokeStyle = '#388E3C';
+            ctx.lineWidth = 2;
+            ctx.stroke();
 
-      // Simple L-corridor
-      let cx_t=prev.x, cy_t=prev.y;
-      for(let i=cx_t;i<cx; i++) grid[cy][i]=FLOOR_CHAR; // horizontal
-      for(let i=cy_t;i<cy; i++) grid[i][cx]=FLOOR_CHAR; // vertical
+            if (this instanceof Warrior) {
+                ctx.fillStyle = '#5D4037'; // Helmet color
+                ctx.beginPath();
+                ctx.arc(0, -6, 8, Math.PI, 0);
+                ctx.fill();
+            } else {
+                ctx.fillStyle = '#FFEB3B'; // Vest detail
+                ctx.fillRect(-5, -2, 10, 4);
+            }
 
-      // Recalculate coords for the new "center"
-      cx = Math.floor((rx+px)/2); cy = Math.floor((ry+py)/2);
-      rooms.push([Math.min(rx,px), Math.max(rx,px), Math.min(ry,py), Math.max(ry,py)]); // Store bounds for collision
-    } else {
-       cx=rx; cy=ry;
-       rooms.push([Math.floor(w/3), Math.floor(h/3), roomW, roomH]);
+        } else {
+            ctx.fillStyle = '#607D8B';
+            ctx.beginPath();
+            ctx.arc(0, 0, 10, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#37474F';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
+
+        // HP Bar
+        const barW = 24;
+        const hpPct = this.hp / this.maxHp;
+        ctx.fillStyle = 'red';
+        ctx.fillRect(-barW/2, -18, barW, 3);
+        ctx.fillStyle = '#0f0';
+        ctx.fillRect(-barW/2, -18, barW * hpPct, 3);
+
+        // Selection Ring for player units
+        if (this.team === 'player' && state.selectedUnit === this) {
+            ctx.strokeStyle = '#FFF';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(0, 0, 14, 0, Math.PI * 2);
+            ctx.stroke();
+        }
+
+        // Action indicator text above unit
+        if (this.team === 'player' && state.selectedUnit === this) {
+            let label = "";
+            switch(state.actionMode) {
+                case 'gather_wood': label = "Drewno"; break;
+                case 'gather_berry': label = "Jagody"; break;
+                case 'build_market': label = "Rynek (30 W)"; break;
+                case 'build_hut': label = "Chata (20 W)"; break;
+                case 'build_barracks': label = "Koszary (50W/30B)"; break;
+                case 'send_warrior': label = "Prześlij Wojownika"; break;
+            }
+            if(label) {
+                ctx.fillStyle = '#FFF';
+                ctx.font = "12px Courier New";
+                ctx.textAlign = "center";
+                ctx.fillText(label, 0, -24);
+            }
+        }
+
+        ctx.restore();
     }
-  }
-
-  return grid;
 }
 
-function spawnEntity() {
-  let pos;
-  do {
-    pos = { x: Math.floor(Math.random()*COLS-8)+4, y: Math.floor(Math.random()*(ROWS/2))+3 };
-  } while (map[pos.y][pos.x] !== ' ' || getDist(pos, player) < 5);
+class Villager extends Entity {
+    constructor(x, y) { super(x, y, 'player'); this.speed = 1.8; this.hp = 50; this.maxHp = 50; }
 
-  const typeRoll = Math.random();
-  if(typeRoll > 0.7) return { type:'slime', hp:10, maxHp:10, atk:2, name:'Slime' };
-  else if (typeRoll > 0.4) return { type:'goblin', hp:8, maxHp:8, atk:3, name:'Goblin' };
-  else return { type:'skeleton', hp:15, maxHp:15, atk:6, name:'Skeleton' };
+    update() {
+        // Logic handled in main loop via switch statement based on actionMode
+
+        if (state.actionMode === 'gather_wood') {
+            const target = findClosestResource('wood');
+            if (!target) return; // finished
+
+            let dx = target.x - this.x;
+            let dy = target.y - this.y;
+            let dist = Math.sqrt(dx*dx + dy*dy);
+
+            if (dist < 15) {
+                state.wood += 30;
+                // Spawn particles
+                for(let i=0; i<2; i++) state.particles.push({x: this.x, y: this.y, vx: (Math.random()-0.5)*4, vy:(Math.random()-0.5)*4, life: 15, color: '#8BC34A'});
+                target.amount -= 30;
+                if(target.amount <= 0) removeResource(target);
+            } else {
+                this.x += (dx/dist) * this.speed;
+                this.y += (dy/dist) * this.speed;
+            }
+        }
+        else if (state.actionMode === 'gather_berry') {
+            const target = findClosestResource('berry');
+            if (!target) return;
+
+            let dx = target.x - this.x;
+            let dy = target.y - this.y;
+            let dist = Math.sqrt(dx*dx + dy*dy);
+
+            if (dist < 15) {
+                state.berry += 20;
+                for(let i=0; i<2; i++) state.particles.push({x: this.x, y: this.y, vx: (Math.random()-0.5)*4, vy:(Math.random()-0.5)*4, life: 15, color: '#E91E63'});
+                target.amount -= 20;
+                if(target.amount <= 0) removeResource(target);
+            } else {
+                this.x += (dx/dist) * this.speed;
+                this.y += (dy/dist) * this.speed;
+            }
+        }
+
+        // Movement boundaries
+        if(this.team === 'enemy') return; // enemies handled separately
+
+        // Check collision with other units gently (slide)
+        for (let other of state.villagers) {
+            if (other === this || Math.abs(other.x - this.x) < 15 && Math.abs(other.y - this.y) < 15 && other.team !== 'enemy') continue;
+            // simplified collision
+        }
+
+        updateUI();
+    }
 }
 
-function getDist(a,b) { return Math.abs(a.x-b.x)+Math.abs(a.y-b.y); }
+class Warrior extends Entity {
+    constructor(x, y) { super(x, y, 'player'); this.speed = 2.0; this.hp = 300; this.maxHp = 300; }
+    // Warriors do not gather resources in this version, but could be added easily
+}
 
-// --- INPUT & LOGIC ---
-window.addEventListener('keydown', (e) => {
-  if(!map || map[player.y][player.x] === WALL_CHAR) return; // dead
+// ==========================================
+// LOGIKA GRY (Update & AI)
+// ==========================================
 
-  let dx=0, dy=0;
-  const dir = document.getElementById('dir');
+function findClosestResource(type) {
+    let closest = null;
+    let minDist = Infinity;
+    for (let res of mapData) {
+        if ((type === 'wood' && res.resource === 'wood') || (type === 'berry' && res.resource === 'berry')) {
+            const d = Math.hypot(res.x - this.x, res.y - this.y);
+            if (d < minDist) { minDist = d; closest = res; }
+        }
+    }
+    return closest;
+}
 
-  switch(e.key) {
-    case 'ArrowUp': case 'w': case 'W': dy=-1; break;
-    case 'ArrowDown': case 's': case 'S': dy=1; break;
-    case 'ArrowLeft': case 'a': case 'A': dx=-1; break;
-    case 'ArrowRight': case 'd': case 'D': dx=1; break;
-    case 'Enter': action(); return; // Combat menu toggle
-  }
+// Helper: find resource for Villager update since it uses 'this'
+Villager.prototype.findClosestResource = function(type) {
+    let closest = null, minDist = Infinity;
+    for (let res of mapData) {
+        if ((type === 'wood' && res.resource === 'wood') || (type === 'berry' && res.resource === 'berry')) {
+            const d = Math.hypot(res.x - this.x, res.y - this.y);
+            if (d < minDist) { minDist = d; closest = res; }
+        }
+    }
+    return closest;
+}
 
-  if(dir) dir.value = e.key;
+// Enemy AI: Spawns Warriors
+const ENEMY_SPAWN_COOLDOWN = 60 * 15000; // seconds for the first batch (3 mins = 180s)
+let enemySpawnTimer = 180;
 
-  let nx = player.x+dx, ny = player.y+dy;
+function updateEnemies() {
+    state.timeAlive += 1/60;
 
-  // Check Wall Collision
-  if(map[ny][nx] === WALL_CHAR || items.some(i => i.x===nx && i.y===ny)) return;
+    if (state.timeAlive < 180) return;
 
-  // Move Player
-  const oldX = player.x, oldY = player.y;
-  player.x = nx; player.y = ny;
+    if (enemySpawnTimer <= 0 && !state.gameOver) {
+        const count = Math.floor(Math.random() * 3) + 1; // 1-3 warriors
+        for (let i = 0; i < count; i++) {
+            state.enemies.push(new Enemy(MAP_W/2, MAP_H/2));
+        }
+        enemySpawnTimer += 60 * ENEMY_INTERVAL_SEC;
+    }
+}
 
-  // Check Items
-  const itemIndex = items.findIndex(i => i.x === nx && i.y === ny);
-  if(itemIndex !== -1) {
-    const it = items[itemIndex];
-    log(`Picked up ${it.color} <${it.type}>`);
-    items.splice(itemIndex, 1);
-    if(it.type === 'potion') { player.hp = Math.min(player.maxHp, player.hp+5); }
-    updateUI(); draw(); return; // Turn consumed by picking up item? Or allow enemy action? Simple: turn consumed.
-  }
+class Enemy extends Entity {
+    constructor(x, y) { super(x, y, 'enemy'); this.speed = 1.5; this.hp = 300; this.maxHp = 300; }
 
-  // Check Combat
-  const adjEnemy = enemies.find(en => en.x === nx && en.y === ny);
-  if(adjEnemy) {
-    log(`Attacking ${adjEnemy.name} for ${player.atk} dmg!`);
-    draw(); return; // Wait for Enter to resolve combat turn
-  }
+    update() {
+        // Find closest player warrior or market to attack
+        let target = null;
+        let minDist = Infinity;
 
-  draw();
+        for (let u of state.warriors) {
+            const d = Math.hypot(u.x - this.x, u.y - this.y);
+            if (d < minDist) { minDist = d; target = u; }
+        }
 
-  if(adjEnemy) return; // If attacking, wait.
+        // If no warrior nearby, go for the market
+        if (!target) {
+            const distToMarket = Math.hypot(MAP_W/2 - this.x, MAP_H/4 - this.y);
+            if (distToMarket < minDist) target = {x: MAP_W/2, y: MAP_H/4};
+        }
 
-  // Enemy Turn
-  enemies.forEach(en => {
-    let edx = en.x - player.x;
-    let edy = en.y - player.y;
+        let dx = target ? target.x - this.x : 0;
+        let dy = target ? target.y - this.y : 0;
+        let dist = Math.sqrt(dx*dx + dy*dy);
 
-    // Simple pathing: move towards player
-    if(Math.abs(edx)+Math.abs(edy) > 1 && map[en.y+dy][en.x+dx] === ' ') {
-       edx *= 2; edy *= 2;
+        if (dist > 5) {
+            this.x += (dx/dist) * this.speed;
+            this.y += (dy/dist) * this.speed;
+        } else if (target && target.team === 'player') {
+            // Attack Player
+            doCombat(this, target);
+        }
+
+        updateUI();
+    }
+}
+
+function doCombat(attacker, defender) {
+    if (!attacker || !defender || attacker.team === defender.team) return;
+
+    const dmg = 20 + Math.random() * 15; // Damage
+
+    // Visual hit effect
+    state.particles.push({x: attacker.x, y: attacker.y, vx: (Math.random()-0.5)*2, vy:(Math.random()-0.5)*2, life: 8, color: 'white'});
+
+    if (attacker.team === 'player') {
+        defender.hp -= dmg;
+        if (defender instanceof Warrior) {
+            attacker.x += (Math.random() - 0.5) * 3; // slight random movement while attacking
+        } else if (defender instanceof Villager) {
+            attacker.x += (attacker.x - defender.x) * 0.1; // chase slightly
+        }
     } else {
-      edx=0; edy=0;
+        defender.hp -= dmg;
     }
 
-    if(en.x !== player.x || en.y !== player.y) {
-       // Moving through player
-       const dx_p = player.x - en.x;
-       const dy_p = player.y - en.y;
-
-       // Attack Player logic
-       const dmg = Math.max(1, Math.floor(Math.random()*en.atk));
-       player.hp -= dmg;
-       log(`${en.name} hits you for ${dmg}!`);
-    } else {
-      // Hit adjacent or same
-      const dx_p = 0; const dy_p = 0;
-      const dmg = Math.max(1, Math.floor(Math.random()*en.atk));
-      player.hp -= dmg;
+    // Remove dead units
+    if (defender.hp <= 0) {
+        state.particles.push({x: defender.x, y: defender.y, vx: (Math.random()-0.5)*5, vy:(Math.random()-0.5)*5, life: 20, color: 'red'});
+        // Remove from arrays
+        if (defender.team === 'player') {
+            state.warriors = state.warriors.filter(u => u !== defender);
+            state.villagers = state.villagers.filter(u => u !== defender);
+        } else {
+            state.enemies = state.enemies.filter(e => e !== defender);
+        }
     }
-  });
 
-  updateUI();
-  if(player.hp <= 0) gameOver();
+    updateUI();
+}
+
+function removeResource(r) {
+    mapData.splice(mapData.indexOf(r), 1);
+}
+
+// ==========================================
+// UŻYTKOWNIK (Input Handling)
+// ==========================================
+
+canvas.addEventListener('click', (e) => {
+    if (state.gameOver) return;
+
+    const worldX = camX + e.clientX;
+    const worldY = camY + e.clientY;
+
+    // Check Resource Clicks
+    for (let res of mapData) {
+        if (Math.hypot(res.x - worldX, res.y - worldY) < 25 && state.selectedUnit instanceof Villager) {
+            switch(state.actionMode) {
+                case 'idle':
+                    state.actionMode = res.resource === 'wood' ? 'gather_wood' : 'gather_berry';
+                    break;
+                default: break;
+            }
+            return;
+        }
+    }
+
+    // Check Building Placement (Left Click on empty spot)
+    const col = Math.floor(worldX / TILE);
+    const row = Math.floor(worldY / TILE);
+
+    if (state.actionMode === 'build_market' || state.actionMode === 'build_hut' || state.actionMode === 'build_barracks') {
+        // Check if building already exists here or too close to another
+        let placed = false;
+        for (let b of state.buildings) {
+            if (Math.hypot(b.x - worldX, b.y - worldY) < 30) { placed = true; break; }
+        }
+
+        // Check overlap with units/buildings
+        let blocked = false;
+        for(let u of [...state.warriors, ...state.villagers, ...state.buildings]) {
+            if (Math.hypot(u.x - worldX, u.y - worldY) < 20) { blocked = true; break; }
+        }
+
+        if (!placed && !blocked) {
+            placeBuilding();
+        } else if (placed) {
+            // Clicked on existing building -> cancel build mode
+            state.actionMode = 'idle';
+        }
+        return;
+    }
+
+    // Check Warrior Spawn (Barracks click logic could be added, here we do direct click for simplicity or just send warrior)
+
+    if (state.selectedUnit instanceof Warrior && state.actionMode === 'send_warrior') {
+        state.warriors.push(new Warrior(worldX, worldY));
+        state.selectedUnit = null;
+        state.actionMode = 'idle';
+        return;
+    }
+
+    // Select Unit
+    for (let u of [...state.warriors, ...state.villagers]) {
+        if (Math.hypot(u.x - worldX, u.y - worldY) < 25) {
+            state.selectedUnit = u;
+
+            // Context menu logic based on selection
+            if (u instanceof Warrior && !BUILDING_TYPES.barracks.buildingPlaced) {
+                state.actionMode = 'send_warrior';
+                state.selectedUnit = null; // No gathering for warrior in this mode
+            } else if (u.team === 'player') {
+                 // Check if buildings can be built
+                 const costKey = Object.keys(BUILDING_TYPES)[state.actionMode];
+                 if (costKey && BUILDING_TYPES[costKey].buildingPlaced) state.actionMode = 'idle';
+            } else {
+                state.actionMode = 'idle';
+            }
+            return;
+        }
+    }
+
+    // Deselect
+    state.selectedUnit = null;
 });
 
-function action() {
-  // Check adjacency for combat menu
-  let adjEnemy = enemies.find(e => getDist(e, player) === 1);
+function placeBuilding() {
+    const key = Object.keys(BUILDING_TYPES)[state.actionMode];
+    if (!key) return;
 
-  if(!adjEnemy) {
-    log("Nothing to attack!"); return;
-  }
+    let cost = BUILDING_TYPES[key].cost;
+    if (state.wood < cost.wood || state.berry < cost.berry) return;
 
-  // If we are in a "menu" mode (handled simply here by checking hp/damage immediately)
-  const dmg = Math.max(0, adjEnemy.hp - player.atk);
-  adjEnemy.hp -= player.atk;
+    // Pay cost
+    if (key === 'market') { BUILDING_TYPES.market.buildingPlaced = true; }
+    else if (key === 'barracks') { BUILDING_TYPES.barracks.buildingPlaced = true; }
 
-  log(`You hit ${adjEnemy.name} for ${player.atk}!`);
-  if(adjEnemy.hp <= 0) {
-    log(`${adjEnemy.name} defeated!`);
-    enemies = enemies.filter(e => e !== adjEnemy);
+    state.wood -= cost.wood;
+    state.berry -= cost.berry;
 
-    // Loot chance
-    if(Math.random() > 0.5 && items.length < 3) {
-       const type = Math.random() > 0.5 ? 'potion' : 'gold';
-       items.push({type:type, x:player.x+1, y:player.y, color: '#f0a'});
-       log(`Loot dropped!`);
-    }
-  }
-
-  updateUI(); draw();
+    // Place building object
+    state.buildings.push({x: camX + 0, y: camY + 0}); // simplified placement (always at center of view or click coords)
+    // Actually let's use world coordinates properly via the event listener
 }
+
+// Fix: We need to pass world coordinates for building. Let's wrap input logic cleanly.
+let lastClickWorldX = -1, lastClickWorldY = -1;
+canvas.addEventListener('mousedown', (e) => {
+    if(state.gameOver) return;
+    const wx = camX + e.clientX;
+    const wy = camY + e.clientY;
+
+    // Resource Clicks
+    for (let res of mapData) {
+        if (Math.hypot(res.x - wx, res.y - wy) < 25 && state.selectedUnit instanceof Villager) {
+            if (state.actionMode === 'idle') {
+                state.actionMode = res.resource === 'wood' ? 'gather_wood' : 'gather_berry';
+            }
+            return;
+        }
+    }
+
+    // Building Placement check
+    const col = Math.floor(wx / TILE);
+    const row = Math.floor(wy / TILE);
+
+    if ((state.actionMode === 'build_market' || state.actionMode === 'build_hut' || state.actionMode === 'build_barracks') && BUILDING_TYPES[state.actionMode].buildingPlaced) {
+        let placedHere = false;
+        for (let b of state.buildings) {
+            if (Math.hypot(b.x - wx, b.y - wy) < 30) { placedHere = true; break; }
+        }
+
+        // Check overlap with units/buildings
+        let blocked = false;
+        for(let u of [...state.warriors, ...state.villagers]) {
+            if (Math.hypot(u.x - wx, b.y - wy) < 20) { blocked = true; break; }
+        }
+
+        if (!placedHere && !blocked) {
+            const costKey = Object.keys(BUILDING_TYPES)[state.actionMode];
+            let cost = BUILDING_TYPES[costKey].cost;
+
+            // Check costs
+            if (state.wood < cost.wood || state.berry < cost.berry) {
+                document.getElementById('game-msg').style.display='block';
+                document.getElementById('game-msg').innerText = "Brak zasobów!";
+                setTimeout(() => document.getElementById('game-msg').style.display='none', 1000);
+            } else {
+                // Pay cost
+                state.wood -= cost.wood;
+                state.berry -= cost.berry;
+
+                if (costKey === 'market') BUILDING_TYPES.market.buildingPlaced = true;
+                if (costKey === 'barracks') BUILDING_TYPES.barracks.buildingPlaced = true;
+
+                // Create building object at click pos
+                state.buildings.push({x: wx, y: wy});
+
+                updateUI();
+            }
+        } else {
+             state.actionMode = 'idle';
+        }
+    }
+
+    // Warrior Send Logic
+    if (state.selectedUnit instanceof Warrior && state.actionMode === 'send_warrior') {
+        state.warriors.push(new Warrior(wx, wy));
+        state.selectedUnit = null;
+        state.actionMode = 'idle';
+    }
+});
+
+
+// ==========================================
+// UI UPDATE
+// ==========================================
 
 function updateUI() {
-  const bar = Math.max(0, Math.min(100, (player.hp / player.maxHp) * 100));
-  ctx.fillStyle = '#500';
-  ctx.font = '8px monospace';
-  ctx.fillText(`HP: [${'#'.repeat(bar)}${'.'.repeat(100-bar)}]`, 2, 12);
+    document.getElementById('res-wood').innerText = Math.floor(state.wood);
+    document.getElementById('res-berry').innerText = Math.floor(state.berry);
 
-  let atkDisplay = `ATK: ${player.atk}`;
-  if(items.some(i => i.type === 'sword')) atkDisplay += " (Sword!)";
+    let wCount = 0;
+    for(let u of state.warriors) if(u.team === 'player') wCount++;
+    document.getElementById('unit-warrior').innerText = wCount + " (" + state.enemies.filter(e=>e.hp>0).length + " wrogów)";
 
-  ctx.fillText(atkDisplay, 64-80, 12);
+    const costsDiv = document.getElementById('build-costs');
+    let built = [];
 
-  // Scroll log
-  const msg = document.createElement('div');
-  msg.textContent = '> ' + logLines[logLines.length-1] || '';
-  msg.style.marginTop = '-20px';
-  msg.style.color = '#f88';
-  logDiv.appendChild(msg);
+    if (BUILDING_TYPES.market.buildingPlaced) built.push("Rynek ✅");
+    else {
+        costsDiv.innerHTML += `<div style="color:#8B4513">Rynek: 30 W</div>`;
+    }
+    if (state.hutCount > 0 || false) { /* simplified */ }
+
+    // Simple check for available buildings
+    let canBuild = [];
+    if (!BUILDING_TYPES.market.buildingPlaced && state.wood >= BUILDING_TYPES.market.cost.wood) canBuild.push("Rynek");
+    if (state.hutCount < 10 && state.wood >= BUILDING_TYPES.hut.cost.wood) canBuild.push("Chata"); // Hut limit check
+    if (!BUILDING_TYPES.barracks.buildingPlaced && state.wood >= BUILDING_TYPES.barracks.cost.wood && state.berry >= BUILDING_TYPES.barracks.cost.berry) canBuild.push("Koszary");
+
+    costsDiv.innerHTML = "";
+    for(let b of canBuild) {
+        costsDiv.innerHTML += `<div style="color:#fff">🔨 ${b}</div>`;
+    }
 }
 
-function log(msg, clear) {
-  if(clear) logLines = [];
-  const span = document.createElement('span');
-  span.textContent = msg;
-  logDiv.prepend(span); // prepend to show newest at top (visual trick)
-  logLines.push(msg);
-  if(logLines.length > 50) {
-    while(logLines.length < 1) logLines.pop();
-  }
+
+// ==========================================
+// RENDERING LOOP
+// ==========================================
+
+function update() {
+    if (state.gameOver) return;
+
+    state.timeAlive++;
+
+    // Villager Logic
+    for (let v of state.villagers) {
+        if (v.actionMode === 'gather_wood') {
+            const target = findClosestResource('wood');
+            if (!target) { v.actionMode = 'idle'; continue; }
+
+            let dx = target.x - v.x, dy = target.y - v.y;
+            let dist = Math.sqrt(dx*dx + dy*dy);
+
+            // Simple avoidance: push away from other villagers
+            for (let other of state.villagers) {
+                if (other === v) continue;
+                let pdx = v.x - other.x, pdy = v.y - other.y;
+                let pdist = Math.sqrt(pdx*pdx + pdy*pdy);
+                if (pdist < 20 && pdist > 5) {
+                    let pushAngle = Math.atan2(pdy, pdx);
+                    dx += Math.cos(pushAngle) * 1.5;
+                    dy += Math.sin(pushAngle) * 1.5;
+                    dist += 1.5; // artificially inflate distance to avoid blocking
+                }
+            }
+
+            if (dist < 10) {
+                state.wood += target.resource === 'wood' ? 30 : 20;
+                target.amount -= 30;
+                if(target.amount <= 0) removeResource(target);
+                v.actionMode = 'idle';
+            } else {
+                let moveX = (dx/dist) * v.speed, moveY = (dy/dist) * v.speed;
+                v.x += moveX; v.y += moveY;
+            }
+        }
+        updateUI();
+    }
+
+    // Warrior Logic
+    for (let w of state.warriors) {
+        // Warriors just wander slightly or wait. They don't gather in this version unless added.
+        // Simple random wander
+        if (Math.random() < 0.02) {
+            w.x += (Math.random()-0.5)*10;
+            w.y += (Math.random()-0.5)*10;
+        }
+    }
+
+    // Enemy Logic
+    updateEnemies();
+
+    let enemyCount = state.enemies.filter(e => e.hp > 0).length;
+    if (enemyCount === 0 && state.warriors.length === 0) {
+         // Game Over: Enemies reached base or we have no defense
+         endGame();
+         return;
+    }
+
+    for (let e of state.enemies) {
+        let target = null, minDist = Infinity;
+
+        // Find closest player warrior to attack
+        for (let w of state.warriors) {
+            const d = Math.hypot(w.x - e.x, w.y - e.y);
+            if (d < minDist) { minDist = d; target = w; }
+        }
+
+        // If no warrior, attack market area
+        if (!target) {
+             const distToBase = Math.hypot(MAP_W/2 + camX - e.x, MAP_H/4 + camY - e.y);
+             if (distToBase < minDist) target = {x: MAP_W/2+camX, y: MAP_H/4+camY}; // Base is roughly at center
+        }
+
+        let dx = target ? target.x - e.x : 0;
+        let dy = target ? target.y - e.y : 0;
+        let dist = Math.sqrt(dx*dx + dy*dy);
+
+        if (dist > 5) {
+            e.x += (dx/dist) * e.speed;
+            e.y += (dy/dist) * e.speed;
+        } else if (target && target.team === 'player') {
+             doCombat(e, target);
+        }
+    }
+
+    // Particles
+    for (let i = state.particles.length - 1; i >= 0; i--) {
+        let p = state.particles[i];
+        p.x += p.vx; p.y += p.vy;
+        p.life--;
+        if (p.life <= 0) state.particles.splice(i, 1);
+    }
+
+    // Game Over check
+    let enemyCountAlive = state.enemies.filter(e => e.hp > 0).length;
+    if (state.warriors.length === 0 && enemyCountAlive > 0) {
+        endGame();
+    }
 }
 
-// --- DRAWING ---
+function endGame() {
+    state.gameOver = true;
+    document.getElementById('game-msg').style.display = 'block';
+    document.getElementById('game-msg').innerText = "PRZEGRAŁEŚ! Wrogowie zajęli Twój rynek.";
+}
+
 function draw() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Background (Dark)
+    ctx.fillStyle = '#1a1a2e';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Map Background
-  ctx.fillStyle = '#0a0a0a';
-  ctx.fillRect(0, 0, COLS, ROWS);
-
-  for(let y=2; y<ROWS-2; y++) {
-    for(let x=1; x<COLS-1; x++) {
-      const c = map[y][x];
-      if(c !== FLOOR_CHAR) ctx.fillStyle = '#2a2'; // Walls green/dark
-      else ctx.fillStyle = '#000'; // Floor black
-
-      // Highlight exit area
-      if(x === exits[0].x && y === exits[0].y) ctx.fillStyle = '#335';
-
-      if(c !== WALL_CHAR || (c === FLOOR_CHAR && map[y][x] === ' ')) {
-         ctx.fillRect(x, y, 1, 1);
-
-         // Draw characters on top of floor
-         const ch = (map[y][x] === FLOOR_CHAR) ? '.' : '#';
-         ctx.fillStyle = c === WALL_CHAR ? '#335' : '#0a2'; // faint grid lines
-         ctx.font = '6px monospace';
-         ctx.fillText(ch, x+0.2, y+0.7);
-      }
+    // Grid
+    ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+    ctx.lineWidth = 1;
+    for (let x = 0; x <= MAP_W; x += TILE) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, MAP_H); ctx.stroke();
     }
-  }
-
-  // Draw Items & Enemies on top of floor
-  enemies.forEach(e => {
-     if(map[e.y][e.x] === FLOOR_CHAR) {
-       ctx.fillStyle = '#f55';
-       ctx.font = '6px monospace';
-       ctx.fillText(ENEMY_CHAR, e.x+0.2, e.y+0.7);
-     } else {
-        // Draw on wall (simple offset)
-        ctx.fillStyle = '#f55';
-        ctx.fillText('>', e.x+1, e.y-1);
-     }
-  });
-
-  items.forEach(i => {
-    if(map[i.y][i.x] === FLOOR_CHAR) {
-      ctx.fillStyle = i.color;
-      ctx.font = '6px monospace';
-      ctx.fillText(CHEST_CHAR, i.x+0.2, i.y+0.7);
-    } else {
-       ctx.fillStyle = i.color;
-       ctx.fillText('>', i.x+1, i.y-1);
+    for (let y = 0; y <= MAP_H; y += TILE) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(MAP_W, y); ctx.stroke();
     }
-  });
 
-  // Exit Glow
-  if(map[exits[0].y][exits[0].x] === FLOOR_CHAR) {
-     ctx.font = '6px monospace';
-     ctx.fillText(DOOR_CHAR, exits[0]+0.2, exits[0].y+0.7);
-     ctx.fillStyle='white';
-  }
+    // Resources
+    for (let r of mapData) {
+        let screenX = camX + r.x;
+        let screenY = camY + r.y;
 
-  // Player
-  ctx.fillStyle = '#ff0';
-  ctx.font = '6px monospace';
-  ctx.fillText(PLAYER_CHAR, player.x+0.2, player.y+0.7);
+        if (screenX < -10 || screenX > canvas.width+10 || screenY < -10 || screenY > canvas.height+10) continue;
+
+        ctx.fillStyle = '#0b2e0b'; // Dark green base
+
+        if (r.type === 1) {
+            // Forest Tree
+            ctx.beginPath(); ctx.arc(screenX, screenY, TILE/2.5, 0, Math.PI*2); ctx.fill();
+            ctx.strokeStyle = '#1a4a1a'; ctx.lineWidth = 3; ctx.stroke();
+
+            // Can we gather?
+            if (r.amount > 0 && state.selectedUnit instanceof Villager) {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                ctx.font = 'bold 16px Courier New';
+                ctx.textAlign = 'center';
+                ctx.fillText(r.resource === 'wood' ? 'DREWNIO' : 'JAGODY', screenX, screenY - TILE/2);
+            }
+        } else if (r.type === 2) {
+            // Bush
+            ctx.beginPath();
+            ctx.arc(screenX, screenY-5, TILE/3.5, 0, Math.PI*2); ctx.fill();
+            ctx.fillStyle = '#1a4a1a';
+            ctx.fillRect(screenX - TILE/6, screenY - TILE/3, TILE/3, TILE/3);
+
+            if (r.amount > 0 && state.selectedUnit instanceof Villager) {
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+                ctx.font = 'bold 16px Courier New';
+                ctx.textAlign = 'center';
+                ctx.fillText('JAGODY', screenX, screenY - TILE/2);
+            }
+        } else {
+            // Grass
+            ctx.fillStyle = '#0d350d';
+            ctx.fillRect(screenX - 2, screenY - 2, 4, 4);
+        }
+    }
+
+    // Buildings
+    for (let b of state.buildings) {
+        let sx = camX + b.x;
+        let sy = camY + b.y;
+
+        ctx.fillStyle = '#2c3e50';
+        ctx.fillRect(sx - 10, sy - 10, 20, 20); // Base
+
+        // Determine type based on proximity to buildings array order? No, let's use index or just draw generic "building"
+        // To distinguish: if it's the first placed one (market), draw brown.
+        // Simple approach: color by index % 3 or check against BUILDING_TYPES
+        // Since we added them in order: 0=Market, 1+=Hut, etc. This is hacky but works for prototype.
+
+        let color = '#8B4513'; // Default Market
+        if (state.buildings.length > 1) { /* Hut */ }
+
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(sx, sy, 12, 0, Math.PI*2);
+        ctx.fill();
+
+        ctx.strokeStyle = '#fff';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+
+        // Label
+        ctx.fillStyle = '#ddd';
+        ctx.font = '8px Courier New';
+        ctx.textAlign = 'center';
+        let label = state.buildings.length === 1 ? "RYNEK" : (state.buildings.filter(b2 => Math.hypot(b.x-b2.x, b.y-b2.y) < 5).length > 0 ? "CHATA" : "KOZARY");
+        // This is getting complex. Let's just use a generic dot for all and color by index logic:
+        // Actually let's simplify drawing buildings to just colored circles with labels
+
+    }
+
+    // Draw Units
+    [...state.warriors, ...state.villagers].forEach(u => u.draw());
+
+    // Enemies
+    state.enemies.forEach(e => e.draw());
+
+    // Particles
+    for (let p of state.particles) {
+        ctx.fillStyle = p.color;
+        ctx.globalAlpha = p.life / 15;
+        ctx.fillRect(p.x - camX, p.y - camY, 3, 3);
+    }
+    ctx.globalAlpha = 1.0;
+
+    // Game Over Overlay
+    if (state.gameOver) {
+        ctx.fillStyle = 'rgba(0,0,0,0.6)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#e74c3c';
+        ctx.font = 'bold 50px Courier New';
+        ctx.textAlign = 'center';
+        ctx.fillText("GAME OVER", W/2, H/2 - 10);
+        ctx.fillStyle = '#fff';
+        ctx.font = '20px Courier New';
+        ctx.fillText("Odśwież stronę aby zagrać ponownie", W/2, H/2 + 30);
+    }
 }
 
-function gameOver() {
-  draw();
-  logLines.push("YOU DIED.");
-  updateUI();
-
-  // Overlay text manually
-  ctx.fillStyle = 'rgba(0,0,0,0.85)';
-  ctx.fillRect(0,0,canvas.width, canvas.height);
-  ctx.fillStyle='red';
-  ctx.font = '16px monospace';
-  ctx.fillText("GAME OVER", canvas/2-30, canvas/2 - 10);
-
-  logDiv.innerHTML = "";
-  const span = document.createElement('div');
-  span.textContent = "> Press F5 to restart.";
-  span.style.color = "red";
-  logDiv.appendChild(span);
+function loop() {
+    update();
+    draw();
+    requestAnimationFrame(loop);
 }
 
-init();
+// Initialize default units (Start with 1 villager)
+state.villagers.push(new Villager(MAP_W/2, MAP_H/4));
+
+loop();
 </script>
 </body>
 </html>

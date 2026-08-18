@@ -1,0 +1,272 @@
+/*
+ * Six values, six cards, one horizontal lane. The section is deliberately about
+ * a screen tall: everything past the first card is there for the reader who
+ * wants it, and costs nothing to the one who does not.
+ */
+.principles {
+  position: relative;
+  padding: clamp(72px, 9vw, 132px) 0 clamp(56px, 7vw, 96px);
+  background: var(--paper);
+}
+
+.intro {
+  padding: 0 clamp(20px, 5vw, 72px);
+}
+
+/* --- the lane ------------------------------------------------------------- */
+
+.track {
+  /* The cards are measured against this box, so it has to be the offset parent. */
+  position: relative;
+  display: flex;
+  gap: clamp(16px, 2vw, 28px);
+  padding: 4px clamp(16px, 5vw, 72px) 8px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+
+.track::-webkit-scrollbar {
+  display: none;
+}
+
+.track:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: -2px;
+  border-radius: 26px;
+}
+
+/* Hand-driven scrolling has to be able to land between snap points. */
+.track[data-dragging="true"] {
+  scroll-snap-type: none;
+  cursor: grabbing;
+  user-select: none;
+}
+
+.slide {
+  display: flex;
+  flex: 0 0 min(1000px, 100%);
+  scroll-snap-align: center;
+  transition:
+    opacity 0.45s ease,
+    transform 0.45s ease;
+}
+
+/* The neighbours stay legible enough to be worth reaching for, and no more. */
+.slide[data-active="false"] {
+  opacity: 0.42;
+  transform: scale(0.97);
+}
+
+.card {
+  display: grid;
+  width: 100%;
+  padding: clamp(22px, 2.6vw, 40px);
+  gap: clamp(20px, 3vw, 46px);
+  align-items: center;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1fr);
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow: 0 24px 50px -34px rgba(1, 33, 65, 0.5);
+}
+
+/* --- the drawing ---------------------------------------------------------- */
+
+.stage {
+  position: relative;
+  display: grid;
+  padding: clamp(18px, 2.2vw, 32px);
+  align-items: center;
+  border-radius: 18px;
+  background: linear-gradient(170deg, #f7f9fc 0%, #eaf0f6 100%);
+}
+
+.count {
+  position: absolute;
+  top: clamp(12px, 1.4vw, 18px);
+  left: clamp(14px, 1.6vw, 22px);
+  color: var(--orange);
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+}
+
+/* --- the four steps ------------------------------------------------------- */
+
+.copy h3 {
+  margin: 0 0 clamp(18px, 2vw, 26px);
+  color: var(--ink);
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(21px, 2.1vw, 29px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.18;
+  text-wrap: balance;
+}
+
+.steps {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  gap: clamp(14px, 1.6vw, 20px);
+  list-style: none;
+}
+
+/*
+ * The rail turns orange halfway down the list: the first two steps are the
+ * reader's own situation, the last two are what changes.
+ */
+.steps li {
+  padding-left: 18px;
+  border-left: 2px solid #dde5ee;
+}
+
+.steps li:nth-child(n + 3) {
+  border-left-color: var(--orange);
+}
+
+.label {
+  display: block;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-family: "Poppins", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+}
+
+.steps li:nth-child(n + 3) .label {
+  color: var(--orange);
+}
+
+.steps p {
+  margin: 0;
+  color: #4d5a68;
+  font-size: 15px;
+  line-height: 1.62;
+}
+
+.steps li:nth-child(n + 3) p {
+  color: var(--navy);
+}
+
+/* --- controls ------------------------------------------------------------- */
+
+.controls {
+  display: flex;
+  margin-top: clamp(24px, 3vw, 38px);
+  gap: 18px;
+  align-items: center;
+  justify-content: center;
+}
+
+.arrow {
+  display: grid;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid #dbe3ec;
+  border-radius: 50%;
+  color: var(--navy);
+  background: #ffffff;
+  cursor: pointer;
+  transition:
+    border-color 0.25s ease,
+    color 0.25s ease,
+    opacity 0.25s ease;
+}
+
+.arrow svg {
+  width: 20px;
+  height: 20px;
+}
+
+.arrow:hover:not(:disabled) {
+  border-color: var(--orange);
+  color: var(--orange);
+}
+
+.arrow:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.dots {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  gap: 9px;
+  align-items: center;
+  list-style: none;
+}
+
+.dots button {
+  display: block;
+  width: 9px;
+  height: 9px;
+  padding: 0;
+  border: 0;
+  border-radius: 999px;
+  background: #c6d1dd;
+  cursor: pointer;
+  transition:
+    width 0.35s ease,
+    background-color 0.35s ease;
+}
+
+.dots button[data-active] {
+  width: 30px;
+  background: var(--orange);
+}
+
+/* --- narrow screens ------------------------------------------------------- */
+
+@media (max-width: 900px) {
+  .card {
+    gap: 24px;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .stage {
+    max-width: 460px;
+    margin: 0 auto;
+  }
+
+  /* A single card fills the lane, so there is nothing to dim beside it. */
+  .slide[data-active="false"] {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 620px) {
+  .track {
+    padding-right: 16px;
+    padding-left: 16px;
+  }
+
+  .card {
+    padding: 22px 20px 26px;
+    border-radius: 20px;
+  }
+
+  .steps li {
+    padding-left: 14px;
+  }
+
+  .steps p {
+    font-size: 14.5px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slide,
+  .dots button,
+  .arrow {
+    transition-duration: 0.01ms;
+  }
+}

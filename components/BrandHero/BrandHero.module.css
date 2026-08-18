@@ -76,7 +76,7 @@
 .headline {
   position: relative;
   z-index: 1;
-  margin: clamp(28px, 4svh, 52px) 0 clamp(4px, 1.2svh, 14px);
+  margin: clamp(2px, 4svh, 52px) 0 clamp(4px, 1.2svh, 14px);
   max-width: 24ch;
   opacity: 0;
   color: var(--ink);
@@ -86,6 +86,21 @@
   font-size: clamp(1.6rem, 3.3vw, 2.7rem);
   font-weight: 600;
   line-height: 1.08;
+  letter-spacing: -0.035em;
+}
+
+.subheading {
+  position: relative;
+  z-index: 1;
+  margin: 1rem 0 clamp(4px, 1.2svh, 14px);
+  max-width: 48ch;
+  color: var(--muted);
+  text-align: center;
+  text-wrap: balance;
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(0.8rem, 1.25vw, 1rem);
+  font-weight: 400;
+  line-height: 1.24;
   letter-spacing: -0.035em;
 }
 

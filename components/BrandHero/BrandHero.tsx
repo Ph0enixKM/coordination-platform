@@ -174,6 +174,7 @@ export default function BrandHero() {
         </div>
 
         <h1 className={styles.headline}>Rozwój firmy zaczyna się od dobrych decyzji</h1>
+        <h2 className={styles.subheading}>Porządkujemy strategię, sprzedaż i procesy, żeby Twoja firma rosła bez chaosu.</h2>
 
         <ParcelScene play={flying} />
       </div>
