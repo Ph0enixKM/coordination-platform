@@ -104,6 +104,131 @@
   letter-spacing: -0.035em;
 }
 
+/*
+ * The call to action reads as a solid, slightly domed slab of the logo navy
+ * resting a few millimetres above the paper: a vertical body gradient for the
+ * dome (bottoming out at the mark's darkest #0d1c2c), a bright lip and a dark
+ * underside inside the shell, then a shadow stack that goes from a tight
+ * contact shadow out to a wide, colour-bearing ambient one. The bounce light
+ * lives in .cta::after so the paper picks up a real navy wash rather than just
+ * a tinted box-shadow.
+ */
+.ctaRow {
+  position: relative;
+  z-index: 1;
+  margin: clamp(14px, 2.6svh, 30px) 0 clamp(10px, 2svh, 24px);
+  opacity: 0;
+  isolation: isolate;
+}
+
+.cta {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.95em 2.1em;
+  border-radius: 999px;
+  color: #f2f7fc;
+  background-image:
+    linear-gradient(180deg, #38587a 0%, #23415f 34%, #17304a 62%, #0d1c2c 100%),
+    radial-gradient(120% 160% at 50% -30%, rgba(190, 220, 250, 0.4), rgba(190, 220, 250, 0) 58%);
+  background-blend-mode: normal, screen;
+  box-shadow:
+    /* shell: bright top lip, shaded underside, thin rim */
+    inset 0 1.5px 0.5px rgba(196, 222, 248, 0.5),
+    inset 0 -2px 3px rgba(2, 7, 13, 0.7),
+    inset 0 0 0 1px rgba(180, 210, 240, 0.12),
+    /* contact shadow — sharp, right under the slab */
+    0 1px 1.5px rgba(6, 15, 26, 0.3),
+    0 3px 5px -1px rgba(6, 15, 26, 0.24),
+    /* ambient occlusion spreading onto the paper */
+    0 9px 18px -6px rgba(6, 15, 26, 0.32),
+    0 20px 34px -12px rgba(6, 15, 26, 0.26),
+    /* the navy itself bouncing back off the page */
+    0 14px 28px -10px rgba(24, 56, 92, 0.5),
+    0 26px 52px -16px rgba(24, 56, 92, 0.4);
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(0.88rem, 1.15vw, 1.02rem);
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: -0.015em;
+  white-space: nowrap;
+  transform: translateY(0);
+  transition:
+    transform 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.24s cubic-bezier(0.22, 1, 0.36, 1),
+    filter 0.24s ease-out;
+}
+
+/* Specular sheen across the upper dome. */
+.cta::before {
+  content: "";
+  position: absolute;
+  inset: 1px 1px 46%;
+  border-radius: 999px 999px 60% 60% / 999px 999px 26px 26px;
+  background-image: linear-gradient(180deg, rgba(214, 234, 255, 0.28), rgba(214, 234, 255, 0.05) 70%, rgba(214, 234, 255, 0));
+  pointer-events: none;
+}
+
+/* Coloured light pooling on the paper below the slab. */
+.cta::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 24% -6% -78%;
+  border-radius: 50%;
+  background-image: radial-gradient(50% 50% at 50% 50%, rgba(24, 56, 92, 0.42), rgba(24, 56, 92, 0.12) 55%, rgba(24, 56, 92, 0) 76%);
+  filter: blur(14px);
+  pointer-events: none;
+}
+
+.ctaLabel {
+  text-shadow: 0 1px 1px rgba(2, 8, 15, 0.55);
+}
+
+.cta:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    inset 0 1.5px 0.5px rgba(208, 230, 252, 0.6),
+    inset 0 -2px 3px rgba(2, 7, 13, 0.62),
+    inset 0 0 0 1px rgba(190, 218, 246, 0.16),
+    0 2px 2px rgba(6, 15, 26, 0.28),
+    0 5px 8px -1px rgba(6, 15, 26, 0.22),
+    0 14px 24px -6px rgba(6, 15, 26, 0.3),
+    0 28px 44px -12px rgba(6, 15, 26, 0.24),
+    0 20px 36px -10px rgba(24, 56, 92, 0.56),
+    0 34px 66px -16px rgba(24, 56, 92, 0.44);
+}
+
+.cta:hover::after {
+  inset: 26% -10% -88%;
+  opacity: 0.9;
+}
+
+/* Pressed: the slab sinks onto the paper and its shadows collapse with it. */
+.cta:active {
+  transform: translateY(1px) scaleY(0.985);
+  box-shadow:
+    inset 0 2px 4px rgba(2, 7, 13, 0.62),
+    inset 0 -1px 0.5px rgba(180, 208, 236, 0.3),
+    inset 0 0 0 1px rgba(180, 210, 240, 0.1),
+    0 1px 1px rgba(6, 15, 26, 0.28),
+    0 3px 6px -2px rgba(6, 15, 26, 0.24),
+    0 6px 12px -6px rgba(24, 56, 92, 0.36);
+  filter: brightness(0.97);
+  transition-duration: 0.08s;
+}
+
+.cta:active::after {
+  inset: 20% 0 -60%;
+  opacity: 0.6;
+}
+
+.cta:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 4px;
+}
+
 /* --- intro: the mark owns the whole viewport --- */
 
 .hero[data-phase="intro"] .brand,
@@ -152,8 +277,16 @@
   animation: headline-rise 0.85s 0.15s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
+.hero[data-phase="settled"] .ctaRow {
+  animation: headline-rise 0.85s 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 .hero[data-phase="settled"][data-intro] .headline {
   animation-delay: 0.5s;
+}
+
+.hero[data-phase="settled"][data-intro] .ctaRow {
+  animation-delay: 0.67s;
 }
 
 @keyframes mark-arrive {
@@ -220,6 +353,11 @@
     max-width: 16ch;
     font-size: clamp(1.5rem, 6.4vw, 2rem);
   }
+
+  .cta {
+    padding: 0.95em 1.8em;
+    font-size: 0.95rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -230,8 +368,14 @@
   }
 
   .hero .brand,
-  .hero .headline {
+  .hero .headline,
+  .hero .ctaRow {
     animation-duration: 0.01ms;
     animation-delay: 0ms;
+  }
+
+  .hero .cta:hover,
+  .hero .cta:active {
+    transform: none;
   }
 }

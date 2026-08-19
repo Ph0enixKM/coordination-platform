@@ -1,5 +1,5 @@
 /*
- * Six values, six cards, one horizontal lane. The section is deliberately about
+ * Ten points, ten cards, one horizontal lane. The section is deliberately about
  * a screen tall: everything past the first card is there for the reader who
  * wants it, and costs nothing to the one who does not.
  */
@@ -93,10 +93,10 @@
   letter-spacing: 0.18em;
 }
 
-/* --- the four steps ------------------------------------------------------- */
+/* --- the point ------------------------------------------------------------ */
 
 .copy h3 {
-  margin: 0 0 clamp(18px, 2vw, 26px);
+  margin: 0 0 clamp(16px, 1.8vw, 22px);
   color: var(--ink);
   font-family: "Poppins", sans-serif;
   font-size: clamp(21px, 2.1vw, 29px);
@@ -106,51 +106,40 @@
   text-wrap: balance;
 }
 
-.steps {
+.body {
   display: grid;
-  margin: 0;
-  padding: 0;
-  gap: clamp(14px, 1.6vw, 20px);
-  list-style: none;
+  gap: clamp(10px, 1.2vw, 14px);
 }
 
-/*
- * The rail turns orange halfway down the list: the first two steps are the
- * reader's own situation, the last two are what changes.
- */
-.steps li {
-  padding-left: 18px;
-  border-left: 2px solid #dde5ee;
-}
-
-.steps li:nth-child(n + 3) {
-  border-left-color: var(--orange);
-}
-
-.label {
-  display: block;
-  margin-bottom: 4px;
-  text-transform: uppercase;
-  color: var(--muted);
-  font-family: "Poppins", sans-serif;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.18em;
-}
-
-.steps li:nth-child(n + 3) .label {
-  color: var(--orange);
-}
-
-.steps p {
+.body p {
   margin: 0;
   color: #4d5a68;
   font-size: 15px;
   line-height: 1.62;
 }
 
-.steps li:nth-child(n + 3) p {
+/*
+ * Every point in the source document lands on the same sentence: what we do
+ * differently. It gets the accent, and the only rail on the card.
+ */
+.difference {
+  margin: clamp(18px, 2vw, 24px) 0 0;
+  padding-left: 18px;
+  border-left: 2px solid var(--orange);
   color: var(--navy);
+  font-size: 15px;
+  line-height: 1.62;
+}
+
+.label {
+  display: block;
+  margin-bottom: 4px;
+  text-transform: uppercase;
+  color: var(--orange);
+  font-family: "Poppins", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
 }
 
 /* --- controls ------------------------------------------------------------- */
@@ -254,11 +243,12 @@
     border-radius: 20px;
   }
 
-  .steps li {
+  .difference {
     padding-left: 14px;
   }
 
-  .steps p {
+  .body p,
+  .difference {
     font-size: 14.5px;
   }
 }

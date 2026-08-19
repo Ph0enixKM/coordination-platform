@@ -151,7 +151,7 @@ export default function BrandHero() {
       data-intro={introPlayed ? "true" : undefined}
     >
       <noscript>
-        <style>{`.${styles.backdrop}{opacity:0}.${styles.brand},.${styles.headline}{opacity:1}.${styles.wordmark}{-webkit-text-fill-color:#012141}`}</style>
+        <style>{`.${styles.backdrop}{opacity:0}.${styles.brand},.${styles.headline},.${styles.ctaRow}{opacity:1}.${styles.wordmark}{-webkit-text-fill-color:#012141}`}</style>
       </noscript>
 
       <div className={styles.viewport}>
@@ -175,6 +175,12 @@ export default function BrandHero() {
 
         <h1 className={styles.headline}>Rozwój firmy zaczyna się od dobrych decyzji</h1>
         <h2 className={styles.subheading}>Porządkujemy strategię, sprzedaż i procesy, żeby Twoja firma rosła bez chaosu.</h2>
+
+        <div className={styles.ctaRow}>
+          <a className={styles.cta} href="#kontakt">
+            <span className={styles.ctaLabel}>Wypełnij formularz</span>
+          </a>
+        </div>
 
         <ParcelScene play={flying} />
       </div>

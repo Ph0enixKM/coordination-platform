@@ -1,5 +1,5 @@
 /*
- * Six line-art scenes, one per value. They share a 360×240 frame, a stroke
+ * Ten line-art scenes, one per point. They share a 360×240 frame, a stroke
  * weight and a loop length, so the carousel never changes rhythm between
  * slides.
  *
@@ -60,7 +60,7 @@
  */
 .halo,
 .mark,
-.fault,
+.cause,
 .outcome,
 .pulse {
   transform-box: fill-box;
@@ -69,7 +69,7 @@
 
 .touched,
 .ring,
-.loop {
+.hauler {
   transform-box: view-box;
 }
 
@@ -79,7 +79,129 @@
   }
 }
 
-/* --- 1. one system, not separate parts ------------------------------------ */
+/* --- 1. the cause is not always where the symptom is ---------------------- */
+
+/* The area the client points at, and keeps pointing at until it is explained. */
+.symptomRing {
+  stroke: var(--accent);
+  stroke-dasharray: 6 7;
+}
+
+.symptom {
+  opacity: 0.34;
+}
+
+.trace {
+  stroke: var(--accent);
+  stroke-width: 2;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+  opacity: 0.55;
+}
+
+.traceHead {
+  stroke: var(--accent);
+  stroke-width: 2.6;
+}
+
+.causeRing {
+  stroke: var(--accent);
+  stroke-width: 3;
+}
+
+.causeDot {
+  fill: var(--accent);
+  stroke: none;
+}
+
+.scene[data-play="true"] .symptom {
+  animation: symptom var(--cycle) ease-in-out infinite;
+}
+
+.scene[data-play="true"] .trace {
+  animation: trace var(--cycle) ease-in-out infinite;
+}
+
+.scene[data-play="true"] .traceHead {
+  animation: trace-head var(--cycle) ease-out infinite;
+}
+
+.scene[data-play="true"] .cause {
+  animation: cause var(--cycle) cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+/* It flashes on its own for a while — that is the whole temptation. */
+@keyframes symptom {
+  0% {
+    opacity: 0.2;
+  }
+  8% {
+    opacity: 1;
+  }
+  18% {
+    opacity: 0.5;
+  }
+  28% {
+    opacity: 1;
+  }
+  40% {
+    opacity: 0.7;
+  }
+  52% {
+    opacity: 1;
+  }
+  76%,
+  100% {
+    opacity: 0.34;
+  }
+}
+
+@keyframes trace {
+  0%,
+  34% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+  40% {
+    opacity: 0.55;
+  }
+  62% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 0.55;
+  }
+}
+
+@keyframes trace-head {
+  0%,
+  62% {
+    opacity: 0;
+  }
+  70%,
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes cause {
+  0%,
+  62% {
+    opacity: 0;
+    transform: scale(0.86);
+  }
+  76% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* --- 2. one area is never repaired at the cost of another ----------------- */
 
 .node {
   fill: #ffffff;
@@ -101,7 +223,7 @@
   opacity: 0;
 }
 
-/* Marks the part someone tried to repair on its own. */
+/* Marks the part someone tried to improve on its own. */
 .touched {
   stroke: var(--accent);
   stroke-dasharray: 0.055 0.045;
@@ -194,7 +316,247 @@
   }
 }
 
-/* --- 2. rules, not another round of tasks --------------------------------- */
+/* --- 3. more is not automatically the answer ------------------------------ */
+
+.bar {
+  fill: #ffffff;
+  stroke: var(--ink);
+  transform-box: fill-box;
+  transform-origin: bottom;
+}
+
+/* The three that are worth keeping end the loop marked; the rest end faded. */
+.barKeep {
+  stroke: var(--accent);
+}
+
+.barDrop {
+  opacity: 0.12;
+}
+
+.flatLine {
+  stroke: var(--ink);
+  stroke-dasharray: 6 7;
+  opacity: 0;
+}
+
+.riseLine {
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+
+.riseHead {
+  stroke: var(--accent);
+  stroke-width: 3;
+}
+
+.scene[data-play="true"] .bar {
+  animation: bar-grow var(--cycle) cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+/*
+ * Both variants still need the growth, so they repeat it rather than replacing
+ * it — two animations touching the same property would just cancel out.
+ */
+.scene[data-play="true"] .barDrop {
+  animation:
+    bar-grow var(--cycle) cubic-bezier(0.22, 1, 0.36, 1) infinite,
+    bar-fade var(--cycle) ease-out infinite;
+}
+
+.scene[data-play="true"] .barKeep {
+  animation:
+    bar-grow var(--cycle) cubic-bezier(0.22, 1, 0.36, 1) infinite,
+    bar-mark var(--cycle) ease-out infinite;
+}
+
+.scene[data-play="true"] .flatLine {
+  animation: flat-line var(--cycle) ease-in-out infinite;
+}
+
+.scene[data-play="true"] .riseLine {
+  animation: rise-line var(--cycle) cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+.scene[data-play="true"] .riseHead {
+  animation: rise-head var(--cycle) ease-out infinite;
+}
+
+@keyframes bar-grow {
+  0% {
+    transform: scaleY(0.04);
+  }
+  20% {
+    transform: scaleY(1);
+  }
+  100% {
+    transform: scaleY(1);
+  }
+}
+
+@keyframes bar-fade {
+  0% {
+    opacity: 0;
+  }
+  12% {
+    opacity: 1;
+  }
+  52% {
+    opacity: 1;
+  }
+  66%,
+  100% {
+    opacity: 0.12;
+  }
+}
+
+@keyframes bar-mark {
+  0% {
+    opacity: 0;
+    stroke: var(--ink);
+  }
+  12% {
+    opacity: 1;
+  }
+  52% {
+    stroke: var(--ink);
+  }
+  66%,
+  100% {
+    stroke: var(--accent);
+  }
+}
+
+/* More of everything, and the line that actually matters does not move. */
+@keyframes flat-line {
+  0% {
+    opacity: 0;
+  }
+  22% {
+    opacity: 0.4;
+  }
+  52% {
+    opacity: 0.4;
+  }
+  64%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes rise-line {
+  0%,
+  60% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+  66% {
+    opacity: 1;
+  }
+  88% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes rise-head {
+  0%,
+  86% {
+    opacity: 0;
+  }
+  94%,
+  100% {
+    opacity: 1;
+  }
+}
+
+/* --- 4. what the contract does to the rest of the firm -------------------- */
+
+.window {
+  fill: var(--ink);
+  stroke: none;
+  opacity: 0.16;
+}
+
+.keel {
+  fill: rgba(1, 33, 65, 0.05);
+  stroke: var(--ink);
+  stroke-dasharray: 8 9;
+  opacity: 0.55;
+}
+
+.waterFill {
+  fill: rgba(1, 33, 65, 0.09);
+  stroke: none;
+}
+
+.waterLine {
+  stroke: var(--ink);
+  opacity: 0.35;
+}
+
+.markBadge {
+  fill: #ffffff;
+  stroke: var(--accent);
+}
+
+.scene[data-play="true"] .water {
+  animation: tide var(--cycle) cubic-bezier(0.65, 0, 0.35, 1) infinite;
+}
+
+.scene[data-play="true"] .mark {
+  animation: reveal var(--cycle) cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+/* The waterline drops far enough to put the whole keel in plain sight. */
+@keyframes tide {
+  0% {
+    transform: translate(0, 0);
+  }
+  30% {
+    transform: translate(0, 96px);
+  }
+  74% {
+    transform: translate(0, 96px);
+  }
+  100% {
+    transform: translate(0, 0);
+  }
+}
+
+@keyframes reveal {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  20% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+  36% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  78% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  92% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+}
+
+/* --- 5. one case, then a rule for the next one ---------------------------- */
 
 .gate {
   fill: #ffffff;
@@ -204,6 +566,8 @@
 .gateRule {
   stroke: var(--accent);
   stroke-width: 3;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
 }
 
 .chip {
@@ -215,11 +579,11 @@
 }
 
 .scene[data-play="true"] .gateRule {
-  animation: rule-pulse 1.8s ease-in-out infinite;
+  animation: rule-write var(--cycle) ease-out infinite;
 }
 
 /*
- * A task rides in on the lane, disappears into the rule for a beat, and comes
+ * A case rides in on the lane, disappears into the rule for a beat, and comes
  * out sorted — the rule is the only thing on screen that stays.
  */
 @keyframes chip-run {
@@ -261,17 +625,146 @@
   }
 }
 
-@keyframes rule-pulse {
-  0%,
-  100% {
-    opacity: 0.4;
+/* The criterion is written once, at the top of the loop, and then it is used. */
+@keyframes rule-write {
+  0% {
+    stroke-dashoffset: 1;
+    opacity: 0.25;
   }
-  50% {
+  6% {
+    opacity: 1;
+  }
+  24% {
+    stroke-dashoffset: 0;
+  }
+  100% {
+    stroke-dashoffset: 0;
     opacity: 1;
   }
 }
 
-/* --- 3. the owner keeps the seat ------------------------------------------ */
+/* --- 6. it does not end at the strategy document -------------------------- */
+
+.sheet {
+  opacity: 0.4;
+}
+
+.feed {
+  stroke: var(--faint);
+  stroke-dasharray: 7 8;
+}
+
+.branch {
+  stroke: var(--faint);
+  stroke-dasharray: 7 8;
+}
+
+.taken {
+  stroke: var(--accent);
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
+}
+
+.badge {
+  fill: #ffffff;
+  stroke: var(--accent);
+}
+
+.pulse {
+  stroke: var(--accent);
+  opacity: 0;
+  transform-origin: 204px 118px;
+}
+
+.scene[data-play="true"] .sheet {
+  animation: sheet-stack var(--cycle) ease-out infinite;
+}
+
+.scene[data-play="true"] .feed {
+  animation: ants 1.1s linear infinite;
+}
+
+.scene[data-play="true"] .taken {
+  animation: take var(--cycle) ease-in-out infinite;
+}
+
+.scene[data-play="true"] .pulse {
+  animation: halo var(--cycle) ease-out infinite;
+  animation-delay: 1.9s;
+}
+
+.scene[data-play="true"] .outcome {
+  animation: outcome var(--cycle) cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+/* Paperwork keeps arriving and then just sits there. */
+@keyframes sheet-stack {
+  0% {
+    opacity: 0;
+    transform: translate(-14px, 10px);
+  }
+  16% {
+    opacity: 1;
+    transform: translate(0, 0);
+  }
+  38% {
+    opacity: 0.4;
+  }
+  100% {
+    opacity: 0.4;
+  }
+}
+
+@keyframes ants {
+  to {
+    stroke-dashoffset: -15;
+  }
+}
+
+@keyframes take {
+  0% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+  36% {
+    stroke-dashoffset: 1;
+    opacity: 1;
+  }
+  62% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+  100% {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+@keyframes outcome {
+  0% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  62% {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  74% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.outcome {
+  transform-box: view-box;
+  transform-origin: 326px 76px;
+}
+
+/* --- 7. the firm is never taken over from its owner ----------------------- */
 
 /* The boundary we work up to and never cross. */
 .ring {
@@ -410,307 +903,208 @@
   }
 }
 
-/* --- 4. real decisions, not just documents -------------------------------- */
+/* --- 8. control is not taken away, it is exercised differently ------------ */
 
-.sheet {
-  opacity: 0.4;
-}
-
-.feed {
-  stroke: var(--faint);
-  stroke-dasharray: 7 8;
-}
-
-.branch {
-  stroke: var(--faint);
-  stroke-dasharray: 7 8;
-}
-
-.taken {
-  stroke: var(--accent);
-  stroke-dasharray: 1;
-  stroke-dashoffset: 0;
-}
-
-.badge {
-  fill: #ffffff;
-  stroke: var(--accent);
-}
-
-.pulse {
-  stroke: var(--accent);
+.stateBusy {
   opacity: 0;
-  transform-origin: 204px 118px;
 }
 
-.scene[data-play="true"] .sheet {
-  animation: sheet-stack var(--cycle) ease-out infinite;
+.stateSorted {
+  opacity: 1;
 }
 
-.scene[data-play="true"] .feed {
-  animation: ants 1.1s linear infinite;
+/* A criterion standing across the line, so the matter settles before the owner. */
+.ruleBar {
+  stroke: var(--accent);
+  stroke-width: 3.4;
 }
 
-.scene[data-play="true"] .taken {
-  animation: take var(--cycle) ease-in-out infinite;
+.scene[data-play="true"] .stateBusy {
+  animation: state-busy var(--cycle) ease-in-out infinite;
 }
 
-.scene[data-play="true"] .pulse {
-  animation: halo var(--cycle) ease-out infinite;
-  animation-delay: 1.9s;
+.scene[data-play="true"] .stateSorted {
+  animation: state-sorted var(--cycle) ease-in-out infinite;
 }
 
-.scene[data-play="true"] .outcome {
-  animation: outcome var(--cycle) cubic-bezier(0.22, 1, 0.36, 1) infinite;
-}
-
-/* Paperwork keeps arriving and then just sits there. */
-@keyframes sheet-stack {
+/* Every matter, however small, running through one person. */
+@keyframes state-busy {
   0% {
     opacity: 0;
-    transform: translate(-14px, 10px);
   }
-  16% {
+  8% {
     opacity: 1;
+  }
+  20% {
+    opacity: 0.45;
+  }
+  32% {
+    opacity: 1;
+  }
+  46% {
+    opacity: 1;
+  }
+  60%,
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes state-sorted {
+  0%,
+  52% {
+    opacity: 0;
+  }
+  68% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+/* --- 9. a firm that works, but works too hard ----------------------------- */
+
+/* How little ground all that effort actually covered. */
+.span {
+  stroke: var(--faint);
+}
+
+.strain {
+  stroke: var(--accent);
+  stroke-width: 2.2;
+}
+
+.scene[data-play="true"] .hauler {
+  animation: haul var(--cycle) cubic-bezier(0.34, 0.2, 0.4, 1) infinite;
+}
+
+.scene[data-play="true"] .strain {
+  animation: strain 1.4s ease-in-out infinite;
+}
+
+/* Pushed hard, slipping back twice a loop, and barely up the slope. */
+@keyframes haul {
+  0% {
+    opacity: 0;
     transform: translate(0, 0);
+  }
+  8% {
+    opacity: 1;
+  }
+  28% {
+    transform: translate(28px, -7px);
   }
   38% {
-    opacity: 0.4;
+    transform: translate(21px, -5px);
   }
-  100% {
-    opacity: 0.4;
-  }
-}
-
-@keyframes ants {
-  to {
-    stroke-dashoffset: -15;
-  }
-}
-
-@keyframes take {
-  0% {
-    stroke-dashoffset: 1;
-    opacity: 0;
-  }
-  36% {
-    stroke-dashoffset: 1;
-    opacity: 1;
-  }
-  62% {
-    stroke-dashoffset: 0;
-    opacity: 1;
-  }
-  100% {
-    stroke-dashoffset: 0;
-    opacity: 1;
-  }
-}
-
-@keyframes outcome {
-  0% {
-    opacity: 0;
-    transform: scale(0.6);
-  }
-  62% {
-    opacity: 0;
-    transform: scale(0.6);
+  64% {
+    transform: translate(54px, -13px);
   }
   74% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.outcome {
-  transform-box: view-box;
-  transform-origin: 326px 76px;
-}
-
-/* --- 5. the costs under the waterline ------------------------------------- */
-
-.window {
-  fill: var(--ink);
-  stroke: none;
-  opacity: 0.16;
-}
-
-.keel {
-  fill: rgba(1, 33, 65, 0.05);
-  stroke: var(--ink);
-  stroke-dasharray: 8 9;
-  opacity: 0.55;
-}
-
-.waterFill {
-  fill: rgba(1, 33, 65, 0.09);
-  stroke: none;
-}
-
-.waterLine {
-  stroke: var(--ink);
-  opacity: 0.35;
-}
-
-.markBadge {
-  fill: #ffffff;
-  stroke: var(--accent);
-}
-
-.scene[data-play="true"] .water {
-  animation: tide var(--cycle) cubic-bezier(0.65, 0, 0.35, 1) infinite;
-}
-
-.scene[data-play="true"] .mark {
-  animation: reveal var(--cycle) cubic-bezier(0.22, 1, 0.36, 1) infinite;
-}
-
-/* The waterline drops far enough to put the whole keel in plain sight. */
-@keyframes tide {
-  0% {
-    transform: translate(0, 0);
-  }
-  30% {
-    transform: translate(0, 96px);
-  }
-  74% {
-    transform: translate(0, 96px);
-  }
-  100% {
-    transform: translate(0, 0);
-  }
-}
-
-@keyframes reveal {
-  0% {
-    opacity: 0;
-    transform: scale(0.5);
-  }
-  20% {
-    opacity: 0;
-    transform: scale(0.5);
-  }
-  36% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  78% {
-    opacity: 1;
-    transform: scale(1);
+    transform: translate(47px, -12px);
   }
   92% {
-    opacity: 0;
-    transform: scale(0.85);
+    opacity: 1;
+    transform: translate(74px, -18px);
   }
   100% {
     opacity: 0;
-    transform: scale(0.85);
+    transform: translate(74px, -18px);
   }
 }
 
-/* --- 6. the loop that stops repeating ------------------------------------- */
-
-.loop {
-  stroke: var(--ink);
-  transform-origin: 140px 124px;
-  opacity: 0.16;
+@keyframes strain {
+  0%,
+  100% {
+    opacity: 0.25;
+  }
+  50% {
+    opacity: 0.9;
+  }
 }
 
-.fault {
-  transform-origin: 140px 66px;
-  opacity: 0;
-}
+/* --- 10. the strategic direction, checked against the everyday ------------ */
 
-.rise {
+.aim {
   stroke: var(--accent);
   stroke-width: 3;
   stroke-dasharray: 1;
   stroke-dashoffset: 0;
 }
 
-.riseHead {
+.aimHead {
   stroke: var(--accent);
   stroke-width: 3;
 }
 
-.scene[data-play="true"] .loop {
-  animation:
-    spin 3s linear infinite,
-    loop-mute var(--cycle) ease-in-out infinite;
+.drop {
+  stroke: var(--faint);
+  stroke-dasharray: 1;
+  stroke-dashoffset: 0;
 }
 
-.scene[data-play="true"] .fault {
-  animation: fault var(--cycle) ease-in-out infinite;
+.tileCheck {
+  stroke: var(--accent);
+  stroke-width: 3;
 }
 
-.scene[data-play="true"] .rise {
-  animation: draw-rise var(--cycle) cubic-bezier(0.65, 0, 0.35, 1) infinite;
+.scene[data-play="true"] .aim {
+  animation: draw-aim var(--cycle) ease-out infinite;
 }
 
-.scene[data-play="true"] .riseHead {
-  animation: head-in var(--cycle) ease-out infinite;
+.scene[data-play="true"] .aimHead {
+  animation: aim-head var(--cycle) ease-out infinite;
 }
 
-@keyframes loop-mute {
+.scene[data-play="true"] .drop {
+  animation: draw-drop var(--cycle) ease-in-out infinite;
+}
+
+.scene[data-play="true"] .tileCheck {
+  animation: tile-check var(--cycle) cubic-bezier(0.22, 1, 0.36, 1) infinite;
+}
+
+@keyframes draw-aim {
   0% {
+    stroke-dashoffset: 1;
+    opacity: 0;
+  }
+  6% {
     opacity: 1;
   }
-  44% {
-    opacity: 1;
-  }
-  60% {
-    opacity: 0.16;
+  26% {
+    stroke-dashoffset: 0;
   }
   100% {
-    opacity: 0.16;
+    stroke-dashoffset: 0;
+    opacity: 1;
   }
 }
 
-/* Same mistake, once per lap, until the loop is broken. */
-@keyframes fault {
-  0% {
+@keyframes aim-head {
+  0%,
+  24% {
+    opacity: 0;
+  }
+  32%,
+  100% {
     opacity: 1;
-    transform: scale(0.9);
   }
-  10% {
-    transform: scale(1.08);
-  }
-  20% {
-    transform: scale(0.94);
-  }
+}
+
+/* The direction is only worth anything once it reaches the everyday. */
+@keyframes draw-drop {
+  0%,
   30% {
-    transform: scale(1.08);
-  }
-  44% {
-    opacity: 1;
-    transform: scale(0.94);
-  }
-  58% {
-    opacity: 0;
-    transform: scale(0.6);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(0.6);
-  }
-}
-
-@keyframes draw-rise {
-  0% {
     stroke-dashoffset: 1;
     opacity: 0;
   }
-  50% {
-    stroke-dashoffset: 1;
+  36% {
     opacity: 1;
   }
-  82% {
+  62% {
     stroke-dashoffset: 0;
-    opacity: 1;
   }
   100% {
     stroke-dashoffset: 0;
@@ -718,14 +1112,12 @@
   }
 }
 
-@keyframes head-in {
-  0% {
+@keyframes tile-check {
+  0%,
+  62% {
     opacity: 0;
   }
-  82% {
-    opacity: 0;
-  }
-  90% {
+  74% {
     opacity: 1;
   }
   100% {

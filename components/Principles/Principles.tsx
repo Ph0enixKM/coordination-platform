@@ -4,11 +4,15 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import SectionIntro from "@/components/SectionIntro/SectionIntro";
 import {
+  BridgeScene,
+  ControlScene,
   DecisionScene,
   HiddenCostScene,
-  LoopScene,
+  MoreScene,
   OwnerScene,
   RulesScene,
+  StrainScene,
+  SymptomScene,
   SystemScene,
   type SceneProps,
 } from "./scenes";
@@ -17,72 +21,117 @@ import styles from "./Principles.module.css";
 type Principle = {
   title: string;
   Scene: (props: SceneProps) => React.JSX.Element;
-  /** Ból, Problem, Wartość, Rezultat — in that order. */
-  steps: readonly [string, string, string, string];
+  /** The point as it runs in the source document, paragraph by paragraph. */
+  body: readonly string[];
+  /** The „Różnica:” line that closes the point. */
+  difference: string;
 };
-
-const STEP_LABELS = ["Ból", "Problem", "Wartość", "Rezultat"] as const;
 
 const PRINCIPLES: readonly Principle[] = [
   {
-    title: "Nie naprawiamy oddzielnych części firmy",
+    title:
+      "Nie zaczynamy od tego, co możemy sprzedać. Zaczynamy od tego, co naprawdę nie działa",
+    Scene: SymptomScene,
+    body: [
+      "Agencja marketingowa naturalnie patrzy na marketing. Doradca sprzedaży na sprzedaż. Firma procesowa na procesy. Coordination nie zakłada z góry, gdzie znajduje się rozwiązanie.",
+      "Jeżeli klient mówi „marketing nie działa”, nie zaczynamy od kampanii. Jeżeli mówi „handlowiec nie sprzedaje”, nie zaczynamy od szkolenia handlowca. Najpierw sprawdzamy, czy przyczyna rzeczywiście znajduje się tam, gdzie widoczny jest problem.",
+    ],
+    difference: "nie sprzedajemy rozwiązania przed diagnozą.",
+  },
+  {
+    title: "Nie naprawiamy jednego obszaru kosztem drugiego",
     Scene: SystemScene,
-    steps: [
-      "Raz spada sprzedaż, raz marketing nie przynosi zapytań, raz realizacja nie wyrabia się z terminami. Naprawiane osobno, problemy wracają albo przenoszą się w inne miejsce.",
-      "Spadek sprzedaży nie musi wynikać z pracy handlowca. Może być skutkiem doboru klientów, niejasnej oferty, nierentownych zleceń albo decyzji właściciela.",
-      "Analizujemy firmę jako jeden system powiązanych decyzji. Nie zakładamy z góry, że problem jest tam, gdzie widać jego objaw.",
-      "Zmiany w sprzedaży, marketingu i procesach wzmacniają ten sam kierunek, zamiast tworzyć kolejne napięcia w innym miejscu firmy.",
+    body: [
+      "Marketing może generować więcej leadów, ale niewłaściwych. Sprzedaż może zwiększać obrót, ale obniżać marżę. Handlowiec może zdobywać kontrakty, których realizacja później nie jest w stanie dobrze obsłużyć. Zatrudnienie ludzi może zwiększyć złożoność zamiast odciążyć właściciela.",
+      "Dlatego patrzymy na zależności między klientem, ofertą, marketingiem, sprzedażą, marżą, realizacją, ludźmi i decyzjami.",
     ],
+    difference:
+      "nie optymalizujemy pojedynczego działu. Optymalizujemy jego wpływ na całą firmę.",
   },
   {
-    title: "Projektujemy zasady działania, a nie wykonujemy kolejnych zadań",
-    Scene: RulesScene,
-    steps: [
-      "Powstaje nowa strona, CRM, kampania i procedura. Właściciel nadal sam łączy to w całość i rozstrzyga większość nietypowych sytuacji.",
-      "Bez zasad określających, komu firma sprzedaje, jakie zlecenia przyjmuje i kto podejmuje decyzje, nowe narzędzia zostają dołożone do istniejącego chaosu.",
-      "Projektujemy wspólnie z właścicielem kryteria wyboru klientów, oceny zleceń, priorytetów i odpowiedzialności. Narzędzia są ich konsekwencją, nie punktem wyjścia.",
-      "Podobne sytuacje nie są rozwiązywane od początku. Decyzje stają się przewidywalne, a wyjątków i nieporozumień jest wyraźnie mniej.",
+    title: "Nie zakładamy, że więcej jest rozwiązaniem",
+    Scene: MoreScene,
+    body: [
+      "Nie zawsze potrzebujesz więcej leadów, więcej sprzedaży, więcej klientów, więcej ludzi, więcej narzędzi i więcej działań.",
+      "Czasami firma potrzebuje mniej złych klientów, mniej nierentownych zleceń, mniej wyjątków, mniej decyzji przechodzących przez właściciela i mniej działań konkurujących o zasoby.",
+      "W naszym podejściu sprzedaż nie ma być maksymalizowana za wszelką cenę. Ma być lepsza: skierowana do właściwych klientów, opłacalna i możliwa do dowiezienia.",
     ],
+    difference:
+      "nie pomagamy firmie robić więcej. Pomagamy ustalić, czego warto robić więcej, czego mniej, a czego wcale.",
   },
   {
-    title: "Nie zastępujemy właściciela",
-    Scene: OwnerScene,
-    steps: [
-      "Właściciel chciałby odciążyć się od bieżącego zarządzania, ale boi się utraty kontroli. Trudniejsze decyzje i tak wracają do niego.",
-      "Kiedy doradca przejmuje odpowiedzialność za sposób działania firmy, przynosi chwilową ulgę, ale zostawia firmę zależną od siebie.",
-      "Pokazujemy zależności, konfrontujemy założenia z faktami i budujemy kryteria, według których właściciel i zespół decydują samodzielnie.",
-      "Właściciel zachowuje kontrolę, nie rozstrzygając każdej sytuacji osobiście. Firma jest mniej zależna zarówno od niego, jak i od doradcy.",
-    ],
-  },
-  {
-    title: "Pracujemy na realnych decyzjach, nie tylko na dokumentach",
-    Scene: DecisionScene,
-    steps: [
-      "Strategia, cele i procedury są opisane, a codzienne działanie wygląda tak samo jak wcześniej. Priorytety nadal zmieniają się pod wpływem bieżących problemów.",
-      "Prawdziwy test zaczyna się przy odrzuceniu niewłaściwego klienta, odmowie rabatu albo rezygnacji z nierentownego zlecenia pod presją sytuacji.",
-      "Pracujemy na rzeczywistych zapytaniach, wycenach i decyzjach handlowych. Kiedy firma odchodzi od ustalonych zasad, pokazujemy mechanizm i konsekwencje.",
-      "Strategia staje się praktycznym filtrem decyzyjnym, a nie deklaracją zamkniętą w prezentacji po warsztatach.",
-    ],
-  },
-  {
-    title: "Ujawniamy ukryte koszty dobrze wyglądającej firmy",
+    title: "Nie patrzymy tylko na sprzedaż. Patrzymy na jakość sprzedaży",
     Scene: HiddenCostScene,
-    steps: [
-      "Są klienci, przychody i pełny kalendarz, a mimo to brakuje marży, czasu właściciela i poczucia kontroli. Sam obrót niczego nie wyjaśnia.",
-      "Część zleceń daje przychód, ale blokuje moce przerobowe, mnoży wyjątki i angażuje właściciela. Firma rośnie ilościowo i słabnie operacyjnie.",
-      "Oddzielamy klientów i działania, które realnie wzmacniają firmę, od tych, które tworzą wyłącznie obrót, obciążenie i ryzyko.",
-      "Właściciel wie, gdzie firma zarabia, a gdzie jedynie pracuje. Może rozwijać ją bez proporcjonalnego wzrostu chaosu.",
+    body: [
+      "Jeżeli problemem jest brak sprzedaży, typową odpowiedzią jest zwiększenie liczby leadów, zatrudnienie handlowca albo poprawa konwersji.",
+      "Zadajemy dodatkowe pytania: komu sprzedajemy, co sprzedajemy, na jakiej marży, ile to później kosztuje operacyjnie i czy w ogóle chcemy więcej takich klientów?",
+      "To szczególnie mocno widać w firmach, które rosną przychodowo, ale nie poprawiają wyniku.",
     ],
+    difference:
+      "wynikiem sprzedaży nie jest dla nas tylko podpisany kontrakt. Liczy się także to, co ten kontrakt robi z marżą i resztą firmy.",
   },
   {
-    title: "Firma przestaje powtarzać te same błędy",
-    Scene: LoopScene,
-    steps: [
-      "Znowu przyjęte zlecenie, którego realizacja nie chciała wykonywać. Znowu rabat bez sprawdzenia marży. Zmieniają się nazwy, nie sytuacje.",
-      "Firma usuwa skutki błędów, ale nie wyciąga z nich zasad. Mechanizm, który je wywołał, zostaje bez zmian, więc problem wraca w innej formie.",
-      "Sprawdzamy, jakie założenia stały za decyzją i których kryteriów zabrakło. Wnioski przekładamy na zasady wyboru klientów, zleceń i priorytetów.",
-      "Te same problemy występują rzadziej, a każdy rozwiązany przypadek zwiększa zdolność zespołu do samodzielnego działania.",
+    title: "Nie rozwiązujemy tylko bieżącego przypadku. Budujemy zasadę na następny",
+    Scene: RulesScene,
+    body: [
+      "Klient może przyjść z pytaniem: „Czy przyjąć to zlecenie?”, „Czy dać ten rabat?”, „Czy zatrudnić handlowca?”, „Czy wejść w tę współpracę?”.",
+      "Możemy pomóc podjąć konkretną decyzję, ale prawdziwa wartość powstaje wtedy, gdy z tego przypadku powstaje kryterium decyzji, które firma wykorzysta również za miesiąc.",
+      "To odpowiada przejściu od reagowania na pojedyncze problemy do działania według spójnych zasad.",
     ],
+    difference:
+      "nie tylko rozwiązujemy problem. Staramy się sprawić, żeby firma wiedziała, jak poradzić sobie z następną podobną sytuacją.",
+  },
+  {
+    title: "Nie kończymy na strategii, prezentacji ani rekomendacji",
+    Scene: DecisionScene,
+    body: [
+      "Strategia w naszym modelu nie jest dokumentem. Ma wpływać na to, jak firma wybiera klientów, ustala ceny, prowadzi sprzedaż, organizuje realizację i przydziela odpowiedzialność.",
+      "Podobnie współpraca nie kończy się na „oto rekomendacje”. Zasady są później sprawdzane na rzeczywistych decyzjach klienta i korygowane w czasie.",
+    ],
+    difference:
+      "efektem nie ma być wiedza o tym, co zrobić. Efektem ma być zmiana sposobu podejmowania rzeczywistych decyzji.",
+  },
+  {
+    title: "Nie przejmujemy firmy od właściciela",
+    Scene: OwnerScene,
+    body: [
+      "To ważny wyróżnik wobec fractional managera, zewnętrznego dyrektora czy klasycznego konsultingu wdrożeniowego.",
+      "Nie podejmujemy decyzji za właściciela i nie stajemy się jego zewnętrznym dyrektorem marketingu czy sprzedaży. Pomagamy mu lepiej widzieć sytuację, podejmować decyzje i tworzyć zasady działania, ale odpowiedzialność pozostaje w firmie klienta.",
+      "To ma znaczenie, bo klient nie powinien po roku współpracy być bardziej zależny od Coordination niż wcześniej.",
+    ],
+    difference:
+      "nie budujemy zależności od doradcy. Budujemy zdolność firmy do podejmowania lepszych decyzji samodzielnie.",
+  },
+  {
+    title: "Nie odbieramy właścicielowi kontroli. Zmieniamy sposób jej sprawowania",
+    Scene: ControlScene,
+    body: [
+      "Typowa narracja mówiłaby: „musisz się wycofać”, „musisz delegować”, „przestań być wąskim gardłem”.",
+      "Właściciel niekoniecznie tego chce. Nadal chce wiedzieć, co dzieje się w jego firmie, i zachować wpływ na najważniejsze decyzje. Problemem jest to, że kontroluje firmę przez osobisty udział w zbyt wielu sprawach.",
+      "Pomagamy przejść od kontroli przez osobiste pilnowanie do kontroli przez zasady, odpowiedzialności, informacje i kryteria decyzji.",
+    ],
+    difference:
+      "nie mówimy właścicielowi „odsuń się”. Pomagamy mu kontrolować firmę inaczej.",
+  },
+  {
+    title: "Pracujemy szczególnie z firmą, która „działa, ale działa za ciężko”",
+    Scene: StrainScene,
+    body: [
+      "Nie pracujemy przede wszystkim ze startupem przed pierwszym klientem ani z firmą będącą już korporacją. Nasz klient ma 3–20 osób, sprzedaż, klientów i historię.",
+      "Firma nie musi być w kryzysie. Problem polega na tym, że dotychczasowy sposób działania zaczyna kosztować coraz więcej czasu, marży i uwagi właściciela.",
+    ],
+    difference:
+      "specjalizujemy się nie tyle w branży, ile w konkretnym momencie rozwoju firmy właścicielskiej.",
+  },
+  {
+    title: "Coordination łączy diagnozę strategiczną z codziennością firmy",
+    Scene: BridgeScene,
+    body: [
+      "Nie jesteśmy tylko strategiem, który mówi, dokąd iść. Nie jesteśmy tylko specjalistą sprzedaży, który poprawia lejek. Nie jesteśmy tylko procesowcem, który rozpisuje odpowiedzialności.",
+      "Patrzymy na strategiczny kierunek firmy, ale następnie sprawdzamy jego konsekwencje na poziomie konkretnych klientów, ofert, rabatów, zleceń, priorytetów i decyzji zespołu.",
+    ],
+    difference:
+      "to spójność całego modelu, a nie pojedyncza specjalizacja, jest źródłem przewagi Coordination.",
   },
 ];
 
@@ -260,14 +309,14 @@ export default function Principles() {
       data-visible={inView ? "true" : undefined}
     >
       <div className={styles.intro}>
-        <SectionIntro title="Sześć cech, które nas wyróżnia" />
+        <SectionIntro kicker="Nasze podejście" title="Czym różni się nasze podejście?" />
       </div>
 
       <div
         className={styles.track}
         ref={trackRef}
         role="group"
-        aria-label="Wartości Coordination"
+        aria-label="Podejście Coordination"
         tabIndex={0}
         data-dragging={dragging ? "true" : undefined}
         onKeyDown={onKeyDown}
@@ -276,7 +325,7 @@ export default function Principles() {
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
       >
-        {PRINCIPLES.map(({ title, Scene, steps }, index) => (
+        {PRINCIPLES.map(({ title, Scene, body, difference }, index) => (
           <article
             key={title}
             className={styles.slide}
@@ -297,14 +346,17 @@ export default function Principles() {
 
               <div className={styles.copy}>
                 <h3>{title}</h3>
-                <ol className={styles.steps}>
-                  {steps.map((step, position) => (
-                    <li key={STEP_LABELS[position]}>
-                      <span className={styles.label}>{STEP_LABELS[position]}</span>
-                      <p>{step}</p>
-                    </li>
+
+                <div className={styles.body}>
+                  {body.map((paragraph) => (
+                    <p key={paragraph}>{paragraph}</p>
                   ))}
-                </ol>
+                </div>
+
+                <p className={styles.difference}>
+                  <span className={styles.label}>Różnica</span>
+                  {difference}
+                </p>
               </div>
             </div>
           </article>
@@ -317,7 +369,7 @@ export default function Principles() {
           className={styles.arrow}
           onClick={() => goTo(active - 1)}
           disabled={active === 0}
-          aria-label="Poprzednia wartość"
+          aria-label="Poprzedni punkt"
         >
           <ChevronLeft aria-hidden="true" />
         </button>
@@ -328,7 +380,7 @@ export default function Principles() {
               <button
                 type="button"
                 onClick={() => goTo(index)}
-                aria-label={`Wartość ${index + 1}: ${title}`}
+                aria-label={`Punkt ${index + 1}: ${title}`}
                 aria-current={index === active ? "true" : undefined}
                 data-active={index === active ? "true" : undefined}
               />
@@ -341,7 +393,7 @@ export default function Principles() {
           className={styles.arrow}
           onClick={() => goTo(active + 1)}
           disabled={active === PRINCIPLES.length - 1}
-          aria-label="Następna wartość"
+          aria-label="Następny punkt"
         >
           <ChevronRight aria-hidden="true" />
         </button>
