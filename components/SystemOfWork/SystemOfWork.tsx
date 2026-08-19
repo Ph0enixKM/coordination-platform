@@ -46,19 +46,11 @@ export default function SystemOfWork() {
     >
       <div className={styles.inner}>
         <div className={styles.copy}>
-          <p className={styles.kicker}>Zakres wsparcia</p>
-
           <h2 className={styles.title}>Porządkujemy to, co dziś działa osobno</h2>
 
           <p className={styles.lead}>
-            Pomagamy firmom w uporządkowaniu strategii, sprzedaży, marketingu i procesów
+            Pomożemy Ci w uporządkowaniu strategii, sprzedaży, marketingu i procesów
             w jeden spójny system działania.
-          </p>
-
-          <p className={styles.body}>
-            Wspieramy właścicieli w podejmowaniu lepszych decyzji, budowaniu rentownego
-            modelu biznesowego, wyborze właściwych klientów oraz tworzeniu bardziej
-            przewidywalnego procesu sprzedaży i organizacji pracy.
           </p>
         </div>
 

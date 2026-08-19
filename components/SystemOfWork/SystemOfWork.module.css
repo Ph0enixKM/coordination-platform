@@ -137,11 +137,13 @@
 
 /*
  * Each slot holds the resting place inside the cluster; the scatter it comes
- * from lives in --dx / --dy, far enough out to read as "somewhere else".
+ * from lives in --dx / --dy, far enough out to read as "somewhere else". No two
+ * are quite the same size — a cluster of identical circles reads as a diagram,
+ * and the point here is that these are bubbles.
  */
 .bubbles li {
   position: absolute;
-  width: 36%;
+  width: var(--size);
   aspect-ratio: 1;
   transform: translate(var(--dx), var(--dy)) scale(0.72) rotate(var(--r));
   opacity: 0;
@@ -152,35 +154,39 @@
 }
 
 .bubbles li:nth-child(1) {
+  --size: 39%;
   --dx: -74%;
   --dy: -86%;
   --r: -10deg;
-  top: 12%;
-  left: 12%;
+  top: 10%;
+  left: 9%;
 }
 
 .bubbles li:nth-child(2) {
+  --size: 33%;
   --dx: 96%;
   --dy: -70%;
   --r: 12deg;
-  top: 12%;
-  left: 52%;
+  top: 14%;
+  left: 55%;
 }
 
 .bubbles li:nth-child(3) {
+  --size: 35%;
   --dx: -104%;
   --dy: 62%;
   --r: 9deg;
-  top: 52%;
+  top: 53%;
   left: 12%;
 }
 
 .bubbles li:nth-child(4) {
+  --size: 38%;
   --dx: 82%;
   --dy: 94%;
   --r: -8deg;
-  top: 52%;
-  left: 52%;
+  top: 50%;
+  left: 51%;
 }
 
 .system[data-visible] .bubbles li {
@@ -240,6 +246,8 @@
     inset 3px 4px 3px -3px rgba(255, 255, 255, 0.95),
     /* the far wall of the sphere, kept to a thin arc so it stays a film */
     inset -5px -6px 7px -7px rgba(1, 33, 65, 0.22),
+    /* and the warm bounce riding that same edge, low on the right */
+    inset -7px -9px 12px -11px rgba(242, 121, 45, 0.5),
     /* barely there: a bubble rests on the light it lets through */
     0 8px 12px -11px rgba(1, 33, 65, 0.2);
   font-family: "Poppins", sans-serif;
@@ -281,10 +289,10 @@
 }
 
 /*
- * Behind the film: the far wall bouncing a little light back at the viewer, and
- * the thin-film sheen. Only the rim of the conic shows through the mask, so the
- * middle of the bubble stays clear and the colours ride the edge — and it turns
- * slowly, the way the film really does.
+ * Behind the film: the rim. Nearly all of it is neutral — a bubble only shows
+ * colour where something is actually throwing light into it — and the one place
+ * it warms up is low on the right, where the room bounces back at the viewer.
+ * The mask keeps all of it to the rim, so the middle stays clear.
  */
 .bubble::after {
   content: "";
@@ -293,20 +301,27 @@
   z-index: -1;
   border-radius: 50%;
   background:
+    /* the warm catch, the only colour in the film */
     radial-gradient(
-      circle closest-side at 70% 76%,
+      circle closest-side at 80% 74%,
+      rgba(242, 121, 45, 0.85) 0%,
+      rgba(242, 121, 45, 0.34) 42%,
+      rgba(242, 121, 45, 0) 72%
+    ),
+    /* the far wall throwing light back at the viewer */
+    radial-gradient(
+      circle closest-side at 68% 78%,
       rgba(255, 255, 255, 0.5) 0%,
       rgba(255, 255, 255, 0) 22%
     ),
+    /* the rest of the rim: white with only a breath of cool left in it */
     conic-gradient(
       from 200deg,
-      rgba(255, 138, 205, 0.3) 0%,
-      rgba(255, 214, 130, 0.24) 16%,
-      rgba(150, 245, 190, 0.22) 33%,
-      rgba(126, 205, 255, 0.32) 52%,
-      rgba(190, 150, 255, 0.24) 70%,
-      rgba(255, 160, 190, 0.26) 86%,
-      rgba(255, 138, 205, 0.3) 100%
+      rgba(255, 255, 255, 0.4) 0%,
+      rgba(216, 226, 238, 0.34) 24%,
+      rgba(255, 255, 255, 0.36) 48%,
+      rgba(210, 221, 234, 0.34) 72%,
+      rgba(255, 255, 255, 0.4) 100%
     );
   mask: radial-gradient(circle closest-side, transparent 76%, #000 95%, #000 100%);
   -webkit-mask: radial-gradient(circle closest-side, transparent 76%, #000 95%, #000 100%);
@@ -332,17 +347,6 @@
 .system[data-visible] .bubble {
   animation: float 6.5s ease-in-out infinite;
   animation-delay: calc(1.5s + var(--i) * 0.5s);
-}
-
-.system[data-visible] .bubble::after {
-  animation: sheen 22s linear infinite;
-  animation-delay: calc(var(--i) * -5s);
-}
-
-@keyframes sheen {
-  to {
-    transform: rotate(1turn);
-  }
 }
 
 @keyframes float {
@@ -388,8 +392,7 @@
     transition: none;
   }
 
-  .system[data-visible] .bubble,
-  .system[data-visible] .bubble::after {
+  .system[data-visible] .bubble {
     animation: none;
   }
 }
