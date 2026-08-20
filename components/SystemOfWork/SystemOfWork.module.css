@@ -8,6 +8,29 @@
  */
 .system {
   position: relative;
+
+  /*
+   * One clock for the whole scene. Every keyframe below is placed as a share of
+   * --seq, so the seed, the shell and the four stay in step: they gather by 30%,
+   * the middle one swells against them until 70% on cubic-bezier(.75,0,.25,1),
+   * and then it breaks on cubic-bezier(1,0,.3,1.44) — a curve that hangs, fires
+   * and overshoots, which is where the bounce comes from.
+   *
+   * Those two are written out at every keyframe that needs them rather than
+   * kept in a custom property: a var() in `animation-timing-function` inside a
+   * keyframe is dropped on the floor, and the segment silently runs on `ease`.
+   */
+  --seq: 2.6s;
+
+  /*
+   * How wide the middle one gets at the breaking point, as a share of the
+   * stage, and how far out the four are shoved to stay clear of it. Each of the
+   * four has its own --hx / --hy, worked out from its own radius: it has to
+   * stand at --peak / 2 + its radius + a little air from the centre, or the big
+   * bubble grows straight through it.
+   */
+  --peak: 0.75;
+  --spread: 1;
   padding: clamp(72px, 9vw, 124px) clamp(20px, 5vw, 72px);
   overflow: hidden;
   color: var(--ink);
@@ -86,7 +109,7 @@
   transition:
     transform 0.7s cubic-bezier(0.2, 0.85, 0.28, 1),
     opacity 0.7s ease;
-  transition-delay: 1.25s;
+  transition-delay: calc(var(--seq) * 0.95);
 }
 
 .system[data-visible] .caption {
@@ -97,17 +120,26 @@
 .stage {
   position: relative;
   aspect-ratio: 1;
+
+  /* The seed sits in the middle, so it has no line to be squashed along. */
+  --a: 0deg;
 }
 
 /*
  * Clear through the middle — only a rim, a soft sheen and a highlight give the
  * glass away, so the grey of the section shows straight through it.
+ *
+ * This is the big bubble AFTER it has burst open. Up to that moment the middle
+ * of the stage is held by `.seed`, which wears the small-bubble look; the two
+ * are the same circle at every frame, and the hand-over is a crossfade a few
+ * frames wide inside the pop, where nothing is legible anyway.
  */
 .shell {
   position: absolute;
   inset: 0;
-  transform: scale(0.92);
+  transform: scale(0.75);
   opacity: 0;
+  will-change: transform, opacity;
   border: 1px solid rgba(1, 33, 65, 0.16);
   border-radius: 50%;
   background:
@@ -117,14 +149,42 @@
     inset 0 1px 0 rgba(255, 255, 255, 0.85),
     inset -4px -6px 8px -8px rgba(1, 33, 65, 0.22),
     0 24px 40px -42px rgba(1, 33, 65, 0.4);
-  transition:
-    transform 0.9s cubic-bezier(0.2, 0.85, 0.28, 1),
-    opacity 0.7s ease;
 }
 
 .system[data-visible] .shell {
   transform: none;
   opacity: 1;
+  animation: shell-open var(--seq) both;
+}
+
+/*
+ * The seed: one more bubble, the size of the small ones, sitting in the middle
+ * before there is anything to sit inside. It swells against the four, is pushed
+ * back, swells harder — and then the film lets go.
+ */
+.seed {
+  position: absolute;
+  top: 32%;
+  left: 32%;
+  width: 36%;
+  aspect-ratio: 1;
+  opacity: 0;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+.system[data-visible] .seed {
+  animation: seed-swell var(--seq) both;
+}
+
+/* Nothing sits behind it, so the blur only costs frames while it is stretched. */
+.seed .bubble {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
+.system[data-visible] .seed .bubble::before {
+  animation: seed-dull var(--seq) both;
 }
 
 /* --- the four bubbles ----------------------------------------------------- */
@@ -147,13 +207,15 @@
   aspect-ratio: 1;
   transform: translate(var(--dx), var(--dy)) scale(0.72) rotate(var(--r));
   opacity: 0;
-  transition:
-    transform 1.05s cubic-bezier(0.22, 0.9, 0.3, 1),
-    opacity 0.6s ease;
-  transition-delay: calc(0.45s + var(--i) * 0.14s);
+  will-change: transform;
 }
 
+
+
 .bubbles li:nth-child(1) {
+  --a: 44deg;
+  --hx: -48%;
+  --hy: -46%;
   --size: 39%;
   --dx: -74%;
   --dy: -86%;
@@ -163,6 +225,9 @@
 }
 
 .bubbles li:nth-child(2) {
+  --a: -42deg;
+  --hx: 54%;
+  --hy: -49%;
   --size: 33%;
   --dx: 96%;
   --dy: -70%;
@@ -172,6 +237,9 @@
 }
 
 .bubbles li:nth-child(3) {
+  --a: -45deg;
+  --hx: -50%;
+  --hy: 50%;
   --size: 35%;
   --dx: -104%;
   --dy: 62%;
@@ -181,6 +249,9 @@
 }
 
 .bubbles li:nth-child(4) {
+  --a: 44deg;
+  --hx: 52%;
+  --hy: 50%;
   --size: 38%;
   --dx: 82%;
   --dy: 94%;
@@ -192,6 +263,7 @@
 .system[data-visible] .bubbles li {
   transform: none;
   opacity: 1;
+  animation: gather var(--seq) both;
 }
 
 /*
@@ -215,9 +287,19 @@
 .bubble {
   position: relative;
   display: grid;
+
+  /*
+   * --a is the line from the middle of the stage out to this bubble, set on the
+   * li. `rotate` and `scale` are their own properties, applied before
+   * `transform`, so this pair turns a plain `scale: 0.9 1.06` into a squash
+   * along that line and nothing else — and `transform` stays free for the
+   * float. Declaring a fallback here would shadow the li's value, so the 0deg
+   * the seed needs lives on .stage instead.
+   */
+  rotate: var(--a);
+  transform: rotate(calc(var(--a) * -1));
   width: 100%;
   height: 100%;
-  gap: 5px;
   place-content: center;
   place-items: center;
   isolation: isolate;
@@ -328,6 +410,18 @@
   mix-blend-mode: soft-light;
 }
 
+/*
+ * The exact inverse of the squash, about the same centre, so whatever the film
+ * does to itself it does not do to the icon and the word.
+ */
+.label {
+  display: grid;
+  gap: 5px;
+  place-items: center;
+  rotate: var(--a);
+  transform: rotate(calc(var(--a) * -1));
+}
+
 /* The label rides on top of the film, not under it. */
 .bubble svg,
 .bubble span {
@@ -343,24 +437,205 @@
   filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.7));
 }
 
+/* --- the sequence ---------------------------------------------------------- */
+
+/*
+ * The four drift in from their corners and settle where they belong. Then the
+ * bubble in the middle starts to swell and shoulders them outwards — until it
+ * breaks, and they are pulled straight back through their resting spot and rock
+ * into place behind it.
+ */
+@keyframes gather {
+  0% {
+    transform: translate(var(--dx), var(--dy)) scale(0.72) rotate(var(--r));
+    opacity: 0;
+    animation-timing-function: cubic-bezier(0.22, 0.9, 0.3, 1);
+  }
+
+  12% {
+    opacity: 1;
+  }
+
+  /* home, for a moment */
+  30% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+    animation-timing-function: cubic-bezier(0.75, 0, 0.25, 1);
+  }
+
+  /* shouldered out of the way, clear of the swell */
+  70% {
+    transform: translate(calc(var(--hx) * var(--spread)), calc(var(--hy) * var(--spread)))
+      scale(1) rotate(0deg);
+    animation-timing-function: cubic-bezier(1, 0, 0.3, 1.44);
+  }
+
+  100% {
+    transform: translate(0, 0) scale(1) rotate(0deg);
+  }
+}
+
+/*
+ * The seed. It starts the size of one of the four, swells to --peak with the
+ * four backing away in front of it, and then carries the rest of the way to the
+ * full circle in one movement.
+ *
+ * Its scales are in its own box, which is 36% of the stage — hence the divisor
+ * on --peak, and 2.78 for the stage itself.
+ */
+@keyframes seed-swell {
+  0% {
+    transform: scale(0.5);
+    opacity: 0;
+    animation-timing-function: cubic-bezier(0.2, 0.85, 0.28, 1);
+  }
+
+  14% {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  30% {
+    transform: scale(1);
+    animation-timing-function: cubic-bezier(0.75, 0, 0.25, 1);
+  }
+
+  70% {
+    transform: scale(calc(var(--peak) / 0.36));
+    opacity: 1;
+    animation-timing-function: cubic-bezier(1, 0, 0.3, 1.44);
+  }
+
+  /* it carries the whole break itself, and only hands over once it is there */
+  88% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(2.78);
+    opacity: 0;
+  }
+}
+
+/*
+ * As the seed becomes the room rather than an object in it, the catch of light
+ * on its film has to go — blown up to three quarters of the stage it would read
+ * as a gloss on a ball.
+ */
+@keyframes seed-dull {
+  0%,
+  30% {
+    opacity: 1;
+    animation-timing-function: cubic-bezier(0.75, 0, 0.25, 1);
+  }
+
+  70% {
+    opacity: 0.35;
+  }
+
+  100% {
+    opacity: 0.1;
+  }
+}
+
+/*
+ * The shell is the same circle as the seed, sitting at the size the seed hands
+ * over at, and it rides the same curve through the break — so the swap is only
+ * a change of material, never of geometry. The overshoot in --snap is the pop.
+ */
+@keyframes shell-open {
+  0%,
+  70% {
+    transform: scale(var(--peak));
+    opacity: 0;
+    animation-timing-function: cubic-bezier(1, 0, 0.3, 1.44);
+  }
+
+  88% {
+    opacity: 0;
+  }
+
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/*
+ * What the swell does to the four. It only starts once the middle one starts
+ * growing, deepens all the way to the breaking point, and then flips: the
+ * moment they are pulled inwards they stretch the other way, along the line
+ * they are travelling, before rounding out.
+ *
+ * `scale` here is in the frame set by `rotate` on .bubble, so x is the line to
+ * the middle: less than 1 is flattened against the big bubble, and the taller y
+ * is the film going somewhere, the way a squeezed bubble does.
+ */
+@keyframes squeeze {
+  0%,
+  30% {
+    scale: 1 1;
+    animation-timing-function: cubic-bezier(0.75, 0, 0.25, 1);
+  }
+
+  70% {
+    scale: 0.9 1.06;
+    animation-timing-function: cubic-bezier(1, 0, 0.3, 1.44);
+  }
+
+  88% {
+    scale: 1.06 0.96;
+  }
+
+  100% {
+    scale: 1 1;
+  }
+}
+
+/* The same thing upside down, so the writing comes out flat. */
+@keyframes unsqueeze {
+  0%,
+  30% {
+    scale: 1 1;
+    animation-timing-function: cubic-bezier(0.75, 0, 0.25, 1);
+  }
+
+  70% {
+    scale: 1.111 0.943;
+    animation-timing-function: cubic-bezier(1, 0, 0.3, 1.44);
+  }
+
+  88% {
+    scale: 0.943 1.042;
+  }
+
+  100% {
+    scale: 1 1;
+  }
+}
+
 /* Once they are in place they keep breathing, so the cluster stays alive. */
-.system[data-visible] .bubble {
-  animation: float 6.5s ease-in-out infinite;
-  animation-delay: calc(1.5s + var(--i) * 0.5s);
+.system[data-visible] .bubbles .bubble {
+  animation:
+    squeeze var(--seq) both,
+    float 6.5s ease-in-out calc(var(--seq) + 0.2s + var(--i) * 0.5s) infinite;
+}
+
+.system[data-visible] .bubbles .label {
+  animation: unsqueeze var(--seq) both;
 }
 
 @keyframes float {
   0%,
   100% {
-    transform: translate(0, 0);
+    transform: rotate(calc(var(--a) * -1)) translate(0, 0);
   }
 
   33% {
-    transform: translate(2px, -6px);
+    transform: rotate(calc(var(--a) * -1)) translate(2px, -6px);
   }
 
   66% {
-    transform: translate(-3px, 4px);
+    transform: rotate(calc(var(--a) * -1)) translate(-3px, 4px);
   }
 }
 
@@ -383,6 +658,19 @@
   }
 }
 
+/*
+ * Below this the stage is as wide as the screen allows, so a shove this size
+ * would push the four off the edge and the section would clip them. The whole
+ * move is scaled down instead — the swell stops narrower, and they stand
+ * proportionally closer.
+ */
+@media (max-width: 520px) {
+  .system {
+    --peak: 0.54;
+    --spread: 0.66;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .caption,
   .shell,
@@ -392,7 +680,16 @@
     transition: none;
   }
 
-  .system[data-visible] .bubble {
+  /* Nothing bursts, so the seed has nothing to do but get out of the way. */
+  .seed {
+    display: none;
+  }
+
+  .system[data-visible] .shell,
+  .system[data-visible] .seed,
+  .system[data-visible] .bubbles li,
+  .system[data-visible] .bubbles .bubble,
+  .system[data-visible] .bubbles .label {
     animation: none;
   }
 }
