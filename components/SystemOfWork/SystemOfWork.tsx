@@ -46,7 +46,7 @@ export default function SystemOfWork() {
     >
       <div className={styles.inner}>
         <div className={styles.copy}>
-          <h2 className={styles.title}>Porządkujemy to, co dziś działa osobno</h2>
+          <h2 className={styles.title}>Porządkujemy i projektujemy to, co dziś działa osobno</h2>
 
           <p className={styles.lead}>
             Strategia, sprzedaż, marketing i procesy w większości małych firm żyją
