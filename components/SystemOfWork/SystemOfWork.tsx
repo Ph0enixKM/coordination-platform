@@ -46,8 +46,6 @@ export default function SystemOfWork() {
     >
       <div className={styles.inner}>
         <div className={styles.copy}>
-          <p className={styles.kicker}>W czym pomagamy</p>
-
           <h2 className={styles.title}>Porządkujemy to, co dziś działa osobno</h2>
 
           <p className={styles.lead}>
@@ -55,18 +53,20 @@ export default function SystemOfWork() {
             własnym życiem, a właściciel spina je własnym czasem i uwagą. Łączymy je
             w jeden spójny system działania.
           </p>
-
-          <p className={styles.body}>
-            Pracujemy w czterech obszarach naraz, bo decyzja w jednym z nich zawsze
-            zmienia wynik w pozostałych. Nie zaczynamy od tego, co możemy sprzedać,
-            tylko od tego, co w firmie naprawdę nie działa.
-          </p>
         </div>
 
         <div className={styles.diagram} aria-hidden="true">
-          <p className={styles.caption}>Jeden system działania</p>
-
           <div className={styles.stage}>
+            {/*
+              The big bubble's refraction. It is a layer of the shell in every
+              sense but the DOM: it has to be its own element so the blur can
+              reach the four underneath, and it has to sit below the shell's own
+              film so it never blurs that. Two rings, because the falloff is
+              built by overlapping them — see the stylesheet.
+            */}
+            <div className={styles.refract} />
+            <div className={`${styles.refract} ${styles.refractEdge}`} />
+
             {/* The shell everything gathers inside — glass, not a filled disc. */}
             <div className={styles.shell} />
 
@@ -95,6 +95,18 @@ export default function SystemOfWork() {
                 </li>
               ))}
             </ul>
+
+            {/*
+              The caption rides the bubble instead of sitting on a line above
+              it. The arc it runs on is concentric with the bubble and a little
+              wider, so the words curve exactly the way the film does.
+            */}
+            <svg className={styles.caption} viewBox="0 0 1180 1180" focusable="false">
+              <path id="system-arc" fill="none" d="M 80.7 404.7 A 542 542 0 0 1 1099.3 404.7" />
+              <text>
+                <textPath href="#system-arc" startOffset="50%" textAnchor="middle">Jeden system działania</textPath>
+              </text>
+            </svg>
           </div>
         </div>
       </div>

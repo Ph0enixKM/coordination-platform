@@ -3,24 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import SectionIntro from "@/components/SectionIntro/SectionIntro";
-import {
-  BridgeScene,
-  ControlScene,
-  DecisionScene,
-  HiddenCostScene,
-  MoreScene,
-  OwnerScene,
-  RulesScene,
-  StrainScene,
-  SymptomScene,
-  SystemScene,
-  type SceneProps,
-} from "./scenes";
 import styles from "./Principles.module.css";
 
 type Principle = {
   title: string;
-  Scene: (props: SceneProps) => React.JSX.Element;
   /** The point as it runs in the source document, paragraph by paragraph. */
   body: readonly string[];
   /** The „Różnica:” line that closes the point. */
@@ -31,7 +17,6 @@ const PRINCIPLES: readonly Principle[] = [
   {
     title:
       "Nie zaczynamy od tego, co możemy sprzedać. Zaczynamy od tego, co naprawdę nie działa",
-    Scene: SymptomScene,
     body: [
       "Agencja marketingowa naturalnie patrzy na marketing. Doradca sprzedaży na sprzedaż. Firma procesowa na procesy. Coordination nie zakłada z góry, gdzie znajduje się rozwiązanie.",
       "Jeżeli klient mówi „marketing nie działa”, nie zaczynamy od kampanii. Jeżeli mówi „handlowiec nie sprzedaje”, nie zaczynamy od szkolenia handlowca. Najpierw sprawdzamy, czy przyczyna rzeczywiście znajduje się tam, gdzie widoczny jest problem.",
@@ -40,7 +25,6 @@ const PRINCIPLES: readonly Principle[] = [
   },
   {
     title: "Nie naprawiamy jednego obszaru kosztem drugiego",
-    Scene: SystemScene,
     body: [
       "Marketing może generować więcej leadów, ale niewłaściwych. Sprzedaż może zwiększać obrót, ale obniżać marżę. Handlowiec może zdobywać kontrakty, których realizacja później nie jest w stanie dobrze obsłużyć. Zatrudnienie ludzi może zwiększyć złożoność zamiast odciążyć właściciela.",
       "Dlatego patrzymy na zależności między klientem, ofertą, marketingiem, sprzedażą, marżą, realizacją, ludźmi i decyzjami.",
@@ -50,7 +34,6 @@ const PRINCIPLES: readonly Principle[] = [
   },
   {
     title: "Nie zakładamy, że więcej jest rozwiązaniem",
-    Scene: MoreScene,
     body: [
       "Nie zawsze potrzebujesz więcej leadów, więcej sprzedaży, więcej klientów, więcej ludzi, więcej narzędzi i więcej działań.",
       "Czasami firma potrzebuje mniej złych klientów, mniej nierentownych zleceń, mniej wyjątków, mniej decyzji przechodzących przez właściciela i mniej działań konkurujących o zasoby.",
@@ -61,7 +44,6 @@ const PRINCIPLES: readonly Principle[] = [
   },
   {
     title: "Nie patrzymy tylko na sprzedaż. Patrzymy na jakość sprzedaży",
-    Scene: HiddenCostScene,
     body: [
       "Jeżeli problemem jest brak sprzedaży, typową odpowiedzią jest zwiększenie liczby leadów, zatrudnienie handlowca albo poprawa konwersji.",
       "Zadajemy dodatkowe pytania: komu sprzedajemy, co sprzedajemy, na jakiej marży, ile to później kosztuje operacyjnie i czy w ogóle chcemy więcej takich klientów?",
@@ -72,7 +54,6 @@ const PRINCIPLES: readonly Principle[] = [
   },
   {
     title: "Nie rozwiązujemy tylko bieżącego przypadku. Budujemy zasadę na następny",
-    Scene: RulesScene,
     body: [
       "Klient może przyjść z pytaniem: „Czy przyjąć to zlecenie?”, „Czy dać ten rabat?”, „Czy zatrudnić handlowca?”, „Czy wejść w tę współpracę?”.",
       "Możemy pomóc podjąć konkretną decyzję, ale prawdziwa wartość powstaje wtedy, gdy z tego przypadku powstaje kryterium decyzji, które firma wykorzysta również za miesiąc.",
@@ -83,7 +64,6 @@ const PRINCIPLES: readonly Principle[] = [
   },
   {
     title: "Nie kończymy na strategii, prezentacji ani rekomendacji",
-    Scene: DecisionScene,
     body: [
       "Strategia w naszym modelu nie jest dokumentem. Ma wpływać na to, jak firma wybiera klientów, ustala ceny, prowadzi sprzedaż, organizuje realizację i przydziela odpowiedzialność.",
       "Podobnie współpraca nie kończy się na „oto rekomendacje”. Zasady są później sprawdzane na rzeczywistych decyzjach klienta i korygowane w czasie.",
@@ -93,7 +73,6 @@ const PRINCIPLES: readonly Principle[] = [
   },
   {
     title: "Nie przejmujemy firmy od właściciela",
-    Scene: OwnerScene,
     body: [
       "To ważny wyróżnik wobec fractional managera, zewnętrznego dyrektora czy klasycznego konsultingu wdrożeniowego.",
       "Nie podejmujemy decyzji za właściciela i nie stajemy się jego zewnętrznym dyrektorem marketingu czy sprzedaży. Pomagamy mu lepiej widzieć sytuację, podejmować decyzje i tworzyć zasady działania, ale odpowiedzialność pozostaje w firmie klienta.",
@@ -104,7 +83,6 @@ const PRINCIPLES: readonly Principle[] = [
   },
   {
     title: "Nie odbieramy właścicielowi kontroli. Zmieniamy sposób jej sprawowania",
-    Scene: ControlScene,
     body: [
       "Typowa narracja mówiłaby: „musisz się wycofać”, „musisz delegować”, „przestań być wąskim gardłem”.",
       "Właściciel niekoniecznie tego chce. Nadal chce wiedzieć, co dzieje się w jego firmie, i zachować wpływ na najważniejsze decyzje. Problemem jest to, że kontroluje firmę przez osobisty udział w zbyt wielu sprawach.",
@@ -115,7 +93,6 @@ const PRINCIPLES: readonly Principle[] = [
   },
   {
     title: "Pracujemy szczególnie z firmą, która „działa, ale działa za ciężko”",
-    Scene: StrainScene,
     body: [
       "Nie pracujemy przede wszystkim ze startupem przed pierwszym klientem ani z firmą będącą już korporacją. Nasz klient ma 3–20 osób, sprzedaż, klientów i historię.",
       "Firma nie musi być w kryzysie. Problem polega na tym, że dotychczasowy sposób działania zaczyna kosztować coraz więcej czasu, marży i uwagi właściciela.",
@@ -125,7 +102,6 @@ const PRINCIPLES: readonly Principle[] = [
   },
   {
     title: "Coordination łączy diagnozę strategiczną z codziennością firmy",
-    Scene: BridgeScene,
     body: [
       "Nie jesteśmy tylko strategiem, który mówi, dokąd iść. Nie jesteśmy tylko specjalistą sprzedaży, który poprawia lejek. Nie jesteśmy tylko procesowcem, który rozpisuje odpowiedzialności.",
       "Patrzymy na strategiczny kierunek firmy, ale następnie sprawdzamy jego konsekwencje na poziomie konkretnych klientów, ofert, rabatów, zleceń, priorytetów i decyzji zespołu.",
@@ -139,13 +115,11 @@ const PRINCIPLES: readonly Principle[] = [
 const DRAG_SLOP = 4;
 
 export default function Principles() {
-  const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const slidesRef = useRef<(HTMLElement | null)[]>([]);
 
   const [active, setActive] = useState(0);
   const [dragging, setDragging] = useState(false);
-  const [inView, setInView] = useState(false);
 
   // The scroll handler and the drag release both need the current slide
   // without re-binding themselves every time it changes.
@@ -215,22 +189,6 @@ export default function Principles() {
       window.removeEventListener("resize", onScroll);
     };
   }, [readActive]);
-
-  // Scenes stay still until the section is actually on screen.
-  useEffect(() => {
-    const section = sectionRef.current;
-
-    if (!section) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => setInView(entry.isIntersecting),
-      { threshold: 0.2 },
-    );
-
-    observer.observe(section);
-
-    return () => observer.disconnect();
-  }, []);
 
   /* --- dragging ---------------------------------------------------------- */
 
@@ -302,14 +260,9 @@ export default function Principles() {
   };
 
   return (
-    <section
-      className={styles.principles}
-      id="wartosci"
-      ref={sectionRef}
-      data-visible={inView ? "true" : undefined}
-    >
+    <section className={styles.principles} id="wartosci">
       <div className={styles.intro}>
-        <SectionIntro kicker="Nasze podejście" title="Czym różni się nasze podejście?" />
+        <SectionIntro title="Czym różni się nasze podejście?" />
       </div>
 
       <div
@@ -325,7 +278,7 @@ export default function Principles() {
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
       >
-        {PRINCIPLES.map(({ title, Scene, body, difference }, index) => (
+        {PRINCIPLES.map(({ title, body, difference }, index) => (
           <article
             key={title}
             className={styles.slide}
@@ -337,12 +290,8 @@ export default function Principles() {
             aria-label={`${index + 1} z ${PRINCIPLES.length}`}
           >
             <div className={styles.card}>
-              <div className={styles.stage}>
-                <span className={styles.count}>
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                <Scene play={inView && index === active} />
-              </div>
+              {/* Placeholder: the illustration that belongs here is still to come. */}
+              <div className={styles.stage} />
 
               <div className={styles.copy}>
                 <h3>{title}</h3>
