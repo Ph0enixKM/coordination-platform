@@ -12,7 +12,7 @@ const process = [
 export default function Process() {
   return (
     <section className={styles.process} id="proces">
-      <SectionIntro kicker="Od diagnozy do samodzielności" title="Jeden spójny proces zmiany" />
+      <SectionIntro title="Jeden spójny proces zmiany" />
       <div className={styles.processList}>
         {process.map(([number, title, copy, image], index) => (
           <article key={number} className={index % 2 ? styles.processReverse : undefined}>

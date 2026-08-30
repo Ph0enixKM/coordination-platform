@@ -17,7 +17,7 @@ const supportAreas = [
 export default function SupportAreas() {
   return (
     <section className={styles.support} id="wsparcie">
-      <SectionIntro kicker="Firma jako system" title="W czym pomagamy właścicielom małych firm">
+      <SectionIntro title="W czym pomagamy właścicielom małych firm">
         Pracujemy nad tym, komu firma sprzedaje, na czym naprawdę zarabia, jak działa oferta, sprzedaż i marketing oraz które decyzje powinny przestać wracać do właściciela.
       </SectionIntro>
       <div className={styles.supportGrid}>

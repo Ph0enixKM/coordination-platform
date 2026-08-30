@@ -27,7 +27,7 @@ const PARCEL_POOL = 12;
 
 /**
  * Wide enough that a parcel is always clear of the blade before the one behind
- * it books a swing — see SWITCH_LEAD and SWITCH_CLEAR.
+ * it books a swing - see SWITCH_LEAD and SWITCH_CLEAR.
  */
 const SPAWN_GAP = 2.3;
 const SPAWN_JITTER = 0.3;
@@ -41,7 +41,7 @@ const SWITCH_ANGLE = THREE.MathUtils.degToRad(30);
 const SWITCH_DURATION = 0.42;
 
 /**
- * How far up the line a parcel books the blade — around twice the swing, so the
+ * How far up the line a parcel books the blade - around twice the swing, so the
  * arm is visibly waiting by the time the parcel gets there.
  */
 const SWITCH_LEAD = 4;
@@ -224,7 +224,7 @@ const buildRoute = (
   const length = curve.getLength();
 
   // The blade sits on the +z side of the parcel it pushes to -z, and the other
-  // way round — so the branch is served by the angle pointing away from it.
+  // way round - so the branch is served by the angle pointing away from it.
   return {
     curve,
     length,
@@ -270,7 +270,7 @@ export default function ParcelScene({ play = false }: { play?: boolean }) {
 
     // Owned by the effect rather than by React: teardown hands the GL context
     // back by losing it, and a canvas that has been through that can never get
-    // another one — so each run has to start from a canvas of its own.
+    // another one - so each run has to start from a canvas of its own.
     const canvas = document.createElement("canvas");
 
     canvas.className = styles.canvas;
@@ -284,7 +284,7 @@ export default function ParcelScene({ play = false }: { play?: boolean }) {
     try {
       // No powerPreference on purpose. Asking for "high-performance" makes a Mac
       // with switchable graphics move to the discrete GPU, and that switch loses
-      // every context already on the page — here, the logo's.
+      // every context already on the page - here, the logo's.
       renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
     } catch {
       canvas.remove();
@@ -306,7 +306,7 @@ export default function ParcelScene({ play = false }: { play?: boolean }) {
 
     /**
      * The studio reflections the metal reads against. Both the generator and the
-     * room it renders are one-shot — the map is all that outlives them — and it
+     * room it renders are one-shot - the map is all that outlives them - and it
      * has to be rebuilt after a context loss, because unlike a loaded texture it
      * has no CPU-side copy for three to re-upload.
      */
@@ -667,7 +667,7 @@ export default function ParcelScene({ play = false }: { play?: boolean }) {
       const delta = Math.min(timer.getDelta(), 0.1);
       const step = reduceMotion ? 0 : delta;
 
-      // The flight is held back until the hero arms it and the model is in —
+      // The flight is held back until the hero arms it and the model is in -
       // the canvas fades in over the top shot, and only then does it move.
       if (reduceMotion) {
         flightTime = FLIGHT_DURATION;
@@ -773,7 +773,7 @@ export default function ParcelScene({ play = false }: { play?: boolean }) {
 
         // Parcels that open at or past the blade were sorted before the scene
         // started, so they must not re-book it. The blade is parked for the
-        // nearest of them — the one whose turn it still is.
+        // nearest of them - the one whose turn it still is.
         const settled = parcels
           .filter(
             (parcel) =>

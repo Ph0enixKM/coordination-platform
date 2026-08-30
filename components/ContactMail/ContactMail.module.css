@@ -1,0 +1,243 @@
+.contact {
+  position: relative;
+  /* One stacking context for the whole section: the envelope layers' z-indexes
+     stay an internal affair, under the hero's intro overlay and the footer. */
+  z-index: 0;
+  padding: clamp(48px, 6vw, 84px) 0 clamp(52px, 6.5vw, 92px);
+  background: var(--paper);
+  /* The falling envelope is clipped at the section's bottom edge, where the
+     footer begins - so it reads as sliding in under the footer. */
+  overflow: clip;
+}
+
+.intro {
+  padding: 0 clamp(20px, 5vw, 72px);
+}
+
+/* The mail is the section; the words above it only have to introduce it. */
+.intro > * {
+  margin-bottom: clamp(26px, 3vw, 34px);
+}
+
+/*
+ * The form and its confirmation share one cell: the mail flies out of it and
+ * the confirmation lands in the same place, so the page never jumps.
+ *//* --- the envelope ---------------------------------------------------------
+ * A one-shot intro prop in the middle of the stage. Two copies of the same
+ * box sandwich the letter - body and flap behind it (z-index 1), the pocket
+ * in front (z-index 3) - so the letter (z-index 2) reads as sliding out of
+ * it, and each layer is free to transform without breaking the sandwich.
+ */
+
+.envelopeLayer {
+  grid-area: 1 / 1;
+  width: min(560px, 84%);
+  aspect-ratio: 1.55;
+  place-self: center;
+  pointer-events: none;
+}
+
+.envelopeBack {
+  z-index: 1;
+}
+
+.envelopeFront {
+  z-index: 3;
+}
+
+.envelope {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  perspective: 1100px;
+  transform: scale(0.9);
+}
+
+.playing .envelope {
+  animation: envelope-in 0.55s 0.05s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes envelope-in {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Both layers ride the same fall timeline, so they stay glued together. */
+.envelopeLayer.playing {
+  animation: envelope-fall 0.9s 1.2s cubic-bezier(0.5, 0.05, 0.78, 0.4) forwards;
+}
+
+/* Far enough down that the open flap standing over the box goes under too. */
+@keyframes envelope-fall {
+  to {
+    transform: translateY(220%) rotate(-2.5deg);
+  }
+}
+
+/* The sheet of paper the envelope is folded from. */
+.body {
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #fdfdfe 0%, #f0f3f8 55%, #e4eaf1 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(1, 33, 65, 0.1),
+    0 6px 14px -6px rgba(1, 33, 65, 0.3),
+    0 34px 64px -26px rgba(1, 33, 65, 0.5);
+}
+
+/* Shades the mouth, so the opened envelope reads as hollow. */
+.body::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 46%;
+  border-radius: 10px 10px 0 0;
+  background: linear-gradient(180deg, rgba(9, 25, 43, 0.55), transparent);
+}
+
+.flap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 62%;
+  transform-origin: 50% 0;
+  border-radius: 10px 10px 0 0;
+  background: linear-gradient(180deg, #ffffff 0%, #f2f5fa 58%, #dfe6ef 100%);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  filter: drop-shadow(0 5px 6px rgba(1, 33, 65, 0.22));
+}
+
+.playing .flap {
+  animation: flap-open 0.45s 0.7s cubic-bezier(0.55, 0.1, 0.3, 1.2) forwards;
+}
+
+@keyframes flap-open {
+  to {
+    transform: rotateX(-168deg);
+  }
+}
+
+/* The pocket: the envelope rect with the front folds cut into a "V". */
+.pocket {
+  position: absolute;
+  inset: 0;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #ffffff 0%, #f5f8fb 45%, #e7edf4 100%);
+  box-shadow: inset 0 0 0 1px rgba(1, 33, 65, 0.1);
+  clip-path: polygon(0 0, 50% 47%, 100% 0, 100% 100%, 0 100%);
+}
+
+/* Hairlines along both fold edges, riding the boxes' own diagonals. */
+.pocket::before,
+.pocket::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 50%;
+  height: 47%;
+}
+
+.pocket::before {
+  left: 0;
+  background: linear-gradient(
+    to top right,
+    transparent calc(50% - 0.7px),
+    rgba(1, 33, 65, 0.16) 50%,
+    transparent calc(50% + 0.7px)
+  );
+}
+
+.pocket::after {
+  right: 0;
+  background: linear-gradient(
+    to bottom right,
+    transparent calc(50% - 0.7px),
+    rgba(1, 33, 65, 0.16) 50%,
+    transparent calc(50% + 0.7px)
+  );
+}
+
+.mark {
+  position: absolute;
+  bottom: 11%;
+  left: 50%;
+  width: auto;
+  height: 15%;
+  transform: translateX(-50%);
+  filter: drop-shadow(0 2px 3px rgba(1, 33, 65, 0.25));
+}
+
+/* --- arriving: the letter grows out of the pocket -------------------------
+ * Tucked inside at card size while the envelope opens and falls clear (the
+ * hold up to 62%), then it floats up to full size.
+ */
+
+/*
+ * The letter shows itself as the flap opens (from 0.75s) - a closed envelope
+ * never has paper poking over its folds, but an opening one already has the
+ * letter sitting in its pocket. It holds there until the envelope has
+ * dropped clear (75% of the run = 1.35s, matching the fall's 1.2s + 0.9s
+ * timeline), then floats up to full size.
+ */
+/* `both`, not `forwards`: the parked state has to hold through the delay too,
+   or the letter shows at full size until the animation starts. */
+.letter {
+  animation: letter-out 1.8s 0.75s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* The parked scale is measured, not guessed: the section solves it from the
+   real letter and envelope heights (tall mobile letters need far less than
+   0.6) so the letter never hangs out under the envelope's bottom edge. */
+@keyframes letter-out {
+  0% {
+    opacity: 0;
+    transform: translateY(14%) scale(var(--letter-parked-scale, 0.6));
+  }
+
+  10% {
+    opacity: 1;
+  }
+
+  75% {
+    opacity: 1;
+    transform: translateY(14%) scale(var(--letter-parked-scale, 0.6));
+    animation-timing-function: cubic-bezier(0.45, 0.05, 0.2, 1);
+  }
+
+  100% {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Before the envelope opens the letter is simply not there yet. */
+.letterWaiting {
+  opacity: 0;
+}
+
+/* A narrow screen makes the letter tall, so the envelope grows with it: wider
+   across the cell and squarer, to leave the parked letter more headroom. */
+@media (max-width: 640px) {
+  .envelopeLayer {
+    width: min(560px, 94%);
+    aspect-ratio: 1.3;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* No intro at all: the envelope never shows and the letter is simply there. */
+  .envelopeLayer {
+    display: none;
+  }
+
+  .letterWaiting,
+  .letter {
+    opacity: 1;
+    animation: none;
+  }
+}

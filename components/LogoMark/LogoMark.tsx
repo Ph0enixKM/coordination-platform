@@ -41,11 +41,11 @@ export default function LogoMark({ tone = "light" }: { tone?: LogoTone }) {
     let activeCamera: THREE.Camera = fallbackCamera;
 
     // A browser that has run out of WebGL contexts returns one that is already
-    // lost, and three throws reading its capabilities — fall back to the SVG.
+    // lost, and three throws reading its capabilities - fall back to the SVG.
     let renderer: THREE.WebGLRenderer;
 
     try {
-      // No powerPreference on purpose — see ParcelScene: asking for the discrete
+      // No powerPreference on purpose - see ParcelScene: asking for the discrete
       // GPU costs every context already on the page.
       renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
     } catch {

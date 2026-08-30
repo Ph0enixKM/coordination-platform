@@ -5,7 +5,7 @@
  *
  * Two rules keep the whole file predictable:
  *
- * 1. The base style of every element is its RESTING state — what the drawing
+ * 1. The base style of every element is its RESTING state - what the drawing
  *    should look like standing still. Keyframes do all the hiding and moving.
  *    That is what makes a reduced-motion visitor, and every slide that is not
  *    the active one, land on a finished picture instead of a blank frame.
@@ -130,7 +130,7 @@
   animation: cause var(--cycle) cubic-bezier(0.22, 1, 0.36, 1) infinite;
 }
 
-/* It flashes on its own for a while — that is the whole temptation. */
+/* It flashes on its own for a while - that is the whole temptation. */
 @keyframes symptom {
   0% {
     opacity: 0.2;
@@ -358,7 +358,7 @@
 
 /*
  * Both variants still need the growth, so they repeat it rather than replacing
- * it — two animations touching the same property would just cancel out.
+ * it - two animations touching the same property would just cancel out.
  */
 .scene[data-play="true"] .barDrop {
   animation:
@@ -584,7 +584,7 @@
 
 /*
  * A case rides in on the lane, disappears into the rule for a beat, and comes
- * out sorted — the rule is the only thing on screen that stays.
+ * out sorted - the rule is the only thing on screen that stays.
  */
 @keyframes chip-run {
   0% {
@@ -818,7 +818,7 @@
 
 /*
  * The card that is turned down needs the same entry as the other one, so it
- * carries a keyframe set of its own rather than a second animation — two rules
+ * carries a keyframe set of its own rather than a second animation - two rules
  * driving one opacity would just cancel each other out.
  */
 .scene[data-play="true"] .declined {

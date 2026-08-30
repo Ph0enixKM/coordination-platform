@@ -11,7 +11,7 @@ const industries = [
 export default function Industries() {
   return (
     <section className={styles.industries}>
-      <SectionIntro kicker="Właściwe dopasowanie" title="Dla jakich firm jest ta współpraca">
+      <SectionIntro title="Dla jakich firm jest ta współpraca">
         Pracujemy z właścicielami firm, które już działają, mają klientów, zespół i powtarzalne przychody, ale zaczynają odczuwać, że dalszy rozwój nie może opierać się wyłącznie na intuicji, osobistym zaangażowaniu właściciela i gaszeniu bieżących problemów.
       </SectionIntro>
       <div className={styles.industryGrid}>

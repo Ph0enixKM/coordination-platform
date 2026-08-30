@@ -22,7 +22,7 @@
 
 /*
  * The world fog dissolves the belts into white long before they leave the
- * frustum, but a very wide canvas can still clip a conveyor at the side —
+ * frustum, but a very wide canvas can still clip a conveyor at the side -
  * this feathers the last few percent of the frame into the paper.
  */
 .veil {
@@ -37,7 +37,7 @@
 
 @media (max-width: 560px) {
   /* A tall, near-square canvas has to buy its width back by standing off, which
-   * shrinks the sorter and leaves dead sky above it — a shorter stage keeps the
+   * shrinks the sorter and leaves dead sky above it - a shorter stage keeps the
    * frame wide enough that the shot stays close. */
   .stage {
     height: clamp(200px, 26svh, 260px);

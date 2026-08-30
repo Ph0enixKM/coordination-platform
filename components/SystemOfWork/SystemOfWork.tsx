@@ -62,12 +62,12 @@ export default function SystemOfWork() {
               sense but the DOM: it has to be its own element so the blur can
               reach the four underneath, and it has to sit below the shell's own
               film so it never blurs that. Two rings, because the falloff is
-              built by overlapping them — see the stylesheet.
+              built by overlapping them - see the stylesheet.
             */}
             <div className={styles.refract} />
             <div className={`${styles.refract} ${styles.refractEdge}`} />
 
-            {/* The shell everything gathers inside — glass, not a filled disc. */}
+            {/* The shell everything gathers inside - glass, not a filled disc. */}
             <div className={styles.shell} />
 
             {/*

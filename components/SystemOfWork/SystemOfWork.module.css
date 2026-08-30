@@ -13,7 +13,7 @@
    * One clock for the whole scene. Every keyframe below is placed as a share of
    * --seq, so the seed, the shell and the four stay in step: they gather by 30%,
    * the middle one swells against them until 70% on cubic-bezier(.75,0,.25,1),
-   * and then it breaks on cubic-bezier(1,0,.3,1.44) — a curve that hangs, fires
+   * and then it breaks on cubic-bezier(1,0,.3,1.44) - a curve that hangs, fires
    * and overshoots, which is where the bounce comes from.
    *
    * Those two are written out at every keyframe that needs them rather than
@@ -48,16 +48,6 @@
 }
 
 /* --- the words ------------------------------------------------------------ */
-
-.kicker {
-  margin: 0 0 14px;
-  text-transform: uppercase;
-  color: var(--orange);
-  font-family: "Poppins", sans-serif;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.2em;
-}
 
 .title {
   margin: 0 0 clamp(18px, 2vw, 26px);
@@ -102,7 +92,7 @@
  *
  * The box is the stage grown by 9% on every side, so in its own units the
  * bubble is a circle of radius 500 about (590, 590) and the words ride an arc
- * of radius 542 — the film's own curve, held off by a little air. Everything
+ * of radius 542 - the film's own curve, held off by a little air. Everything
  * is in those units, type included, so the caption scales with the bubble
  * rather than with the viewport.
  */
@@ -115,7 +105,7 @@
    * Sized outright rather than with a matching `right`/`bottom`: an <svg> with
    * no width or height attribute is a replaced element, and browsers disagree
    * about whether one should stretch between two insets. Where it does not, it
-   * keeps some other width and honours only `left` — which slides the whole
+   * keeps some other width and honours only `left` - which slides the whole
    * caption 9% off the bubble.
    */
   width: 118%;
@@ -155,13 +145,13 @@
 /*
  * The big bubble once it is open, and it is a bubble like the other five: the
  * same film, the same catch of light, the same warm rim low on the right. The
- * numbers are not the same though — every px in .bubble is cut for a circle
+ * numbers are not the same though - every px in .bubble is cut for a circle
  * around 170px across, and this one is 460, so the shadows are opened up to
  * match rather than reused.
  *
  * That is the whole reason it exists as a second element: up to the break the
  * middle is held by `.seed`, which is the small-bubble look blown up by a
- * transform — thick, soft, stretched — and this takes over from it drawn cleanly
+ * transform - thick, soft, stretched - and this takes over from it drawn cleanly
  * at full size. Same circle, same material, different draw.
  */
 .shell {
@@ -266,11 +256,11 @@
  *
  * It is a layer of the shell that has to live outside it, twice over: a
  * backdrop filter cannot reach past the isolation the shell needs for its own
- * rim, and it belongs UNDER the film — above the four, so they blur, but below
+ * rim, and it belongs UNDER the film - above the four, so they blur, but below
  * the shell itself, so the rim and the catch of light stay sharp.
  *
  * The shape is a clip-path and not the mask it ought to be, because Chromium
- * drops a backdrop filter outright on any masked element — with or without a
+ * drops a backdrop filter outright on any masked element - with or without a
  * layer promotion, and whether the mask sits here or on a parent. clip-path it
  * does honour, so the falloff is built the long way instead: two rings, each
  * blurring only a little, the narrower one sitting inside the wider. They start
@@ -348,7 +338,7 @@
 /*
  * The seed: one more bubble, the size of the small ones, sitting in the middle
  * before there is anything to sit inside. It swells against the four, is pushed
- * back, swells harder — and then the film lets go.
+ * back, swells harder - and then the film lets go.
  */
 .seed {
   position: absolute;
@@ -382,7 +372,7 @@
 
 /*
  * Each slot holds a resting place in the cluster, and --hx / --hy how far out
- * of it the swell shoves this one. No two are quite the same size — a cluster
+ * of it the swell shoves this one. No two are quite the same size - a cluster
  * of identical circles reads as a diagram, and the point here is that these are
  * bubbles.
  *
@@ -448,14 +438,14 @@
 
 /*
  * A real soap bubble. The film keeps almost no colour of its own, so the grey
- * of the section shows straight through the middle — everything that gives the
+ * of the section shows straight through the middle - everything that gives the
  * glass away sits at the edge: a bright hairline where the light lands, a thin
  * darker one where the sphere turns away, and the thin-film sheen riding the
  * rim. The catch of the key light sits on the FRONT of the film (::before),
  * upper-left, where a real specular would be.
  *
  * Two things are deliberate here, because both make a bubble read as a solid
- * ball instead of a film: no broad inner shading and no heavy cast shadow —
+ * ball instead of a film: no broad inner shading and no heavy cast shadow -
  * shading is what the eye takes for opacity, whatever the colour actually is.
  * And the backdrop filter only blurs and saturates: anything that lifts
  * brightness makes the bubble jump lighter the moment its entry transform
@@ -472,7 +462,7 @@
    * --a is the line from the middle of the stage out to this bubble, set on the
    * li. `rotate` and `scale` are their own properties, applied before
    * `transform`, so this pair turns a plain `scale: 0.9 1.06` into a squash
-   * along that line and nothing else — and `transform` stays free for the
+   * along that line and nothing else - and `transform` stays free for the
    * float. Declaring a fallback here would shadow the li's value, so the 0deg
    * the seed needs lives on .stage instead.
    */
@@ -551,8 +541,8 @@
 }
 
 /*
- * Behind the film: the rim. Nearly all of it is neutral — a bubble only shows
- * colour where something is actually throwing light into it — and the one place
+ * Behind the film: the rim. Nearly all of it is neutral - a bubble only shows
+ * colour where something is actually throwing light into it - and the one place
  * it warms up is low on the right, where the room bounces back at the viewer.
  * The mask keeps all of it to the rim, so the middle stays clear.
  */
@@ -640,7 +630,7 @@
 }
 
 /*
- * Then the bubble in the middle starts to swell and shoulders them outwards —
+ * Then the bubble in the middle starts to swell and shoulders them outwards -
  * until it breaks, and they are pulled straight back through their resting spot
  * and rock into place behind it.
  */
@@ -669,7 +659,7 @@
  * four backing away in front of it, and then carries the rest of the way to the
  * full circle in one movement.
  *
- * Its scales are in its own box, which is 36% of the stage — hence the divisor
+ * Its scales are in its own box, which is 36% of the stage - hence the divisor
  * on --peak, and 2.78 for the stage itself.
  */
 @keyframes seed-swell {
@@ -725,7 +715,7 @@
 
 /*
  * The shell is the same circle as the seed, sitting at the size the seed hands
- * over at, and it rides the same curve through the break — so the swap is only
+ * over at, and it rides the same curve through the break - so the swap is only
  * a change of material, never of geometry. The overshoot in --snap is the pop.
  */
 @keyframes shell-open {
@@ -874,7 +864,7 @@
 /*
  * Below this the stage is as wide as the screen allows, so a shove this size
  * would push the four off the edge and the section would clip them. The whole
- * move is scaled down instead — the swell stops narrower, and they stand
+ * move is scaled down instead - the swell stops narrower, and they stand
  * proportionally closer.
  */
 @media (max-width: 520px) {

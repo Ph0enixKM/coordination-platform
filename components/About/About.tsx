@@ -4,7 +4,6 @@ export default function About() {
   return (
     <section className={styles.about} id="o-nas">
       <div className={styles.aboutTitle}>
-        <p className={styles.kicker}>Dlaczego Coordination</p>
         <h2>Mała firma nie potrzebuje więcej chaosu. Potrzebuje spójnych decyzji.</h2>
       </div>
       <div className={styles.aboutCopy}>

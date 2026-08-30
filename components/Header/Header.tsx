@@ -9,7 +9,7 @@ export default function Header() {
 
   return (
     <header className={styles.header}>
-      <a className={styles.logoLink} href="#top" aria-label="Coordination — strona główna">
+      <a className={styles.logoLink} href="#top" aria-label="Coordination - strona główna">
         <img src="/assets/logo.svg" alt="" />
       </a>
       <nav className={styles.desktopNav} aria-label="Główna nawigacja">

@@ -1,3 +1,4 @@
+import LogoMark from "@/components/LogoMark/LogoMark";
 import styles from "./Footer.module.css";
 
 export default function Footer() {
@@ -5,7 +6,9 @@ export default function Footer() {
     <footer className={styles.footer}>
       <div className={styles.footerGrid}>
         <div className={styles.footerBrand}>
-          <img src="/assets/logo.svg" alt="Coordination" />
+          <div className={styles.mark} role="img" aria-label="Coordination">
+            <LogoMark tone="light" />
+          </div>
           <p>Firmy rosną szybciej, gdy strategia, sprzedaż i marketing działają jako jeden system. My ten system projektujemy i wdrażamy.</p>
           <div><a href="https://www.facebook.com/groups/804139875408843/">f</a><a href="https://www.instagram.com/coordination.pl/">◎</a><a href="https://www.linkedin.com/in/szymon-pirko-bb00271b1/">in</a></div>
         </div>

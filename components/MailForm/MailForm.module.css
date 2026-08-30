@@ -1,0 +1,355 @@
+/*
+ * The mail itself: a compose window with the recipient fixed, a draft in the
+ * body, and the send that flies it away. The envelope intro that wraps it in
+ * the contact section lives with that section, not here.
+ */
+
+.stage {
+  display: grid;
+  width: min(780px, 100%);
+  margin: 0 auto;
+  padding: 0 clamp(16px, 5vw, 40px);
+  align-items: center;
+  justify-items: stretch;
+}
+
+.stage > * {
+  grid-area: 1 / 1;
+}
+
+/* --- the mail ------------------------------------------------------------- */
+
+.mail {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow:
+    0 1px 2px rgba(1, 33, 65, 0.06),
+    0 24px 50px -34px rgba(1, 33, 65, 0.5);
+  overflow: hidden;
+  transform-origin: 50% 40%;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px clamp(18px, 2.4vw, 26px);
+  border-bottom: 1px solid rgba(1, 33, 65, 0.09);
+}
+
+.rowLabel {
+  flex: none;
+  min-width: 48px;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.recipient {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 5px 12px 5px 5px;
+  border-radius: 999px;
+  background: rgba(1, 33, 65, 0.05);
+  color: var(--ink);
+  font-size: 15px;
+}
+
+.avatar {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: inset 0 0 0 1px rgba(1, 33, 65, 0.08);
+}
+
+.avatar img {
+  width: 14px;
+  height: auto;
+}
+
+.subject {
+  color: var(--ink);
+  font-size: 15px;
+}
+
+.message {
+  min-height: 116px;
+  max-height: 34vh;
+  padding: clamp(14px, 1.8vw, 18px) clamp(18px, 2.4vw, 26px);
+  border: 0;
+  color: var(--navy);
+  background: transparent;
+  font-size: 15.5px;
+  line-height: 1.65;
+  resize: none;
+  outline: none;
+}
+
+.message::placeholder {
+  color: #93a0ad;
+}
+
+.message:disabled {
+  color: var(--navy);
+  opacity: 1;
+}
+
+/* --- the consents --------------------------------------------------------- */
+
+.consents {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: clamp(11px, 1.4vw, 14px) clamp(18px, 2.4vw, 26px);
+  border-top: 1px solid rgba(1, 33, 65, 0.09);
+}
+
+.consent {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+  color: var(--muted);
+  font-size: 13px;
+  line-height: 1.5;
+  cursor: pointer;
+}
+
+.consent input {
+  width: 17px;
+  height: 17px;
+  margin: 0;
+  accent-color: var(--orange);
+  /* Sits on the first line of the sentence, not on the block's top edge. */
+  margin-top: 2px;
+  cursor: pointer;
+}
+
+.consent input:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 2px;
+}
+
+.consent a {
+  color: var(--navy);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+/* --- the send row --------------------------------------------------------- */
+
+.actions {
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 1.6vw, 18px);
+  padding: clamp(12px, 1.5vw, 16px) clamp(18px, 2.4vw, 26px) clamp(14px, 1.7vw, 18px);
+  border-top: 1px solid rgba(1, 33, 65, 0.09);
+}
+
+.fields {
+  display: grid;
+  flex: 1;
+  gap: clamp(10px, 1.4vw, 14px);
+  grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+  min-width: 0;
+}
+
+/* Capsules, so the row reads as one shape with the slab it sits next to. */
+.field {
+  width: 100%;
+  min-width: 0;
+  padding: 0.7em 1.5em;
+  border: 1px solid rgba(1, 33, 65, 0.14);
+  border-radius: 999px;
+  color: var(--navy);
+  background: var(--soft);
+  font-size: clamp(0.88rem, 1.15vw, 1.02rem);
+  line-height: 1;
+  outline: none;
+  transition:
+    border-color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.field::placeholder {
+  color: #93a0ad;
+}
+
+.field:focus {
+  border-color: var(--orange);
+  box-shadow: 0 0 0 3px rgba(242, 121, 45, 0.16);
+}
+
+.field:disabled {
+  color: var(--navy);
+  opacity: 1;
+}
+
+.error {
+  margin: 0;
+  padding: 0 clamp(18px, 2.4vw, 26px) clamp(18px, 2.2vw, 24px);
+  color: #b4441c;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  clip-path: inset(50%);
+  overflow: hidden;
+  white-space: nowrap;
+}
+/* --- sending: the mail pulls back, then leaves ---------------------------- */
+
+.stage[data-state="sending"] .mail,
+.stage[data-state="sent"] .mail {
+  animation: mail-send 0.72s forwards;
+  pointer-events: none;
+}
+
+.stage[data-state="sent"] .mail {
+  visibility: hidden;
+}
+
+@keyframes mail-send {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+    animation-timing-function: cubic-bezier(0.32, 0.9, 0.35, 1);
+  }
+
+  26% {
+    transform: translateY(10px) scale(0.9);
+    opacity: 1;
+    animation-timing-function: cubic-bezier(0.6, 0, 0.85, 0.2);
+  }
+
+  100% {
+    transform: translateY(-110vh) scale(0.34);
+    opacity: 0;
+  }
+}
+
+/* The send failed, so the mail drops back onto the page. */
+.stage[data-state="returning"] .mail {
+  animation: mail-return 0.42s cubic-bezier(0.22, 1, 0.36, 1) backwards;
+}
+
+@keyframes mail-return {
+  from {
+    transform: translateY(-40px) scale(0.94);
+    opacity: 0;
+  }
+
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+/* --- sent ----------------------------------------------------------------- */
+
+.done {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+  outline: none;
+  pointer-events: none;
+}
+
+.stage[data-state="sent"] .done {
+  animation: done-in 0.5s 0.06s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes done-in {
+  from {
+    transform: scale(0.92);
+    opacity: 0;
+  }
+
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+.check {
+  width: 68px;
+  height: 68px;
+  margin-bottom: 10px;
+  fill: none;
+  stroke: var(--orange);
+  stroke-width: 3.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.check circle {
+  stroke-dasharray: 145;
+  stroke-dashoffset: 145;
+  animation: draw 0.5s 0.1s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+.check path {
+  stroke-dasharray: 40;
+  stroke-dashoffset: 40;
+  animation: draw 0.32s 0.46s cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+@keyframes draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+.doneTitle {
+  margin: 0;
+  color: var(--ink);
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(22px, 2.4vw, 28px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.doneNote {
+  margin: 0;
+  color: var(--muted);
+  font-size: 16px;
+}
+@media (max-width: 640px) {
+  .actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .fields {
+    grid-template-columns: 1fr;
+  }
+
+  .actions > :last-child {
+    align-self: stretch;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage[data-state="sending"] .mail,
+  .stage[data-state="sent"] .mail,
+  .stage[data-state="returning"] .mail,
+  .stage[data-state="sent"] .done,
+  .check circle,
+  .check path {
+    animation-duration: 0.01ms;
+    animation-delay: 0ms;
+  }
+}

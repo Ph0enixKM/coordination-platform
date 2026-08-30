@@ -426,7 +426,7 @@ export function ControlScene({ play }: SceneProps) {
         ))}
       </g>
 
-      {/* Control by rules, responsibilities and criteria — same control, less traffic. */}
+      {/* Control by rules, responsibilities and criteria - same control, less traffic. */}
       <g className={styles.stateSorted}>
         {MATTERS.map((matter, index) => (
           <path
@@ -489,7 +489,7 @@ export function StrainScene({ play }: SceneProps) {
 
 /* --- 10. the strategic direction, checked against the everyday ------------ */
 
-/** Clients, offers, discounts, orders — where a direction is actually settled. */
+/** Clients, offers, discounts, orders - where a direction is actually settled. */
 const EVERYDAY = [26, 108, 190, 272] as const;
 
 export function BridgeScene({ play }: SceneProps) {

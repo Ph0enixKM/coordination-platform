@@ -4,6 +4,7 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import LogoMark from "@/components/LogoMark/LogoMark";
 import type { LogoTone } from "@/components/LogoMark/LogoMark";
 import ParcelScene from "@/components/ParcelScene/ParcelScene";
+import CtaButton from "@/components/CtaButton/CtaButton";
 import styles from "./BrandHero.module.css";
 
 const SESSION_KEY = "coordination:intro-played";
@@ -38,7 +39,7 @@ const markPlayed = () => {
   try {
     window.sessionStorage.setItem(SESSION_KEY, "1");
   } catch {
-    /* private mode — the intro simply replays */
+    /* private mode - the intro simply replays */
   }
 };
 
@@ -59,7 +60,7 @@ export default function BrandHero() {
    * viewport, with the row nudged sideways so the mark alone sits on the axis.
    *
    * Everything is read off `.brand` and offset metrics, which stay untouched by
-   * the transforms the intro itself applies — so this is safe to redo on resize.
+   * the transforms the intro itself applies - so this is safe to redo on resize.
    */
   const measureSplash = useCallback(() => {
     const brand = brandRef.current;
@@ -109,7 +110,7 @@ export default function BrandHero() {
     window.scrollTo(0, 0);
 
     // A viewport we cannot measure (a page rendered while hidden) would put the
-    // splash somewhere arbitrary — better to land straight on the finished page.
+    // splash somewhere arbitrary - better to land straight on the finished page.
     if (!measureSplash()) {
       setPhase("settled");
       return;
@@ -158,7 +159,7 @@ export default function BrandHero() {
         {/*
           Sticky positioning makes the viewport its own stacking context, so the
           backdrop has to live inside it to stay under the brand during the
-          splash — from outside, its z-index would cover the whole hero.
+          splash - from outside, its z-index would cover the whole hero.
         */}
         <div className={styles.backdrop} aria-hidden="true" />
 
@@ -177,9 +178,7 @@ export default function BrandHero() {
         <h2 className={styles.subheading}>Porządkujemy strategię, sprzedaż i procesy, żeby Twoja firma rosła bez chaosu.</h2>
 
         <div className={styles.ctaRow}>
-          <a className={styles.cta} href="#kontakt">
-            <span className={styles.ctaLabel}>Wypełnij formularz</span>
-          </a>
+          <CtaButton href="#kontakt">Wypełnij formularz</CtaButton>
         </div>
 
         <ParcelScene play={flying} />

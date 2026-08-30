@@ -10,7 +10,7 @@ const mediaLinks = [
 export default function Media() {
   return (
     <section className={styles.media}>
-      <SectionIntro kicker="Materiały bezpłatne" title="Posłuchaj nas" />
+      <SectionIntro title="Posłuchaj nas" />
       <div className={styles.mediaGrid}>
         {mediaLinks.map(([href, image, label]) => (
           <a key={label} href={href} target="_blank" rel="noreferrer"><img src={image} alt={label} /></a>

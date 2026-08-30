@@ -26,7 +26,7 @@ export default function WhoWeHelp() {
   return (
     <section className={styles.who} id="dla-kogo">
       <div className={styles.intro}>
-        <SectionIntro kicker="Właściwe dopasowanie" title="Dla jakich firm jesteśmy właściwym wyborem?">
+        <SectionIntro title="Dla jakich firm jesteśmy właściwym wyborem?">
           Pracujemy z mikro i małymi firmami, które mają już klientów, zespół i przychody, ale widzą, że dalszy rozwój wymaga uporządkowania strategii, sprzedaży, marketingu i sposobu podejmowania decyzji.
         </SectionIntro>
       </div>

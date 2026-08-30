@@ -3,7 +3,7 @@ import { ArrowUpRight } from "lucide-react";
 import styles from "./Paths.module.css";
 
 const paths = [
-  ["/assets/path-question.svg", "Chcesz zadać anonimowe pytanie", "Przejdź do FAQ. Możesz zapytać o wszystko związane z Twoją firmą — to bezpieczny pierwszy krok.", "Przejdź do FAQ", "https://coordination.pl/faq/"],
+  ["/assets/path-question.svg", "Chcesz zadać anonimowe pytanie", "Przejdź do FAQ. Możesz zapytać o wszystko związane z Twoją firmą - to bezpieczny pierwszy krok.", "Przejdź do FAQ", "https://coordination.pl/faq/"],
   ["/assets/path-time.svg", "Wiesz, że coś nie działa, ale potrzebujesz czasu", "Dołącz do zamkniętej społeczności i zobacz, jak rozmawiamy o strategii, sprzedaży i produkcji.", "Dołącz do społeczności", "https://coordination.pl/spolecznosc/"],
   ["/assets/path-conversation.svg", "Jesteś gotowy na rozmowę", "Umów bezpłatną konsultację. Poznamy Twoją sytuację i wspólnie sprawdzimy, czy dalsza współpraca ma sens.", "Umów rozmowę", "#kontakt"],
 ] as const;
@@ -11,7 +11,7 @@ const paths = [
 export default function Paths() {
   return (
     <section className={styles.paths}>
-      <SectionIntro kicker="Zacznij po swojemu" title="Nie oczekujemy, że każdy od razu będzie gotowy na rozmowę" />
+      <SectionIntro title="Nie oczekujemy, że każdy od razu będzie gotowy na rozmowę" />
       <div className={styles.pathGrid}>
         {paths.map(([image, title, copy, label, href]) => (
           <article key={title}>

@@ -11,7 +11,7 @@ export default function Knowledge() {
   return (
     <section className={styles.knowledge} id="wiedza">
       <div className={styles.sectionHeaderRow}>
-        <div><p className={styles.kicker}>Baza wiedzy</p><h2>Najnowsze wpisy</h2></div>
+        <div><h2>Najnowsze wpisy</h2></div>
         <a href="https://coordination.pl/blog-coordination/">Zobacz wszystkie <ArrowUpRight aria-hidden="true" /></a>
       </div>
       <div className={styles.articleGrid}>

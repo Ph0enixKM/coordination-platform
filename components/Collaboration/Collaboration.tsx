@@ -10,7 +10,7 @@ const steps = [
 export default function Collaboration() {
   return (
     <section className={styles.collaboration}>
-      <SectionIntro kicker="Praca, nie prezentacja" title="Projektujemy, wdrażamy i utrzymujemy zmianę" />
+      <SectionIntro title="Projektujemy, wdrażamy i utrzymujemy zmianę" />
       <img className={styles.collaborationLine} src="/assets/collaboration-line.png" alt="Schemat współpracy" />
       <div className={styles.threeColumns}>
         {steps.map(([number, title, copy]) => <article key={number}><span>{number}</span><h3>{title}</h3><p>{copy}</p></article>)}

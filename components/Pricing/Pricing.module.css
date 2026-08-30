@@ -1,0 +1,336 @@
+.pricing {
+  padding: clamp(72px, 9vw, 124px) 0;
+  background: #e8eaee;
+}
+
+.intro {
+  padding: 0 clamp(20px, 5vw, 72px);
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.7s cubic-bezier(0.22, 1, 0.3, 1);
+}
+
+.pricing[data-visible] .intro {
+  opacity: 1;
+  transform: none;
+}
+
+.cards {
+  display: grid;
+  gap: clamp(16px, 2vw, 28px);
+  width: min(1160px, 100%);
+  margin: 0 auto;
+  padding: 0 clamp(16px, 5vw, 72px);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: stretch;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: clamp(16px, 1.6vw, 20px);
+  padding: clamp(24px, 2.6vw, 36px);
+  border-radius: 24px;
+  background: #ffffff;
+  box-shadow: 0 24px 50px -34px rgba(1, 33, 65, 0.5);
+
+  opacity: 0;
+  transform: translateY(24px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.6s cubic-bezier(0.25, 0, 0.3, 1),
+    box-shadow 0.4s ease;
+  /* Behind the heading, then one card after another across the row. */
+  transition-delay: calc(160ms + var(--i, 0) * 130ms);
+}
+
+.card[data-visible] {
+  opacity: 1;
+  transform: none;
+}
+
+.card[data-visible]:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 32px 60px -32px rgba(1, 33, 65, 0.55);
+  transition-delay: 0s;
+}
+
+/*
+  Titles run to one, two or three lines, which would leave every card's amount
+  and list at its own height. Subgrid puts the four blocks of each card on the
+  same four rows, so they line up across the row of cards.
+*/
+@supports (grid-template-rows: subgrid) {
+  .cards {
+    grid-template-rows: auto auto auto 1fr auto;
+  }
+
+  .card {
+    display: grid;
+    grid-row: span 5;
+    grid-template-rows: subgrid;
+  }
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  align-self: start;
+}
+
+.icon {
+  display: grid;
+  flex: none;
+  width: 46px;
+  height: 46px;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--orange);
+  background: rgba(242, 121, 45, 0.12);
+}
+
+.icon svg {
+  width: 21px;
+  height: 21px;
+}
+
+.card h3 {
+  margin: 0;
+  color: var(--ink);
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(18px, 1.6vw, 21px);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  line-height: 1.25;
+}
+
+/* --- the amount ---------------------------------------------------------- */
+
+.price {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  opacity: 0;
+  transform: scale(0.96);
+  transition:
+    opacity 0.5s ease,
+    transform 0.6s cubic-bezier(0.22, 1, 0.3, 1);
+  transition-delay: calc(360ms + var(--i, 0) * 130ms);
+  padding: clamp(16px, 1.8vw, 20px);
+  border-radius: 16px;
+  background: var(--soft);
+}
+
+.card[data-visible] .price {
+  opacity: 1;
+  transform: none;
+}
+
+.amount {
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  margin: 0;
+}
+
+.prefix {
+  color: var(--muted);
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(15px, 1.3vw, 17px);
+  font-weight: 600;
+}
+
+.price strong {
+  color: var(--ink);
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(24px, 2.4vw, 30px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+
+.suffix {
+  color: #4d5a68;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+/* --- the benefits -------------------------------------------------------- */
+
+.benefitsTitle {
+  margin: 0;
+  color: var(--ink);
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.benefits {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.benefits li {
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 0.45s ease,
+    transform 0.5s cubic-bezier(0.22, 1, 0.3, 1);
+  /* After the card and its price, then row by row down the list. */
+  transition-delay: calc(480ms + var(--i, 0) * 130ms + var(--j, 0) * 70ms);
+}
+
+.card[data-visible] .benefits li {
+  opacity: 1;
+  transform: none;
+}
+
+.benefits li,
+.shared li {
+  display: grid;
+  grid-template-columns: 20px 1fr;
+  gap: 10px;
+  align-items: start;
+  color: #4d5a68;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.benefits li svg,
+.shared li svg {
+  width: 20px;
+  height: 20px;
+  padding: 4px;
+  border-radius: 50%;
+  color: var(--orange);
+  background: rgba(242, 121, 45, 0.12);
+  /* Sits on the first line of the item, not on the block's top edge. */
+  margin-top: 1px;
+}
+
+/* --- what everyone gets -------------------------------------------------- */
+
+.shared {
+  width: min(1160px, 100%);
+  margin: clamp(18px, 2vw, 28px) auto 0;
+  padding: 0 clamp(16px, 5vw, 72px);
+}
+
+.sharedInner {
+  padding: clamp(24px, 2.6vw, 34px) clamp(24px, 3vw, 40px);
+  border: 1px solid rgba(1, 33, 65, 0.12);
+  border-radius: 24px;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.shared h3 {
+  margin: 0 0 clamp(16px, 1.8vw, 22px);
+  color: var(--ink);
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(17px, 1.5vw, 20px);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.shared ul {
+  display: grid;
+  gap: 14px clamp(20px, 3vw, 40px);
+  margin: 0;
+  padding: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  list-style: none;
+}
+
+/* The button fills the card's width, so the three read as one row of offers. */
+.ask {
+  display: grid;
+  margin-top: 4px;
+}
+
+.tail .shared,
+.tail .note {
+  opacity: 0;
+  transform: translateY(20px);
+  transition:
+    opacity 0.6s ease,
+    transform 0.7s cubic-bezier(0.22, 1, 0.3, 1);
+}
+
+.tail .note {
+  transition-delay: 140ms;
+}
+
+.tail[data-visible] .shared,
+.tail[data-visible] .note {
+  opacity: 1;
+  transform: none;
+}
+
+.note {
+  width: min(850px, 100%);
+  margin: clamp(28px, 3.4vw, 44px) auto 0;
+  padding: 0 clamp(20px, 5vw, 72px);
+  text-align: center;
+  color: var(--muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+@media (max-width: 1100px) {
+  .cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    max-width: min(820px, 100%);
+  }
+}
+
+@media (max-width: 760px) {
+  .cards {
+    grid-template-columns: 1fr;
+    max-width: min(560px, 100%);
+  }
+
+  /* Stacked, every card arrives on its own scroll: waiting out the cascade
+     would only delay a card the reader is already looking at. */
+  .card {
+    transition-delay: 0s;
+  }
+
+  .card .price {
+    transition-delay: 160ms;
+  }
+
+  .card .benefits li {
+    transition-delay: calc(260ms + var(--j, 0) * 70ms);
+  }
+
+  .shared ul {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .intro,
+  .price,
+  .benefits li,
+  .tail .shared,
+  .tail .note {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .card[data-visible]:hover {
+    transform: none;
+  }
+}
