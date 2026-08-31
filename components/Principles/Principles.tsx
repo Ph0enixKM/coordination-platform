@@ -137,11 +137,15 @@ const PRINCIPLES: readonly Principle[] = [
 const DRAG_SLOP = 4;
 
 export default function Principles() {
+  const sectionRef = useRef<HTMLElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const slidesRef = useRef<(HTMLElement | null)[]>([]);
 
   const [active, setActive] = useState(0);
   const [dragging, setDragging] = useState(false);
+  // The scenes only start once the section has actually been scrolled to, so
+  // the first one is not already half over by the time it is read.
+  const [seen, setSeen] = useState(false);
 
   // The scroll handler and the drag release both need the current slide
   // without re-binding themselves every time it changes.
@@ -211,6 +215,26 @@ export default function Principles() {
       window.removeEventListener("resize", onScroll);
     };
   }, [readActive]);
+
+  useEffect(() => {
+    const section = sectionRef.current;
+
+    if (!section) return;
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+
+        setSeen(true);
+        observer.disconnect();
+      },
+      { threshold: 0.35 },
+    );
+
+    observer.observe(section);
+
+    return () => observer.disconnect();
+  }, []);
 
   /* --- dragging ---------------------------------------------------------- */
 
@@ -282,7 +306,7 @@ export default function Principles() {
   };
 
   return (
-    <section className={styles.principles} id="wartosci">
+    <section className={styles.principles} id="wartosci" ref={sectionRef}>
       <div className={styles.intro}>
         <SectionIntro title="Czym różni się nasze podejście?" />
       </div>
@@ -314,7 +338,7 @@ export default function Principles() {
             <div className={styles.card}>
               {/* Points without a drawing yet keep the room one would take. */}
               <div className={styles.stage}>
-                {Scene ? <Scene play={index === active} /> : null}
+                {Scene ? <Scene play={seen && index === active} /> : null}
               </div>
 
               <div className={styles.copy}>
