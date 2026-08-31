@@ -1,0 +1,241 @@
+/*
+ * Same two rules as the rest of the drawings: the base style of every element
+ * is its resting state - the finished picture, three decisions up - and nothing
+ * moves unless the scene carries `data-play`.
+ */
+
+.scene {
+  --cycle: 4.6s;
+  --accent: var(--orange);
+  --faint: #c3d0de;
+  --board: #f1f5f9;
+
+  display: block;
+  width: 100%;
+  height: auto;
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  background: var(--board);
+}
+
+/* --- the two of us -------------------------------------------------------- */
+
+/*
+ * The one line that is ours. It reaches the owner and stops there - drawn in
+ * the same travelling dash as the lines to the decisions, so what sets it apart
+ * is that it is the only one still there when they have gone.
+ */
+.link {
+  stroke: var(--accent);
+  stroke-width: 3;
+  stroke-dasharray: 5 6;
+  stroke-dashoffset: 0;
+}
+
+.us,
+.owner {
+  fill: #ffffff;
+  stroke-width: 2.5;
+}
+
+.us {
+  stroke: var(--accent);
+}
+
+.owner {
+  stroke: var(--navy);
+}
+
+.halo {
+  fill: var(--accent);
+  fill-opacity: 0.16;
+  stroke: none;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.figureUs {
+  fill: var(--accent);
+  stroke: none;
+}
+
+.figureOwner {
+  fill: var(--navy);
+  stroke: none;
+}
+
+.name {
+  fill: var(--navy);
+  stroke: none;
+  font-family: "Poppins", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+.nameUs {
+  fill: var(--accent);
+}
+
+/* --- what keeps coming back to him ---------------------------------------- */
+
+/*
+ * A decision that is not in this turn's set is still there, still keeping time
+ * with the others - it is only out of sight. Hidden this way it goes on
+ * running, which is what keeps all three in step; taken out of the drawing it
+ * would come back on a turn of its own.
+ */
+.decision:not([data-up="true"]) {
+  visibility: hidden;
+}
+
+/*
+ * The line to a decision is a dash, and the dash travels: the pattern is in
+ * user units rather than a fraction of the line, so the same dash comes out the
+ * same size on a short line and a long one.
+ */
+.wire {
+  stroke: var(--faint);
+  stroke-width: 2;
+  stroke-dasharray: 5 6;
+  stroke-dashoffset: 0;
+}
+
+.pill {
+  fill: #ffffff;
+  stroke: var(--faint);
+  stroke-width: 2;
+}
+
+.ask {
+  fill: var(--navy);
+  stroke: none;
+  font-family: "Poppins", sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+/* --- the loop ------------------------------------------------------------- */
+
+/*
+ * The line shows first and the decision arrives on it; the decision goes first
+ * on the way back. The last tenth of the turn is empty, which is when the next
+ * set is dealt - the first decision's own turn is what calls for it.
+ *
+ * Under all of that the dashes keep travelling, on a much shorter loop of their
+ * own that pays no attention to the turn: back along the line towards the
+ * owner, because that is the way these things come.
+ */
+/*
+ * Each one lags a little behind the one before it, and `backwards` is what has
+ * it wait in the state its turn opens in rather than in the one the style sheet
+ * leaves it in.
+ */
+.scene[data-play="true"] .wire {
+  animation: reach var(--cycle) ease-in-out infinite, march 1.4s linear infinite;
+  animation-delay: var(--lag), 0s;
+  animation-fill-mode: backwards;
+}
+
+.scene[data-play="true"] .link {
+  animation: march 1.4s linear infinite;
+}
+
+.scene[data-play="true"] .card {
+  animation: put var(--cycle) ease-in-out infinite;
+  animation-delay: var(--lag);
+  animation-fill-mode: backwards;
+}
+
+/*
+ * The clock, and nothing else: it draws nothing, it is only wound back far
+ * enough that it comes round three quarters of the way through the turn, which
+ * is the stretch where no decision is on show. That is when the next set is
+ * dealt, and it is why the turn itself can begin and end with them up - the
+ * drawing at rest and the drawing at the top of its loop are the same picture,
+ * so arriving at the slide starts it without a blink.
+ */
+.scene[data-play="true"] .clock {
+  animation: turn var(--cycle) linear infinite;
+  animation-delay: calc(var(--cycle) * -0.22);
+}
+
+.scene[data-play="true"] .halo {
+  animation: breathe 3.4s ease-in-out infinite;
+}
+
+/*
+ * The turn opens with the decisions up. The decision goes first on the way out
+ * and the line follows it; on the way back the line is there before the
+ * decision arrives on it.
+ */
+@keyframes reach {
+  0%,
+  60% {
+    opacity: 1;
+  }
+  70%,
+  82% {
+    opacity: 0;
+  }
+  90%,
+  100% {
+    opacity: 1;
+  }
+}
+
+/* Nothing moves in it. It exists to come round. */
+@keyframes turn {
+  0%,
+  100% {
+    opacity: 1;
+  }
+}
+
+/* One dash and one gap: the pattern lands where it started every turn. */
+@keyframes march {
+  to {
+    stroke-dashoffset: 11;
+  }
+}
+
+@keyframes put {
+  0%,
+  56% {
+    opacity: 1;
+  }
+  66%,
+  84% {
+    opacity: 0;
+  }
+  94%,
+  100% {
+    opacity: 1;
+  }
+}
+
+/* We are steady, not busy: the halo only breathes. */
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.75;
+    transform: scale(0.96);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.04);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene *,
+  .scene {
+    animation: none !important;
+  }
+}

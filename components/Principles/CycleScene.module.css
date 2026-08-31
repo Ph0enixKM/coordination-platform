@@ -1,0 +1,75 @@
+/*
+ * Only paint lives here. The loop is SMIL, in the markup, because the team's
+ * travel round the ring and the lighting of the stop it is at have to keep the
+ * same clock - see the note at the top of the component.
+ */
+
+.scene {
+  --board: #f1f5f9;
+
+  display: block;
+  width: 100%;
+  height: auto;
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  background: var(--board);
+}
+
+/* The ring the work goes round, and the arrows that say which way. */
+.ring {
+  fill: none;
+  stroke: #dbe3ec;
+  stroke-width: 2;
+}
+
+.arrow {
+  fill: none;
+  stroke: #c3d0de;
+  stroke-width: 2;
+}
+
+/*
+ * A stop on the ring: a white dot, grey until the team is at it. Its name is
+ * set from the side the stop is on, so the anchor is left to the markup.
+ */
+.stop {
+  fill: #ffffff;
+  stroke: #c3d0de;
+  stroke-width: 2.5;
+}
+
+.label {
+  fill: var(--navy);
+  stroke: none;
+  font-family: "Poppins", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  dominant-baseline: central;
+}
+
+/* The team marker: a white badge with two figures, in the accent. */
+.teamHalo {
+  fill: #f2792d;
+  fill-opacity: 0.16;
+  stroke: none;
+}
+
+.teamBadge {
+  fill: #ffffff;
+  stroke: #f2792d;
+  stroke-width: 2.5;
+}
+
+.teamFigure {
+  fill: #f2792d;
+  stroke: none;
+}
+
+/*
+ * Nothing here animates - the scene pauses its own SMIL timeline for a slide
+ * that is off screen or for a visitor who asked for less motion, which parks
+ * the drawing on the team at the first stop, lit.
+ */

@@ -1,0 +1,64 @@
+/*
+ * Only paint lives here. The loop itself is SMIL, in the markup, because the
+ * straightening is a path morph - see the note at the top of the component.
+ */
+
+.scene {
+  /* Kept in step with COOL in the component, which the link animates to. */
+  --faint: #c3d0de;
+  --board: #f1f5f9;
+
+  display: block;
+  width: 100%;
+  height: auto;
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  background: var(--board);
+}
+
+/* --- the flow ------------------------------------------------------------- */
+
+/* The mask that runs the flow out into the board: opaque middle, clear rim. */
+.fadeIn {
+  stop-color: #ffffff;
+}
+
+.fadeOut {
+  stop-color: #000000;
+}
+
+.step {
+  fill: #ffffff;
+  stroke: none;
+}
+
+.label {
+  fill: var(--navy);
+  stroke: none;
+  font-family: "Poppins", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+/* The stretches of the flow nobody is arguing about. */
+.line {
+  stroke: var(--faint);
+}
+
+/*
+ * The handover the point is about. Its colour and its shape are both driven by
+ * the SMIL clock in the markup, so the paint here is only what does not move.
+ */
+.link {
+  fill: none;
+}
+
+/*
+ * Nothing here animates - the loop is SMIL, and the scene pauses its own
+ * timeline for a slide that is off screen or for a visitor who asked for less
+ * motion, which leaves the drawing parked on the tangled handover.
+ */

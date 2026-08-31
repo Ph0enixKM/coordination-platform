@@ -1,8 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ComponentType } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import SectionIntro from "@/components/SectionIntro/SectionIntro";
+import DiagnosisScene from "./DiagnosisScene";
+import FlowScene from "./FlowScene";
+import SlidersScene from "./SlidersScene";
+import DealsScene from "./DealsScene";
+import GateScene from "./GateScene";
+import CycleScene from "./CycleScene";
+import OwnerScene from "./OwnerScene";
 import styles from "./Principles.module.css";
 
 type Principle = {
@@ -11,6 +18,8 @@ type Principle = {
   body: readonly string[];
   /** The „Różnica:” line that closes the point. */
   difference: string;
+  /** The drawing beside the point. Only the points that have one carry it. */
+  Scene?: ComponentType<{ play: boolean }>;
 };
 
 const PRINCIPLES: readonly Principle[] = [
@@ -22,6 +31,7 @@ const PRINCIPLES: readonly Principle[] = [
       "Jeżeli klient mówi „marketing nie działa”, nie zaczynamy od kampanii. Jeżeli mówi „handlowiec nie sprzedaje”, nie zaczynamy od szkolenia handlowca. Najpierw sprawdzamy, czy przyczyna rzeczywiście znajduje się tam, gdzie widoczny jest problem.",
     ],
     difference: "nie sprzedajemy rozwiązania przed diagnozą.",
+    Scene: DiagnosisScene,
   },
   {
     title: "Nie naprawiamy jednego obszaru kosztem drugiego",
@@ -31,6 +41,7 @@ const PRINCIPLES: readonly Principle[] = [
     ],
     difference:
       "nie optymalizujemy pojedynczego działu. Optymalizujemy jego wpływ na całą firmę.",
+    Scene: FlowScene,
   },
   {
     title: "Nie zakładamy, że więcej jest rozwiązaniem",
@@ -41,6 +52,7 @@ const PRINCIPLES: readonly Principle[] = [
     ],
     difference:
       "nie pomagamy firmie robić więcej. Pomagamy ustalić, czego warto robić więcej, czego mniej, a czego wcale.",
+    Scene: SlidersScene,
   },
   {
     title: "Nie patrzymy tylko na sprzedaż. Patrzymy na jakość sprzedaży",
@@ -51,6 +63,7 @@ const PRINCIPLES: readonly Principle[] = [
     ],
     difference:
       "wynikiem sprzedaży nie jest dla nas tylko podpisany kontrakt. Liczy się także to, co ten kontrakt robi z marżą i resztą firmy.",
+    Scene: DealsScene,
   },
   {
     title: "Nie rozwiązujemy tylko bieżącego przypadku. Budujemy zasadę na następny",
@@ -61,6 +74,7 @@ const PRINCIPLES: readonly Principle[] = [
     ],
     difference:
       "nie tylko rozwiązujemy problem. Staramy się sprawić, żeby firma wiedziała, jak poradzić sobie z następną podobną sytuacją.",
+    Scene: GateScene,
   },
   {
     title: "Nie kończymy na strategii, prezentacji ani rekomendacji",
@@ -70,6 +84,7 @@ const PRINCIPLES: readonly Principle[] = [
     ],
     difference:
       "efektem nie ma być wiedza o tym, co zrobić. Efektem ma być zmiana sposobu podejmowania rzeczywistych decyzji.",
+    Scene: CycleScene,
   },
   {
     title: "Nie przejmujemy firmy od właściciela",
@@ -80,35 +95,42 @@ const PRINCIPLES: readonly Principle[] = [
     ],
     difference:
       "nie budujemy zależności od doradcy. Budujemy zdolność firmy do podejmowania lepszych decyzji samodzielnie.",
+    Scene: OwnerScene,
   },
-  {
-    title: "Nie odbieramy właścicielowi kontroli. Zmieniamy sposób jej sprawowania",
-    body: [
-      "Typowa narracja mówiłaby: „musisz się wycofać”, „musisz delegować”, „przestań być wąskim gardłem”.",
-      "Właściciel niekoniecznie tego chce. Nadal chce wiedzieć, co dzieje się w jego firmie, i zachować wpływ na najważniejsze decyzje. Problemem jest to, że kontroluje firmę przez osobisty udział w zbyt wielu sprawach.",
-      "Pomagamy przejść od kontroli przez osobiste pilnowanie do kontroli przez zasady, odpowiedzialności, informacje i kryteria decyzji.",
-    ],
-    difference:
-      "nie mówimy właścicielowi „odsuń się”. Pomagamy mu kontrolować firmę inaczej.",
-  },
-  {
-    title: "Pracujemy szczególnie z firmą, która „działa, ale działa za ciężko”",
-    body: [
-      "Nie pracujemy przede wszystkim ze startupem przed pierwszym klientem ani z firmą będącą już korporacją. Nasz klient ma 3–20 osób, sprzedaż, klientów i historię.",
-      "Firma nie musi być w kryzysie. Problem polega na tym, że dotychczasowy sposób działania zaczyna kosztować coraz więcej czasu, marży i uwagi właściciela.",
-    ],
-    difference:
-      "specjalizujemy się nie tyle w branży, ile w konkretnym momencie rozwoju firmy właścicielskiej.",
-  },
-  {
-    title: "Coordination łączy diagnozę strategiczną z codziennością firmy",
-    body: [
-      "Nie jesteśmy tylko strategiem, który mówi, dokąd iść. Nie jesteśmy tylko specjalistą sprzedaży, który poprawia lejek. Nie jesteśmy tylko procesowcem, który rozpisuje odpowiedzialności.",
-      "Patrzymy na strategiczny kierunek firmy, ale następnie sprawdzamy jego konsekwencje na poziomie konkretnych klientów, ofert, rabatów, zleceń, priorytetów i decyzji zespołu.",
-    ],
-    difference:
-      "to spójność całego modelu, a nie pojedyncza specjalizacja, jest źródłem przewagi Coordination.",
-  },
+  /*
+   * The last three points have no drawing yet, and a slide that is only type
+   * next to slides that are half picture reads as one that is still being
+   * written. They are held here, whole, until each has one of its own.
+   *
+   *   {
+   *     title: "Nie odbieramy właścicielowi kontroli. Zmieniamy sposób jej sprawowania",
+   *     body: [
+   *       "Typowa narracja mówiłaby: „musisz się wycofać”, „musisz delegować”, „przestań być wąskim gardłem”.",
+   *       "Właściciel niekoniecznie tego chce. Nadal chce wiedzieć, co dzieje się w jego firmie, i zachować wpływ na najważniejsze decyzje. Problemem jest to, że kontroluje firmę przez osobisty udział w zbyt wielu sprawach.",
+   *       "Pomagamy przejść od kontroli przez osobiste pilnowanie do kontroli przez zasady, odpowiedzialności, informacje i kryteria decyzji.",
+   *     ],
+   *     difference:
+   *       "nie mówimy właścicielowi „odsuń się”. Pomagamy mu kontrolować firmę inaczej.",
+   *   },
+   *   {
+   *     title: "Pracujemy szczególnie z firmą, która „działa, ale działa za ciężko”",
+   *     body: [
+   *       "Nie pracujemy przede wszystkim ze startupem przed pierwszym klientem ani z firmą będącą już korporacją. Nasz klient ma 3–20 osób, sprzedaż, klientów i historię.",
+   *       "Firma nie musi być w kryzysie. Problem polega na tym, że dotychczasowy sposób działania zaczyna kosztować coraz więcej czasu, marży i uwagi właściciela.",
+   *     ],
+   *     difference:
+   *       "specjalizujemy się nie tyle w branży, ile w konkretnym momencie rozwoju firmy właścicielskiej.",
+   *   },
+   *   {
+   *     title: "Coordination łączy diagnozę strategiczną z codziennością firmy",
+   *     body: [
+   *       "Nie jesteśmy tylko strategiem, który mówi, dokąd iść. Nie jesteśmy tylko specjalistą sprzedaży, który poprawia lejek. Nie jesteśmy tylko procesowcem, który rozpisuje odpowiedzialności.",
+   *       "Patrzymy na strategiczny kierunek firmy, ale następnie sprawdzamy jego konsekwencje na poziomie konkretnych klientów, ofert, rabatów, zleceń, priorytetów i decyzji zespołu.",
+   *     ],
+   *     difference:
+   *       "to spójność całego modelu, a nie pojedyncza specjalizacja, jest źródłem przewagi Coordination.",
+   *   },
+   */
 ];
 
 /** Distance a mouse has to travel before a press counts as a drag. */
@@ -278,7 +300,7 @@ export default function Principles() {
         onPointerUp={endDrag}
         onPointerCancel={endDrag}
       >
-        {PRINCIPLES.map(({ title, body, difference }, index) => (
+        {PRINCIPLES.map(({ title, body, difference, Scene }, index) => (
           <article
             key={title}
             className={styles.slide}
@@ -290,8 +312,10 @@ export default function Principles() {
             aria-label={`${index + 1} z ${PRINCIPLES.length}`}
           >
             <div className={styles.card}>
-              {/* Placeholder: the illustration that belongs here is still to come. */}
-              <div className={styles.stage} />
+              {/* Points without a drawing yet keep the room one would take. */}
+              <div className={styles.stage}>
+                {Scene ? <Scene play={index === active} /> : null}
+              </div>
 
               <div className={styles.copy}>
                 <h3>{title}</h3>

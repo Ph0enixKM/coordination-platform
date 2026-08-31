@@ -1,0 +1,156 @@
+/*
+ * Same two rules as the other drawings: the base style of every element is its
+ * resting state - here, four signed contracts face up, which is the side the
+ * firm already counts - and nothing moves unless the scene carries `data-play`.
+ *
+ * The turn is a scaleX through zero, and the two faces swap at the moment the
+ * card is edge on. Both animations run off the same clock and the same lag, so
+ * the swap always lands inside the sliver where there is nothing to see.
+ */
+
+.scene {
+  --cycle: 7.2s;
+  --accent: var(--orange);
+  --board: #f1f5f9;
+
+  display: block;
+  width: 100%;
+  height: auto;
+  background: var(--board);
+}
+
+/* --- the cards ------------------------------------------------------------ */
+
+/*
+ * The ring under each card does the separating; this only softens where it
+ * ends. No offset, because every card is swung to its own angle and a
+ * directional shadow would swing with it.
+ */
+.card {
+  transform-box: fill-box;
+  transform-origin: center;
+  filter: drop-shadow(0 0 5px var(--board));
+}
+
+.paper {
+  fill: #ffffff;
+}
+
+.halo {
+  fill: var(--board);
+}
+
+/* --- what is on each side ------------------------------------------------- */
+
+.rule {
+  fill: #dde5ef;
+}
+
+.signed {
+  fill: none;
+  stroke: var(--navy);
+  stroke-width: 3.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.money {
+  fill: var(--navy);
+  font-family: "Poppins", sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+  text-anchor: middle;
+}
+
+.column {
+  fill: #e8eef6;
+}
+
+.worth {
+  fill: var(--accent);
+}
+
+/* The back is only ever seen through the turn. */
+.back {
+  opacity: 0;
+}
+
+/* --- the loop ------------------------------------------------------------- */
+
+.scene[data-play="true"] .card {
+  animation: turn var(--cycle) var(--lag) infinite;
+}
+
+.scene[data-play="true"] .front {
+  animation: face-front var(--cycle) var(--lag) infinite;
+}
+
+.scene[data-play="true"] .back {
+  animation: face-back var(--cycle) var(--lag) infinite;
+}
+
+/* Over at the front of the loop, back again at the end of it. */
+@keyframes turn {
+  0%,
+  14% {
+    transform: scaleX(1);
+    animation-timing-function: cubic-bezier(0.5, 0, 0.9, 0.3);
+  }
+  22% {
+    transform: scaleX(0.03);
+    animation-timing-function: cubic-bezier(0.1, 0.7, 0.5, 1);
+  }
+  30%,
+  70% {
+    transform: scaleX(1);
+    animation-timing-function: cubic-bezier(0.5, 0, 0.9, 0.3);
+  }
+  78% {
+    transform: scaleX(0.03);
+    animation-timing-function: cubic-bezier(0.1, 0.7, 0.5, 1);
+  }
+  86%,
+  100% {
+    transform: scaleX(1);
+  }
+}
+
+/*
+ * A hard cut rather than a crossfade: `step-end` holds each value until the
+ * next stop, so the two faces trade places on the single frame where the card
+ * is edge on and there is nothing to see either way.
+ */
+@keyframes face-front {
+  0% {
+    opacity: 1;
+    animation-timing-function: step-end;
+  }
+  22% {
+    opacity: 0;
+    animation-timing-function: step-end;
+  }
+  78% {
+    opacity: 1;
+  }
+}
+
+@keyframes face-back {
+  0% {
+    opacity: 0;
+    animation-timing-function: step-end;
+  }
+  22% {
+    opacity: 1;
+    animation-timing-function: step-end;
+  }
+  78% {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene *,
+  .scene {
+    animation: none !important;
+  }
+}

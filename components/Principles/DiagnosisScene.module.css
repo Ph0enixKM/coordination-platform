@@ -1,0 +1,155 @@
+/*
+ * Same two rules as the rest of the drawings: the base style of every element
+ * is its resting state - the finished picture - and nothing moves unless the
+ * scene carries `data-play`, so only the slide on screen spends frames.
+ */
+
+.scene {
+  --cycle: 7.2s;
+  --accent: var(--orange);
+  --board: #f1f5f9;
+
+  display: block;
+  width: 100%;
+  height: auto;
+  background: var(--board);
+}
+
+/* --- the field ------------------------------------------------------------ */
+
+.cell {
+  fill: #ffffff;
+}
+
+/* The mask that runs the grid out into the board: opaque middle, clear rim. */
+.fadeIn {
+  stop-color: #ffffff;
+}
+
+.fadeOut {
+  stop-color: #000000;
+}
+
+.litCell {
+  fill: var(--accent);
+}
+
+.glowCore {
+  stop-color: var(--accent);
+  stop-opacity: 0.5;
+}
+
+.glowEdge {
+  stop-color: var(--accent);
+  stop-opacity: 0;
+}
+
+.halo {
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+/* --- the second look ------------------------------------------------------ */
+
+.lens,
+.world {
+  transform-box: view-box;
+}
+
+.glass {
+  fill: #f8fafc;
+}
+
+.rim {
+  fill: none;
+  stroke: var(--navy);
+  stroke-width: 9;
+}
+
+.handle {
+  stroke: var(--navy);
+  stroke-width: 19;
+  stroke-linecap: round;
+}
+
+.shine {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 6;
+  stroke-linecap: round;
+  opacity: 0.7;
+}
+
+/* --- the loop ------------------------------------------------------------- */
+
+.scene[data-play="true"] .halo {
+  animation: breathe 2.6s ease-in-out infinite;
+}
+
+/*
+ * The glass and the field it magnifies run the same travel in opposite
+ * directions, so they have to keep the same timing to stay registered.
+ */
+.scene[data-play="true"] .lens {
+  animation: look var(--cycle) cubic-bezier(0.33, 1, 0.5, 1) infinite;
+}
+
+.scene[data-play="true"] .world {
+  animation: look-anchor var(--cycle) cubic-bezier(0.33, 1, 0.5, 1) infinite;
+}
+
+/* A lit cell is never quite steady - that is what keeps drawing the eye. */
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.55;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+}
+
+/*
+ * In from the right, held long enough to be read, out through the bottom. The
+ * frame clips its own edges, so the glass is off-screen at both ends of the
+ * loop and needs no fade to cover the wrap.
+ */
+@keyframes look {
+  0%,
+  6% {
+    transform: translate(280px, 0);
+  }
+  30%,
+  84% {
+    transform: translate(0, 0);
+  }
+  96%,
+  100% {
+    transform: translate(0, 280px);
+  }
+}
+
+/* The same travel, backwards: the field itself never moves. */
+@keyframes look-anchor {
+  0%,
+  6% {
+    transform: translate(-280px, 0);
+  }
+  30%,
+  84% {
+    transform: translate(0, 0);
+  }
+  96%,
+  100% {
+    transform: translate(0, -280px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene *,
+  .scene {
+    animation: none !important;
+  }
+}

@@ -1,0 +1,122 @@
+/*
+ * Same two rules as the other drawings: the base style of every element is its
+ * resting state - here, all three turned up to the same setting, which is
+ * where the firm starts - and nothing moves unless the scene carries
+ * `data-play`.
+ *
+ * The fill is a stroked line with `pathLength="100"`, so its dash offset is
+ * literally the percentage that is missing, and the knob rides on a translate.
+ * Both are ordinary animatable properties, which the SVG geometry attributes
+ * they replace are not, everywhere.
+ */
+
+.scene {
+  --cycle: 7.2s;
+  /* Skip the reveal when the slide becomes active; enter as settling begins. */
+  --entry-phase: -1.44s;
+  --accent: var(--orange);
+  --board: #f1f5f9;
+
+  display: block;
+  width: 100%;
+  height: auto;
+  fill: none;
+  stroke-linecap: round;
+  background: var(--board);
+}
+
+/* --- the sliders ---------------------------------------------------------- */
+
+.track {
+  stroke: #ffffff;
+  stroke-width: 12;
+}
+
+.fill {
+  stroke: var(--accent);
+  stroke-width: 12;
+  stroke-dasharray: 100;
+  stroke-dashoffset: calc((100 - var(--from)) * 1px);
+}
+
+.knob {
+  fill: #ffffff;
+  stroke: var(--navy);
+  stroke-width: 3.5;
+  transform: translateX(calc(var(--from) * 2.4px));
+}
+
+/* --- the loop ------------------------------------------------------------- */
+
+.scene[data-play="true"] .slider {
+  animation: replace var(--cycle) ease-in-out calc(var(--entry-phase) + var(--lag)) infinite;
+}
+
+.scene[data-play="true"] .fill {
+  animation: settle-fill var(--cycle) ease-in-out calc(var(--entry-phase) + var(--lag)) infinite;
+}
+
+.scene[data-play="true"] .knob {
+  animation: settle-knob var(--cycle) ease-in-out calc(var(--entry-phase) + var(--lag)) infinite;
+}
+
+/*
+ * The set is cleared and asked again. The cycle is phased so that the turn of
+ * the loop itself falls inside the blind spot: at 0% nothing is on screen yet,
+ * which is where the new setting and the new order are dealt in.
+ */
+@keyframes replace {
+  0% {
+    opacity: 0;
+  }
+  8%,
+  84% {
+    opacity: 1;
+  }
+  94%,
+  100% {
+    opacity: 0;
+  }
+}
+
+/*
+ * One goes up a little, two come right down - and each is back at the setting
+ * it started from by 94% of the cycle, with nothing visible from there to the
+ * turn.
+ */
+@keyframes settle-fill {
+  0%,
+  20% {
+    stroke-dashoffset: calc((100 - var(--from)) * 1px);
+  }
+  52%,
+  94% {
+    stroke-dashoffset: calc((100 - var(--to)) * 1px);
+  }
+  94.01%,
+  100% {
+    stroke-dashoffset: calc((100 - var(--from)) * 1px);
+  }
+}
+
+@keyframes settle-knob {
+  0%,
+  20% {
+    transform: translateX(calc(var(--from) * 2.4px));
+  }
+  52%,
+  94% {
+    transform: translateX(calc(var(--to) * 2.4px));
+  }
+  94.01%,
+  100% {
+    transform: translateX(calc(var(--from) * 2.4px));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scene *,
+  .scene {
+    animation: none !important;
+  }
+}

@@ -1,0 +1,64 @@
+/*
+ * Only paint lives here. The loop is SMIL, in the markup, because the case
+ * travels along a path and the gate has to light on the same clock as the case
+ * that lights it - see the note at the top of the component.
+ */
+
+.scene {
+  --board: #f1f5f9;
+
+  display: block;
+  width: 100%;
+  height: auto;
+  fill: none;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  background: var(--board);
+}
+
+/* The mask that runs the line out into the board: opaque middle, clear rim. */
+.fadeIn {
+  stop-color: #ffffff;
+}
+
+.fadeOut {
+  stop-color: #000000;
+}
+
+/* The stretches of the line where nothing is being decided. */
+.line {
+  stroke: #c3d0de;
+}
+
+.gate {
+  fill: #ffffff;
+  stroke: #c3d0de;
+  stroke-width: 3.5;
+}
+
+.ask {
+  fill: #8fa3b8;
+  stroke: none;
+  font-family: "Poppins", sans-serif;
+  font-size: 21px;
+  font-weight: 700;
+  text-anchor: middle;
+  dominant-baseline: central;
+}
+
+/*
+ * The case. The board-coloured ring is what keeps it legible as it runs over
+ * the line it is travelling on.
+ */
+.case {
+  fill: #f2792d;
+  stroke: var(--board);
+  stroke-width: 3;
+}
+
+/*
+ * Nothing here animates - the scene pauses its own timeline for a slide that
+ * is off screen or for a visitor who asked for less motion, which parks the
+ * drawing on an empty line and a grey gate.
+ */
