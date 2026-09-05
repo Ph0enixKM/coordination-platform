@@ -1,7 +1,0 @@
-.media { padding: 100px max(4vw, 28px); color: #fff; background: var(--ink); }
-.mediaGrid { display: grid; width: min(900px, 100%); margin: 0 auto; gap: 18px; grid-template-columns: repeat(3, 1fr); }
-.mediaGrid a { display: grid; min-height: 140px; padding: 28px; transition: transform 180ms ease, border-color 180ms ease; border: 1px solid #263247; background: #fff; place-items: center; }
-.mediaGrid a:hover { transform: translateY(-5px); border-color: var(--orange); }
-.mediaGrid img { max-width: 190px; max-height: 64px; }
-@media (max-width: 860px) { .media { padding-top: 76px; padding-bottom: 76px; } }
-@media (max-width: 620px) { .mediaGrid { grid-template-columns: 1fr; } }

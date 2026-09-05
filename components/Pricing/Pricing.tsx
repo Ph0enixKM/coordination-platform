@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { Check, Factory, Handshake, Store } from "lucide-react";
 import CtaButton from "@/components/CtaButton/CtaButton";
 import MailModal from "@/components/MailModal/MailModal";
@@ -70,51 +70,16 @@ const shared = [
   "Zakres ustalony po poznaniu firmy, a nie wybrany z gotowego pakietu",
 ] as const;
 
-/** Latches the first time the element is on screen; it never unlatches. */
-function useInView<T extends Element>(threshold: number) {
-  const ref = useRef<T>(null);
-  const [inView, setInView] = useState(false);
-
-  useEffect(() => {
-    const element = ref.current;
-
-    if (!element) return;
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (!entry.isIntersecting) return;
-
-        setInView(true);
-        observer.disconnect();
-      },
-      { threshold },
-    );
-
-    observer.observe(element);
-
-    return () => observer.disconnect();
-  }, [threshold]);
-
-  return [ref, inView] as const;
-}
-
 type CardProps = {
   group: (typeof groups)[number];
-  index: number;
   onAsk: () => void;
 };
 
-function PricingCard({ group, index, onAsk }: CardProps) {
-  const [ref, inView] = useInView<HTMLElement>(0.25);
+function PricingCard({ group, onAsk }: CardProps) {
   const { Icon, title, prefix, amount, suffix, benefits } = group;
 
   return (
-    <article
-      className={styles.card}
-      ref={ref}
-      data-visible={inView ? "true" : undefined}
-      style={{ "--i": index } as React.CSSProperties}
-    >
+    <article className={styles.card}>
       <header className={styles.head}>
         <div className={styles.icon}>
           <Icon aria-hidden="true" />
@@ -130,11 +95,9 @@ function PricingCard({ group, index, onAsk }: CardProps) {
         <span className={styles.suffix}>{suffix}</span>
       </div>
 
-      <p className={styles.benefitsTitle}>W pakiecie</p>
-
       <ul className={styles.benefits}>
-        {benefits.map((benefit, place) => (
-          <li key={benefit} style={{ "--j": place } as React.CSSProperties}>
+        {benefits.map((benefit) => (
+          <li key={benefit}>
             <Check aria-hidden="true" />
             <span>{benefit}</span>
           </li>
@@ -142,17 +105,13 @@ function PricingCard({ group, index, onAsk }: CardProps) {
       </ul>
 
       <div className={styles.ask}>
-        <CtaButton onClick={onAsk}>Jestem zainteresowany</CtaButton>
+        <CtaButton onClick={onAsk}>Porozmawiajmy</CtaButton>
       </div>
     </article>
   );
 }
 
 export default function Pricing() {
-  // The cards only read as a sequence if the reader is there to see them land,
-  // and the block under them is far enough down to deserve its own cue.
-  const [sectionRef, inView] = useInView<HTMLElement>(0.2);
-  const [tailRef, tailInView] = useInView<HTMLDivElement>(0.3);
   /** The group whose mail is open, or null while the modal is closed. */
   const [asking, setAsking] = useState<(typeof groups)[number] | null>(null);
 
@@ -160,31 +119,28 @@ export default function Pricing() {
     <section
       className={styles.pricing}
       id="cennik"
-      ref={sectionRef}
-      data-visible={inView ? "true" : undefined}
     >
       <div className={styles.intro}>
         <SectionIntro title="Ile kosztuje współpraca?">
-          Nie sprzedajemy sztywnych pakietów. Poniżej kwoty orientacyjne -
-          tyle przeważnie zostawiają u nas firmy z każdej z tych grup.
+          Punkt wyjścia do rozmowy o Twojej firmie. Ostateczny zakres i koszt
+          współpracy ustalamy po poznaniu jej potrzeb.
         </SectionIntro>
       </div>
 
       <div className={styles.cards}>
-        {groups.map((group, index) => (
+        {groups.map((group) => (
           <PricingCard
             key={group.title}
             group={group}
-            index={index}
             onAsk={() => setAsking(group)}
           />
         ))}
       </div>
 
-      <div className={styles.tail} ref={tailRef} data-visible={tailInView ? "true" : undefined}>
+      <div className={styles.tail}>
         <div className={styles.shared}>
           <div className={styles.sharedInner}>
-            <h3>W każdej współpracy, niezależnie od kwoty</h3>
+            <h3>W każdej współpracy,<br />niezależnie od kwoty.</h3>
             <ul>
               {shared.map((item) => (
                 <li key={item}>

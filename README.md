@@ -19,9 +19,13 @@ npm run build
 npm start
 ```
 
-Najważniejsze pliki:
+## Struktura projektu
 
-- `app/page.tsx` — struktura i treść strony;
-- `app/page.module.css` — cały layout i breakpointy;
+- `app/page.tsx` — układ sekcji strony głównej dostępnej pod `/`;
+- `app/layout.tsx` — główny layout i metadane;
 - `app/globals.css` — reset, tokeny i lokalne fonty;
-- `public/assets/` — materiały pobrane z obecnej strony.
+- `app/api/contact/route.ts` — obsługa formularza kontaktowego;
+- `components/` — sekcje strony i komponenty współdzielone; każdy komponent ma swój katalog ze stylami CSS Modules;
+- `public/assets/` — grafiki i modele 3D;
+- `public/fonts/` — lokalne fonty;
+- `.env.example` — przykładowa konfiguracja formularza kontaktowego.
