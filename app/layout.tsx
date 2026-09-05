@@ -2,7 +2,7 @@ import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { siteUrl } from "@/lib/site";
 
-const title = "Coordination — rozwój firmy zaczyna się od dobrych decyzji";
+const title = "Coordination - rozwój firmy zaczyna się od dobrych decyzji";
 const description =
   "Doradztwo strategiczne dla właścicieli małych firm usługowych, produkcyjnych i handlowych. Uporządkuj priorytety i podejmuj lepsze decyzje z Coordination.";
 
@@ -27,14 +27,14 @@ export const metadata: Metadata = {
       width: 1200,
       height: 630,
       type: "image/png",
-      alt: "Coordination — Rozwój firmy zaczyna się od dobrych decyzji. Granatowe logo 3D na białym tle.",
+      alt: "Coordination - Rozwój firmy zaczyna się od dobrych decyzji. Granatowe logo 3D na białym tle.",
     }],
   },
   twitter: {
     card: "summary_large_image",
     title,
     description,
-    images: [{ url: "/images/coordination-og.png", alt: "Coordination — rozwój firmy zaczyna się od dobrych decyzji" }],
+    images: [{ url: "/images/coordination-og.png", alt: "Coordination - rozwój firmy zaczyna się od dobrych decyzji" }],
   },
   robots: {
     index: true,
