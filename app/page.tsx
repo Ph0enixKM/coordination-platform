@@ -4,6 +4,7 @@ import Pricing from "@/components/Pricing/Pricing";
 import ContactMail from "@/components/ContactMail/ContactMail";
 import Principles from "@/components/Principles/Principles";
 import Footer from "@/components/Footer/Footer";
+import SocialMedia from "@/components/SocialMedia/SocialMedia";
 
 export default function Home() {
   return (
@@ -13,6 +14,7 @@ export default function Home() {
         <SystemOfWork />
         <Principles />
         <Pricing />
+        <SocialMedia />
         <ContactMail />
       </main>
       <Footer />
