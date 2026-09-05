@@ -1,12 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
+import { siteUrl } from "@/lib/site";
 
 const title = "Coordination — rozwój firmy zaczyna się od dobrych decyzji";
 const description =
   "Doradztwo strategiczne dla właścicieli małych firm usługowych, produkcyjnych i handlowych. Uporządkuj priorytety i podejmuj lepsze decyzje z Coordination.";
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://coordination.pl"),
+  metadataBase: new URL(siteUrl),
   title: { default: title, template: "%s | Coordination" },
   description,
   applicationName: "Coordination",
