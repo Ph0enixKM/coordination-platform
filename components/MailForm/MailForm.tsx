@@ -194,7 +194,7 @@ export default function MailForm({
               Zgadzam się na przetwarzanie moich danych osobowych w celu odpowiedzi na tę
               wiadomość, zgodnie z{" "}
               <a
-                href="https://coordination.pl/polityka-prywatnosci/"
+                href="/polityka-prywatnosci"
                 target="_blank"
                 rel="noreferrer"
                 onClick={(event) => event.stopPropagation()}
