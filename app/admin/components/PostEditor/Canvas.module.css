@@ -1,0 +1,415 @@
+.canvas {
+  display: flex;
+  flex-direction: column;
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* Rows */
+
+/* Rows, columns and blocks keep their frames and buttons on screen; the
+   preview shows the post without them. */
+.row {
+  position: relative;
+  border: 1px solid #e1e6eb;
+  border-radius: 12px;
+  background: rgba(244, 246, 248, 0.6);
+  transition: border-color 150ms ease;
+}
+
+.row:hover,
+.row:focus-within { border-color: #c9d3dd; }
+
+.rowBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+}
+
+.rowLabel {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.layouts {
+  display: flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 8px;
+  background: #fff;
+  box-shadow: inset 0 0 0 1px #e1e6eb;
+}
+
+.layoutButton {
+  display: grid;
+  width: 34px;
+  height: 26px;
+  place-items: center;
+  border: 0;
+  border-radius: 6px;
+  color: #9aa6b2;
+  background: transparent;
+  cursor: pointer;
+}
+
+.layoutButton:hover { color: var(--navy); }
+
+.layoutButton[aria-checked="true"] {
+  color: var(--orange);
+  background: #fff3ea;
+}
+
+.layoutIcon,
+.layoutIconLarge {
+  display: flex;
+  gap: 2px;
+  width: 22px;
+  height: 14px;
+}
+
+.layoutIconLarge {
+  gap: 3px;
+  width: 48px;
+  height: 28px;
+}
+
+.layoutIcon span,
+.layoutIconLarge span {
+  flex-basis: 0;
+  border-radius: 2px;
+  background: currentColor;
+}
+
+.rowActions {
+  display: flex;
+  gap: 2px;
+  margin-left: auto;
+}
+
+.icon,
+.iconDanger {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  place-items: center;
+  border: 0;
+  border-radius: 6px;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.icon:hover:not(:disabled) { color: var(--navy); background: #e8ecf0; }
+.iconDanger:hover:not(:disabled) { color: #b3361f; background: #fdecea; }
+
+.icon:disabled,
+.iconDanger:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+.grid {
+  display: grid;
+  gap: 16px;
+  padding: 0 8px 10px;
+}
+
+/* Columns */
+
+.column {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 6px;
+  border-radius: 10px;
+}
+
+.column[data-multi] { outline: 1px dashed #d3dbe3; outline-offset: -1px; }
+
+.blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.indicator {
+  height: 3px;
+  margin: -1px 0;
+  border-radius: 2px;
+  background: var(--orange);
+}
+
+/* Blocks */
+
+.block {
+  position: relative;
+  padding: 6px 12px 12px;
+  border: 1px solid #e1e6eb;
+  border-radius: 10px;
+  background: #fff;
+  transition: border-color 150ms ease, box-shadow 150ms ease;
+}
+
+.block:hover { border-color: #c9d3dd; }
+
+.block:focus-within {
+  border-color: #9fb0c1;
+  box-shadow: 0 6px 18px -14px rgba(1, 33, 65, 0.45);
+}
+
+.block[data-dragging] { opacity: 0.4; }
+
+/* Sticks to the top of the canvas, so a long text block keeps its formatting
+   buttons in reach while it scrolls past. */
+.blockBar {
+  position: sticky;
+  top: var(--sticky-top, 0px);
+  z-index: 10;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 8px;
+  min-height: 34px;
+  margin: -6px -12px 4px;
+  padding: 4px 12px;
+  border-bottom: 1px solid #eef1f4;
+  border-radius: 10px 10px 0 0;
+  background: #fff;
+}
+
+/* Formatting gets a line of its own under the block's name and buttons. */
+.tools {
+  flex: 1 1 100%;
+  order: 1;
+  min-width: 0;
+}
+
+.handle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 8px 2px 4px;
+  border-radius: 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: grab;
+  user-select: none;
+}
+
+.handle:hover { color: var(--navy); background: var(--soft); }
+.handle:active { cursor: grabbing; }
+
+.blockActions {
+  display: flex;
+  gap: 2px;
+  margin-left: auto;
+}
+
+/* YouTube and podcast blocks: their links, then the player as it will look. */
+
+.embedBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding-top: 4px;
+}
+
+.linkField {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.linkInput {
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid #cfd6de;
+  border-radius: 8px;
+  color: var(--navy);
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.linkInput:focus {
+  border-color: var(--navy);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(1, 33, 65, 0.1);
+}
+
+.linkInput[aria-invalid] { border-color: #d9826f; }
+
+.linkError {
+  color: #b3361f;
+  font-weight: 400;
+}
+
+/* Adding blocks and rows */
+
+.add {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  gap: 6px;
+  height: 30px;
+  padding: 0 12px;
+  border: 1px dashed #b8c3ce;
+  border-radius: 999px;
+  color: var(--muted);
+  background: transparent;
+  font-size: 13px;
+  cursor: pointer;
+  transition: color 150ms ease, border-color 150ms ease;
+}
+
+.add:hover { color: var(--navy); border-color: var(--navy); }
+
+.addEmpty,
+.addOpen {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px;
+  border: 1.5px dashed #c9d3dd;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.addEmpty { min-height: 110px; }
+
+.addChoice {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 14px;
+  border: 1px solid #dce2e8;
+  border-radius: 8px;
+  color: var(--navy);
+  background: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.addChoice:hover { border-color: var(--orange); color: var(--orange); }
+
+.addCancel {
+  height: 38px;
+  padding: 0 10px;
+  border: 0;
+  color: var(--muted);
+  background: transparent;
+  font-size: 13.5px;
+  cursor: pointer;
+}
+
+.inserter {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  height: 22px;
+  margin: 2px 0;
+}
+
+.inserter::before {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  left: 8px;
+  height: 1px;
+  background: var(--orange);
+  content: "";
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+.inserter:hover::before,
+.inserter[data-open]::before { opacity: 0.6; }
+
+.inserterButton {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 999px;
+  color: #fff;
+  background: var(--orange);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 150ms ease;
+}
+
+.inserter:hover .inserterButton,
+.inserter[data-open] .inserterButton,
+.inserterButton:focus-visible { opacity: 1; }
+
+.inserterMenu {
+  position: absolute;
+  top: calc(100% + 4px);
+  z-index: 20;
+  padding: 10px;
+  border: 1px solid #dce2e8;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 16px 32px -16px rgba(1, 33, 65, 0.35);
+}
+
+.picker {
+  display: grid;
+  grid-template-columns: repeat(3, auto);
+  gap: 8px;
+}
+
+.pickerButton {
+  padding: 8px;
+  border: 1px solid #e1e6eb;
+  border-radius: 8px;
+  color: #b8c3ce;
+  background: #fff;
+  cursor: pointer;
+  transition: color 150ms ease, border-color 150ms ease;
+}
+
+.pickerButton:hover { border-color: var(--orange); color: var(--orange); }
+
+.emptyCanvas {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  padding: 40px 16px;
+  border: 1.5px dashed #c9d3dd;
+  border-radius: 14px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.emptyCanvas p { margin: 0; }
+
+@media (max-width: 700px) {
+  .grid { grid-template-columns: minmax(0, 1fr) !important; }
+}

@@ -1,0 +1,97 @@
+.emblem {
+  /* One size drives the box and both orbits' radii, so they always agree. */
+  --size: clamp(260px, 30vw, 380px);
+  position: relative;
+  display: grid;
+  width: var(--size);
+  aspect-ratio: 1;
+  place-items: center;
+}
+
+/* The S's red, spread soft behind it. */
+.glow {
+  position: absolute;
+  inset: 4%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(227, 11, 23, 0.32) 0%, rgba(227, 11, 23, 0.1) 42%, rgba(227, 11, 23, 0) 70%);
+}
+
+.orbit {
+  position: absolute;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 50%;
+  animation: turn 90s linear infinite;
+}
+
+.orbit[data-orbit="outer"] { inset: 0; }
+
+.orbit[data-orbit="inner"] {
+  inset: 16%;
+  border-color: rgba(255, 255, 255, 0.1);
+  animation-direction: reverse;
+  animation-duration: 70s;
+}
+
+/* A member: a dot on the orbit, at its angle from the top. */
+.member {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  margin: -5px 0 0 -5px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.08);
+  transform: rotate(var(--angle)) translateY(calc(var(--radius) * -1));
+}
+
+.orbit[data-orbit="outer"] .member { --radius: calc(var(--size) / 2); }
+
+.orbit[data-orbit="inner"] .member {
+  --radius: calc(var(--size) * 0.34);
+  width: 8px;
+  height: 8px;
+  margin: -4px 0 0 -4px;
+  background: #ff5a5f;
+  box-shadow: 0 0 0 4px rgba(227, 11, 23, 0.16);
+}
+
+.logo {
+  position: relative;
+  width: 42%;
+  height: auto;
+  filter: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.35));
+}
+
+@keyframes turn {
+  to { transform: rotate(360deg); }
+}
+
+/* Stacked under the copy on a phone: smaller, centred, and pulled up a
+   little, so it closes the header instead of opening a second one. */
+@media (max-width: 760px) {
+  .emblem {
+    --size: 168px;
+    justify-self: center;
+    margin-top: -4px;
+  }
+
+  .member {
+    width: 8px;
+    height: 8px;
+    margin: -4px 0 0 -4px;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.08);
+  }
+
+  .orbit[data-orbit="inner"] .member {
+    width: 6px;
+    height: 6px;
+    margin: -3px 0 0 -3px;
+    box-shadow: 0 0 0 3px rgba(227, 11, 23, 0.16);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orbit { animation: none; }
+}

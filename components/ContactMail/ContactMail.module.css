@@ -1,13 +1,14 @@
 .contact {
   position: relative;
-  /* One stacking context for the whole section: the envelope layers' z-indexes
-     stay an internal affair, under the hero's intro overlay and the footer. */
-  z-index: 0;
+  /* One stacking context for the whole section, so the envelope layers'
+     z-indexes stay an internal affair - and one above the footer (z-index 1),
+     so the envelope flies out over it instead of being sliced at its edge. */
+  z-index: 2;
   padding: clamp(48px, 6vw, 84px) 0 clamp(52px, 6.5vw, 92px);
   background: var(--paper);
-  /* The falling envelope is clipped at the section's bottom edge, where the
-     footer begins - so it reads as sliding in under the footer. */
-  overflow: clip;
+  /* Sideways only: downwards the envelope is free to fly out of the section
+     (it fades out on the way), so the section's edge never slices it. */
+  overflow-x: clip;
 }
 
 .intro {
@@ -19,21 +20,62 @@
   margin-bottom: clamp(26px, 3vw, 34px);
 }
 
+/* A single client voice, quiet enough not to compete with the mail below. */
+.testimonial {
+  width: min(640px, 100%);
+  margin: 0 auto clamp(32px, 4vw, 44px);
+  padding-left: 18px;
+  border-left: 3px solid var(--orange);
+  text-align: left;
+}
+
+.quote {
+  margin: 0 0 12px;
+  color: #414c5a;
+  font-size: 16px;
+  font-style: italic;
+  line-height: 1.65;
+}
+
+.author {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 10px;
+  align-items: baseline;
+}
+
+.authorName {
+  color: var(--navy);
+  font-family: "Poppins", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.authorRole {
+  color: var(--muted);
+  font-size: 14px;
+}
+
 /*
  * The form and its confirmation share one cell: the mail flies out of it and
  * the confirmation lands in the same place, so the page never jumps.
  *//* --- the envelope ---------------------------------------------------------
  * A one-shot intro prop in the middle of the stage. Two copies of the same
- * box sandwich the letter - body and flap behind it (z-index 1), the pocket
- * in front (z-index 3) - so the letter (z-index 2) reads as sliding out of
- * it, and each layer is free to transform without breaking the sandwich.
+ * box sandwich the letter - body, lining and the flap's inside behind it
+ * (z-index 1), the folds and the flap's outside in front (z-index 3) - so the
+ * letter (z-index 2) reads as sliding out of it, and each layer is free to
+ * transform without breaking the sandwich.
  */
 
 .envelopeLayer {
   grid-area: 1 / 1;
-  width: min(560px, 84%);
+  width: min(500px, 84%);
   aspect-ratio: 1.55;
   place-self: center;
+  /* Measured by the section: how far the envelope sits below the letter's
+     center so that its open flap stays clear of the words above the stage.
+     A separate property from transform, so the flight animation composes. */
+  translate: 0 var(--envelope-drop, 0px);
   pointer-events: none;
 }
 
@@ -46,6 +88,18 @@
 }
 
 .envelope {
+  /* One small radius for every piece: the flap and folds are acute wedges
+     running into the corners, and a large radius cuts a wedge back further
+     than the box around it, so the flap would stop short of the corner. */
+  --corner: 5px;
+  /* The fold geometry: the side folds' "V" and the bottom fold's tip meet
+     at the envelope's middle, and the closed flap reaches just past them
+     (its rounded tip ends at ~97% of its depth) so it covers the "V". The
+     section reads --flap-depth to keep the open flap clear of the text
+     above. */
+  --flap-depth: 54%;
+  --v-depth: 50%;
+
   position: relative;
   width: 100%;
   height: 100%;
@@ -65,90 +119,129 @@
   }
 }
 
-/* Both layers ride the same fall timeline, so they stay glued together. */
+/* Both layers ride the same flight, so they stay glued together. */
 .envelopeLayer.playing {
-  animation: envelope-fall 0.9s 1.2s cubic-bezier(0.5, 0.05, 0.78, 0.4) forwards;
+  animation: envelope-away 0.9s 1.2s both;
 }
 
-/* Far enough down that the open flap standing over the box goes under too. */
-@keyframes envelope-fall {
-  to {
-    transform: translateY(220%) rotate(-2.5deg);
+/*
+ * The envelope flies off instead of being cut off: a small tilt as the letter
+ * is let go, then it drops away - tilting and receding - out past the
+ * section's bottom edge, over whatever follows, fading only once it has
+ * cleared the letter so the letter never shows through it.
+ */
+@keyframes envelope-away {
+  0% {
+    opacity: 1;
+    transform: none;
+    animation-timing-function: cubic-bezier(0.3, 0, 0.5, 1);
+  }
+
+  /* A tilt, not a lift: the parked letter's bottom sits only ~7px above the
+     envelope's bottom edge, so raising the envelope would bare it. */
+  18% {
+    transform: rotate(0.6deg);
+    animation-timing-function: cubic-bezier(0.4, 0, 0.7, 0.75);
+  }
+
+  /* By now the pocket has dropped below the parked letter. */
+  75% {
+    opacity: 1;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(170%) scale(0.86) rotate(-8deg);
   }
 }
 
-/* The sheet of paper the envelope is folded from. */
+/* --- the paper ----------------------------------------------------------- */
+
+/* The back of the envelope: the sheet the front folds are wrapped over. */
 .body {
   position: absolute;
   inset: 0;
-  border-radius: 10px;
-  background: linear-gradient(180deg, #fdfdfe 0%, #f0f3f8 55%, #e4eaf1 100%);
+  border-radius: var(--corner);
+  background: linear-gradient(180deg, #ffffff 0%, #eef2f7 100%);
   box-shadow:
-    inset 0 0 0 1px rgba(1, 33, 65, 0.1),
-    0 6px 14px -6px rgba(1, 33, 65, 0.3),
-    0 34px 64px -26px rgba(1, 33, 65, 0.5);
+    inset 0 0 0 1px rgba(1, 33, 65, 0.16),
+    0 2px 4px rgba(1, 33, 65, 0.08),
+    0 14px 28px -12px rgba(1, 33, 65, 0.32),
+    0 44px 80px -30px rgba(1, 33, 65, 0.5);
 }
 
-/* Shades the mouth, so the opened envelope reads as hollow. */
+/* The lining in the mouth: brand navy with a fine weave, so the white
+   letter stands out against it. It sits deeper than the open flap, in its
+   shadow, so it is a shade darker and its weave fainter - that difference is
+   what makes the envelope read as hollow rather than as one navy shape. */
 .body::after {
   content: "";
   position: absolute;
   inset: 0 0 auto;
-  height: 46%;
-  border-radius: 10px 10px 0 0;
-  background: linear-gradient(180deg, rgba(9, 25, 43, 0.55), transparent);
+  height: 52%;
+  border-radius: var(--corner) var(--corner) 0 0;
+  background:
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.035) 0 2px, transparent 2px 9px),
+    linear-gradient(180deg, #010c19 0%, #021a33 50%, #052849 100%);
+  box-shadow: inset 0 14px 22px -10px rgba(0, 0, 0, 0.6);
 }
 
-.flap {
+/* The front folds cast a soft shadow into the opening - over the lining and
+   over the letter tucked behind them - along both edges of the "V". */
+.mouthShade {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 62%;
-  transform-origin: 50% 0;
-  border-radius: 10px 10px 0 0;
-  background: linear-gradient(180deg, #ffffff 0%, #f2f5fa 58%, #dfe6ef 100%);
-  clip-path: polygon(0 0, 100% 0, 50% 100%);
-  filter: drop-shadow(0 5px 6px rgba(1, 33, 65, 0.22));
+  inset: 0;
+  background:
+    linear-gradient(
+        to top right,
+        transparent 50%,
+        rgba(1, 12, 25, 0.34) 50%,
+        rgba(1, 12, 25, 0.12) calc(50% + 6px),
+        transparent calc(50% + 18px)
+      )
+      left top / 50% var(--v-depth) no-repeat,
+    linear-gradient(
+        to bottom right,
+        transparent calc(50% - 18px),
+        rgba(1, 12, 25, 0.12) calc(50% - 6px),
+        rgba(1, 12, 25, 0.34) 50%,
+        transparent 50%
+      )
+      right top / 50% var(--v-depth) no-repeat;
 }
 
-.playing .flap {
-  animation: flap-open 0.45s 0.7s cubic-bezier(0.55, 0.1, 0.3, 1.2) forwards;
-}
-
-@keyframes flap-open {
-  to {
-    transform: rotateX(-168deg);
-  }
-}
-
-/* The pocket: the envelope rect with the front folds cut into a "V". */
+/* The front: two side folds with the "V" of their top edges cut out, so
+   the letter shows above them. */
 .pocket {
   position: absolute;
   inset: 0;
-  border-radius: 10px;
-  background: linear-gradient(180deg, #ffffff 0%, #f5f8fb 45%, #e7edf4 100%);
-  box-shadow: inset 0 0 0 1px rgba(1, 33, 65, 0.1);
-  clip-path: polygon(0 0, 50% 47%, 100% 0, 100% 100%, 0 100%);
+  overflow: hidden;
+  border-radius: var(--corner);
+  background:
+    linear-gradient(90deg, rgba(1, 33, 65, 0.07), transparent 22% 78%, rgba(1, 33, 65, 0.07)),
+    linear-gradient(180deg, #fbfcfe 0%, #f1f4f8 100%);
+  box-shadow: inset 0 0 0 1px rgba(1, 33, 65, 0.16);
+  clip-path: polygon(0 0, 50% var(--v-depth), 100% 0, 100% 100%, 0 100%);
 }
 
-/* Hairlines along both fold edges, riding the boxes' own diagonals. */
+/* A crisp line along both top edges of the side folds. */
 .pocket::before,
 .pocket::after {
   content: "";
   position: absolute;
   top: 0;
   width: 50%;
-  height: 47%;
+  height: var(--v-depth);
 }
 
 .pocket::before {
   left: 0;
   background: linear-gradient(
     to top right,
-    transparent calc(50% - 0.7px),
-    rgba(1, 33, 65, 0.16) 50%,
-    transparent calc(50% + 0.7px)
+    transparent calc(50% - 6px),
+    rgba(1, 33, 65, 0.06) calc(50% - 2px),
+    rgba(1, 33, 65, 0.28) 50%,
+    transparent 50%
   );
 }
 
@@ -156,20 +249,164 @@
   right: 0;
   background: linear-gradient(
     to bottom right,
-    transparent calc(50% - 0.7px),
-    rgba(1, 33, 65, 0.16) 50%,
-    transparent calc(50% + 0.7px)
+    transparent 50%,
+    rgba(1, 33, 65, 0.28) 50%,
+    rgba(1, 33, 65, 0.06) calc(50% + 2px),
+    transparent calc(50% + 6px)
+  );
+}
+
+/* The bottom fold, lying over the side folds and carrying the mark. Its tip
+   reaches up to the tip of the side folds' "V", so the front is three clean
+   folds meeting at one point; the closed flap's tip overlaps it. */
+.bottomFold {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: 0 0 var(--corner) var(--corner);
+  background: linear-gradient(180deg, #ffffff 0%, #f6f8fb 60%, #edf1f6 100%);
+  clip-path: polygon(0 100%, 50% var(--v-depth), 100% 100%);
+}
+
+/* Its two upper edges, each a crisp line with a soft shade beneath. */
+.bottomFold::before,
+.bottomFold::after {
+  content: "";
+  position: absolute;
+  top: var(--v-depth);
+  width: 50%;
+  height: calc(100% - var(--v-depth));
+}
+
+.bottomFold::before {
+  left: 0;
+  background: linear-gradient(
+    to bottom right,
+    transparent 50%,
+    rgba(1, 33, 65, 0.26) 50%,
+    rgba(1, 33, 65, 0.05) calc(50% + 2px),
+    transparent calc(50% + 6px)
+  );
+}
+
+.bottomFold::after {
+  right: 0;
+  background: linear-gradient(
+    to top right,
+    transparent calc(50% - 6px),
+    rgba(1, 33, 65, 0.05) calc(50% - 2px),
+    rgba(1, 33, 65, 0.26) 50%,
+    transparent 50%
   );
 }
 
 .mark {
   position: absolute;
-  bottom: 11%;
+  bottom: 13%;
   left: 50%;
   width: auto;
-  height: 15%;
+  height: 14%;
   transform: translateX(-50%);
-  filter: drop-shadow(0 2px 3px rgba(1, 33, 65, 0.25));
+  opacity: 0.92;
+}
+
+/* The flap is a sheet with two faces - paper outside, lining inside - drawn
+   twice on one timeline: the outside in front of the letter (it covers it
+   while closed), the inside behind it (open, it is folded back). Each face
+   hides past 90deg, so only one of them ever shows. */
+.flap {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--flap-depth);
+  transform-origin: 50% 0;
+  transform-style: preserve-3d;
+}
+
+.flapOuter,
+.flapInner {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+}
+
+.flapOuter {
+  border-radius: var(--corner) var(--corner) 0 0;
+  background:
+    linear-gradient(
+      to top right,
+      transparent 50%,
+      rgba(1, 33, 65, 0.3) 50%,
+      rgba(1, 33, 65, 0.08) calc(50% + 2px),
+      transparent calc(50% + 7px)
+    )
+      left / 50% 100% no-repeat,
+    linear-gradient(
+      to top left,
+      transparent 50%,
+      rgba(1, 33, 65, 0.3) 50%,
+      rgba(1, 33, 65, 0.08) calc(50% + 2px),
+      transparent calc(50% + 7px)
+    )
+      right / 50% 100% no-repeat,
+    linear-gradient(180deg, #ffffff 0%, #f3f6fa 70%, #e8edf3 100%);
+  /* The tip is a short arc, not a point: folded paper never ends in a
+     needle. */
+  clip-path: polygon(
+    0 0,
+    100% 0,
+    52.64% 94.7%,
+    52.01% 95.8%,
+    51.39% 96.53%,
+    50.7% 97%,
+    50% 97.2%,
+    49.3% 97%,
+    48.61% 96.53%,
+    47.99% 95.8%,
+    47.36% 94.7%
+  );
+}
+
+/* Seen from behind the sheet is flipped, so its triangle is drawn
+   point-up to land on the outer one - and its hinge is its bottom edge,
+   where a little shade marks the fold (no light line: on navy it reads as
+   a gap in the paper). Lighter than the
+   mouth below it: the open flap catches the light the mouth does not. */
+.flapInner {
+  /* 2px taller at the top, which the flip turns into 2px past the hinge:
+     the face overlaps the lining instead of butting against it, or the two
+     anti-aliased edges leave a hairline of white paper between them. */
+  top: -2px;
+  border-radius: 0 0 var(--corner) var(--corner);
+  background:
+    linear-gradient(0deg, rgba(0, 0, 0, 0.32), transparent 12px),
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.06) 0 2px, transparent 2px 9px),
+    linear-gradient(180deg, #1a4c80 0%, #0e3866 55%, #0a2f57 100%);
+  clip-path: polygon(
+    47.36% 5.3%,
+    47.99% 4.2%,
+    48.61% 3.47%,
+    49.3% 3%,
+    50% 2.8%,
+    50.7% 3%,
+    51.39% 3.47%,
+    52.01% 4.2%,
+    52.64% 5.3%,
+    100% 100%,
+    0 100%
+  );
+  transform: rotateX(180deg);
+}
+
+.playing .flap {
+  animation: flap-open 0.5s 0.65s cubic-bezier(0.5, 0.05, 0.3, 1.25) forwards;
+}
+
+@keyframes flap-open {
+  to {
+    transform: rotateX(-172deg);
+  }
 }
 
 /* --- arriving: the letter grows out of the pocket -------------------------
@@ -193,10 +430,16 @@
 /* The parked scale is measured, not guessed: the section solves it from the
    real letter and envelope heights (tall mobile letters need far less than
    0.6) so the letter never hangs out under the envelope's bottom edge. */
+/* While parked the sheet throws a shadow on the lining behind it, so it
+   reads as paper standing in the envelope; by 100% it is back to the
+   mail's own shadow. */
 @keyframes letter-out {
   0% {
     opacity: 0;
-    transform: translateY(14%) scale(var(--letter-parked-scale, 0.6));
+    transform: translateY(calc(14% + var(--envelope-drop, 0px))) scale(var(--letter-parked-scale, 0.6));
+    box-shadow:
+      0 0 0 1px rgba(1, 33, 65, 0.08),
+      0 -4px 14px rgba(1, 21, 43, 0.28);
   }
 
   10% {
@@ -205,13 +448,34 @@
 
   75% {
     opacity: 1;
-    transform: translateY(14%) scale(var(--letter-parked-scale, 0.6));
+    transform: translateY(calc(14% + var(--envelope-drop, 0px))) scale(var(--letter-parked-scale, 0.6));
+    box-shadow:
+      0 0 0 1px rgba(1, 33, 65, 0.08),
+      0 -4px 14px rgba(1, 21, 43, 0.28);
     animation-timing-function: cubic-bezier(0.45, 0.05, 0.2, 1);
   }
 
   100% {
     opacity: 1;
     transform: none;
+  }
+}
+
+/* Parked in the envelope the letter is a blank sheet - at that size its
+   fields would only be unreadable specks cut off by the folds. The writing
+   comes up as it grows out. */
+.letter > * {
+  animation: letter-ink 1.8s 0.75s ease-out both;
+}
+
+@keyframes letter-ink {
+  0%,
+  78% {
+    opacity: 0;
+  }
+
+  100% {
+    opacity: 1;
   }
 }
 
@@ -236,7 +500,8 @@
   }
 
   .letterWaiting,
-  .letter {
+  .letter,
+  .letter > * {
     opacity: 1;
     animation: none;
   }

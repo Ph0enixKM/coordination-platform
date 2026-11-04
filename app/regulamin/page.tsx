@@ -2,16 +2,17 @@ import type { Metadata } from "next";
 import SubpageHeader from "@/components/SubpageHeader/SubpageHeader";
 import Prose from "@/components/Prose/Prose";
 import Footer from "@/components/Footer/Footer";
+import SiteNav from "@/components/SiteNav/SiteNav";
 
 export const metadata: Metadata = {
   title: "Regulamin",
   description:
-    "Regulamin strony internetowej coordination.pl — zasady korzystania z serwisu, formularza kontaktowego oraz prawa autorskie.",
+    "Regulamin strony internetowej coordination.pl - zasady korzystania z serwisu, formularza kontaktowego oraz prawa autorskie.",
   alternates: { canonical: "/regulamin" },
   openGraph: {
     title: "Regulamin | Coordination",
     description:
-      "Regulamin strony internetowej coordination.pl — zasady korzystania z serwisu, formularza kontaktowego oraz prawa autorskie.",
+      "Regulamin strony internetowej coordination.pl - zasady korzystania z serwisu, formularza kontaktowego oraz prawa autorskie.",
     url: "/regulamin",
   },
 };
@@ -19,6 +20,7 @@ export const metadata: Metadata = {
 export default function RegulaminPage() {
   return (
     <>
+      <SiteNav variant="subpage" />
       <SubpageHeader
         title="Regulamin strony internetowej"
         lead="Zasady korzystania z serwisu coordination.pl."

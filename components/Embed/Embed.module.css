@@ -1,0 +1,83 @@
+.video {
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--navy);
+  aspect-ratio: 16 / 9;
+}
+
+.video iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+/* The platform switch stands beside the player, one logo above the other. */
+.podcast {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.tabs {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 12px;
+  background: var(--soft);
+}
+
+.tab {
+  display: grid;
+  width: 44px;
+  height: 44px;
+  place-items: center;
+  border: 0;
+  border-radius: 9px;
+  color: #000;
+  background: transparent;
+  cursor: pointer;
+  opacity: 0.4;
+  transition: opacity 150ms ease, background 150ms ease;
+}
+
+.tab:hover { opacity: 0.75; }
+
+.tab[aria-selected="true"] {
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(1, 33, 65, 0.15);
+  opacity: 1;
+}
+
+.tab:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 2px;
+}
+
+.players {
+  position: relative;
+  isolation: isolate;
+  flex: 1;
+  min-width: 0;
+}
+
+.player {
+  display: block;
+  width: 100%;
+  border: 0;
+  border-radius: 12px;
+}
+
+/* The players the switch hides lie under the one shown: transparent rather
+   than hidden, so the browser lazy-loads and paints them together with that
+   one, and switching shows a player that is already drawn. */
+.player:not([data-active]) {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  opacity: 0;
+  pointer-events: none;
+}

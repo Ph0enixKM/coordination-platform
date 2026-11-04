@@ -16,19 +16,32 @@ import styles from "./DealsScene.module.css";
 /** What the four are worth, per cent of the best one the firm could take. */
 const WORTH = [85, 65, 35, 20] as const;
 
-/** The fan: four angles around a pivot below the frame. */
-const PIVOT = { x: 180, y: 258 } as const;
-const ANGLES = [-38, -13, 13, 38] as const;
+/**
+ * The fan: four cards held in one hand. The pivot sits well below the frame,
+ * where the hand would be, so the spread is gentle and the faces stay close to
+ * upright - a steep fan around a near pivot tips the outer cards on their side.
+ */
+const PIVOT = { x: 180, y: 392 } as const;
+const ANGLES = [-16, -5.5, 5.5, 16] as const;
+
+/**
+ * Nobody holds four cards perfectly even. Each one is a touch off its slot -
+ * a fraction of a degree, a pixel or two deeper in the hand - so the fan reads
+ * as held rather than laid out with a protractor.
+ */
+const NUDGE = [
+  { turn: -0.9, sink: 3 },
+  { turn: 0.7, sink: -1 },
+  { turn: -0.5, sink: 1 },
+  { turn: 1.2, sink: 4 },
+] as const;
 
 /** The card, drawn once in its own upright space and then swung into place. */
-const CARD = { x: 145, y: 52, width: 70, height: 104 } as const;
+const CARD = { x: 145, y: 62, width: 70, height: 104 } as const;
 const MIDDLE = CARD.x + CARD.width / 2;
 
-/** How far the board's colour is carried past the edge of each card. */
-const HALO = 5;
-
 /** The column the worth is drawn in. */
-const BAR = { x: 170, width: 20, top: 88, bottom: 148 } as const;
+const BAR = { x: 170, width: 20, top: 98, bottom: 158 } as const;
 
 const vars = (values: Record<string, string>) => values as CSSProperties;
 
@@ -53,67 +66,67 @@ export default function DealsScene({ play }: { play: boolean }) {
     >
       {ANGLES.map((angle, index) => {
         const height = ((BAR.bottom - BAR.top) * worth[index]) / 100;
+        const { turn, sink } = NUDGE[index];
 
         return (
-          <g key={angle} transform={`rotate(${angle} ${PIVOT.x} ${PIVOT.y})`}>
+          /*
+           * The shadow is cast from outside the swing, so it falls straight
+           * down for every card whatever its angle - the way light from above
+           * would - and lands on the card underneath as the only separation
+           * the two need.
+           */
+          <g key={angle} className={styles.lift}>
             <g
-              className={styles.card}
-              style={vars({ "--lag": `${index * 0.14}s` })}
-              onAnimationIteration={index === 0 ? reshuffle : undefined}
+              transform={`rotate(${angle + turn} ${PIVOT.x} ${PIVOT.y}) translate(0 ${sink})`}
             >
-              {/*
-                * The board's colour, laid under the card as a ring: on the
-                * board it cannot be seen, and on the card underneath it is
-                * the whole separation between one white rectangle and the
-                * next. A blurred shadow at this contrast simply vanishes.
-                */}
-              <rect
-                className={styles.halo}
-                x={CARD.x - HALO}
-                y={CARD.y - HALO}
-                width={CARD.width + HALO * 2}
-                height={CARD.height + HALO * 2}
-                rx="15"
-              />
-              <rect className={styles.paper} {...CARD} rx="10" />
+              <g
+                className={styles.card}
+                style={vars({ "--lag": `${index * 0.16}s` })}
+                onAnimationIteration={index === 0 ? reshuffle : undefined}
+              >
+                <rect className={styles.paper} {...CARD} rx="9" />
 
-              {/* The side the sales figure is counted on. */}
-              <g className={styles.front}>
-                {[38, 38, 24].map((width, line) => (
-                  <rect
-                    key={width * line + line}
-                    className={styles.rule}
-                    x={161}
-                    y={76 + line * 12}
-                    width={width}
-                    height="4"
-                    rx="2"
+                {/* The side the sales figure is counted on. */}
+                <g className={styles.front}>
+                  {[38, 38, 24].map((width, line) => (
+                    <rect
+                      key={width * line + line}
+                      className={styles.rule}
+                      x={161}
+                      y={86 + line * 12}
+                      width={width}
+                      height="4"
+                      rx="2"
+                    />
+                  ))}
+                  <path
+                    className={styles.signed}
+                    d="M 167 134 l 8 9 l 17 -21"
                   />
-                ))}
-                <path className={styles.signed} d="M 167 124 l 8 9 l 17 -21" />
-              </g>
+                </g>
 
-              {/* And what the same contract leaves behind. */}
-              <g className={styles.back}>
-                <text className={styles.money} x={MIDDLE} y="80">
-                  $
-                </text>
-                <rect
-                  className={styles.column}
-                  x={BAR.x}
-                  y={BAR.top}
-                  width={BAR.width}
-                  height={BAR.bottom - BAR.top}
-                  rx="10"
-                />
-                <rect
-                  className={styles.worth}
-                  x={BAR.x}
-                  y={BAR.bottom - height}
-                  width={BAR.width}
-                  height={height}
-                  rx="10"
-                />
+                {/* And what the same contract leaves behind. */}
+                <g className={styles.back}>
+                  <text className={styles.money} x={MIDDLE} y="90">
+                    $
+                  </text>
+                  <rect
+                    className={styles.column}
+                    x={BAR.x}
+                    y={BAR.top}
+                    width={BAR.width}
+                    height={BAR.bottom - BAR.top}
+                    rx="10"
+                  />
+                  <rect
+                    className={styles.worth}
+                    x={BAR.x}
+                    y={BAR.bottom - height}
+                    width={BAR.width}
+                    height={height}
+                    rx="10"
+                  />
+                </g>
               </g>
             </g>
           </g>

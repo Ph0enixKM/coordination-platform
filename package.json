@@ -7,12 +7,25 @@
     "dev:preview": "NEXT_DIST_DIR=.next-preview next dev",
     "build": "next build",
     "start": "next start",
+    "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+    "deploy": "opennextjs-cloudflare build && opennextjs-cloudflare deploy",
+    "upload": "opennextjs-cloudflare build && opennextjs-cloudflare upload",
+    "cf-typegen": "wrangler types --include-runtime=false --env-interface CloudflareEnv cloudflare-env.d.ts",
+    "db:migrate:local": "wrangler d1 migrations apply coordination --local",
+    "db:migrate:remote": "wrangler d1 migrations apply coordination --remote",
+    "blog:import": "node --env-file-if-exists=.env scripts/import-blog.mts",
     "lint": "tsc --noEmit"
   },
   "dependencies": {
+    "@opennextjs/cloudflare": "^1.20.13",
+    "@tiptap/extension-table": "^3.32.0",
+    "@tiptap/extensions": "^3.32.0",
+    "@tiptap/pm": "^3.32.0",
+    "@tiptap/react": "^3.32.0",
+    "@tiptap/starter-kit": "^3.32.0",
     "@types/three": "^0.185.4",
     "lucide-react": "^1.25.0",
-    "next": "^15.2.4",
+    "next": "^15.5.28",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "resend": "^6.25.0",
@@ -22,6 +35,10 @@
     "@types/node": "^22.13.10",
     "@types/react": "^19.0.10",
     "@types/react-dom": "^19.0.4",
-    "typescript": "^5.8.2"
+    "linkedom": "^0.18.14",
+    "sharp": "^0.35.5",
+    "typescript": "^5.8.2",
+    "wrangler": "^4.152.0",
+    "yaml": "^2.9.1"
   }
 }

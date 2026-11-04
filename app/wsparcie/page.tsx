@@ -4,12 +4,13 @@ import SectionIntro from "@/components/SectionIntro/SectionIntro";
 import FeatureCards from "@/components/FeatureCards/FeatureCards";
 import CtaButton from "@/components/CtaButton/CtaButton";
 import Footer from "@/components/Footer/Footer";
+import SiteNav from "@/components/SiteNav/SiteNav";
 import styles from "./wsparcie.module.css";
 
 export const metadata: Metadata = {
   title: "Obszary wsparcia",
   description:
-    "W czym pomagamy właścicielom małych firm — strategia, model biznesowy, oferta, sprzedaż, marketing, decyzje właścicielskie, procesy i planowanie.",
+    "W czym pomagamy właścicielom małych firm - strategia, model biznesowy, oferta, sprzedaż, marketing, decyzje właścicielskie, procesy i planowanie.",
   alternates: { canonical: "/wsparcie" },
 };
 
@@ -64,6 +65,7 @@ const areas: readonly { title: string; description: string }[] = [
 export default function WsparciePage() {
   return (
     <>
+      <SiteNav variant="subpage" />
       <SubpageHeader
         title="Obszary wsparcia"
         lead="Pomagamy uporządkować firmę jako system powiązanych decyzji."

@@ -7,7 +7,7 @@ import styles from "./ContactMail.module.css";
 
 /** The mail arrives already written, the way a draft does; it is there to be edited. */
 const DRAFT =
-  "Cześć jestem zainteresowany waszą ofertą i chciałbym z wami współpracować. Do usłyszenia.";
+  "Cześć, chciałbym umówić się na bezpłatną konsultację i porozmawiać o mojej firmie. Do usłyszenia.";
 
 export default function ContactMail() {
   const stageRef = useRef<HTMLDivElement>(null);
@@ -51,6 +51,28 @@ export default function ContactMail() {
             "--letter-parked-scale",
             String(Math.min(0.6, Math.max(0.1, scale))),
           );
+
+          // Opened, the flap stands its own height (--flap-depth · E) above the
+          // envelope, which can reach past the stage into the testimonial
+          // above it. The headroom it has is the space between the envelope
+          // and the stage's top edge plus the gap up to whatever precedes the
+          // stage; anything missing (and a little air) is made up by dropping
+          // envelope and parked letter together. Tall phone letters leave
+          // plenty of room, so there it stays 0.
+          const cell = Math.max(letterHeight, envelopeHeight);
+          const above = stage.previousElementSibling;
+          const gap = above
+            ? stage.getBoundingClientRect().top - above.getBoundingClientRect().bottom
+            : 0;
+          const headroom = (cell - envelopeHeight) / 2 + Math.max(0, gap);
+          const envelope = envelopeRef.current?.firstElementChild;
+          const flapDepth =
+            (envelope &&
+              parseFloat(getComputedStyle(envelope).getPropertyValue("--flap-depth")) / 100) ||
+            0.54;
+          const drop = Math.max(0, flapDepth * envelopeHeight + 12 - headroom);
+
+          stage.style.setProperty("--envelope-drop", `${Math.round(drop)}px`);
         }
 
         setOpened(true);
@@ -70,9 +92,24 @@ export default function ContactMail() {
   return (
     <section className={styles.contact} id="kontakt">
       <div className={styles.intro}>
-        <SectionIntro title="Chcesz zadać nam pytanie?">
-          Skontaktuj się z naszą załogą. Odpiszemy tak szybko jak to możliwe.
+        <SectionIntro title="Umów się na bezpłatną konsultację">
+          Zaczynamy od trzech bezpłatnych spotkań roboczych. My sprawdzamy, czy możemy realnie
+          pomóc Twojej firmie, a Ty, czy nasz sposób pracy Ci odpowiada. Jeśli nie ma
+          dopasowania, nie kontynuujemy.
         </SectionIntro>
+
+        <figure className={styles.testimonial}>
+          <blockquote className={styles.quote}>
+            &bdquo;Z ręką na sercu polecam usługi firmy. Szymon to niesamowicie kompetentna osoba
+            z ogromną wiedzą w temacie przedsiębiorczości i rozwoju osobistego. Do klientów
+            podchodzi z pełnym profesjonalizmem i zaangażowaniem. Super atmosfera, można się czuć
+            swobodnie podczas konsultacji.&rdquo;
+          </blockquote>
+          <figcaption className={styles.author}>
+            <span className={styles.authorName}>Adrian Mech</span>
+            <span className={styles.authorRole}>CEO Inoveria</span>
+          </figcaption>
+        </figure>
       </div>
 
       <MailForm
@@ -85,26 +122,36 @@ export default function ContactMail() {
       >
         {!envelopeGone && (
           <>
-            {/* Behind the letter: the envelope's body and its opening flap. */}
+            {/* Behind the letter: the envelope's body, its navy lining and the
+                flap's inside - which only faces the reader once it is open,
+                folded back behind the letter. */}
             <div
               className={layer(styles.envelopeBack)}
               ref={envelopeRef}
               aria-hidden="true"
               onAnimationEnd={(event) => {
-                if (event.animationName.includes("envelope-fall")) setEnvelopeGone(true);
+                if (event.animationName.includes("envelope-away")) setEnvelopeGone(true);
               }}
             >
               <div className={styles.envelope}>
                 <span className={styles.body} />
-                <span className={styles.flap} />
+                <span className={styles.flap}>
+                  <span className={styles.flapInner} />
+                </span>
               </div>
             </div>
 
-            {/* In front of the letter: the pocket it slides out of. */}
+            {/* In front of the letter: the pocket it slides out of, and the
+                flap's outside, lying over the folds until it swings open. */}
             <div className={layer(styles.envelopeFront)} aria-hidden="true">
               <div className={styles.envelope}>
+                <span className={styles.mouthShade} />
                 <span className={styles.pocket} />
+                <span className={styles.bottomFold} />
                 <img className={styles.mark} src="/assets/logo.svg" alt="" />
+                <span className={styles.flap}>
+                  <span className={styles.flapOuter} />
+                </span>
               </div>
             </div>
           </>

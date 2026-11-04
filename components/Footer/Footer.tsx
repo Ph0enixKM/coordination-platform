@@ -18,7 +18,7 @@ export default function Footer() {
             <a href="https://www.linkedin.com/in/szymon-pirko-bb00271b1/" target="_blank" rel="noreferrer noopener" aria-label="LinkedIn"><LinkedInIcon /></a>
           </div>
         </div>
-        <div><h3>Firma</h3><Link href="/dla-kogo">Doradztwo dla firm</Link><Link href="/proces">Jak pracujemy</Link><Link href="/wsparcie">Obszary wsparcia</Link><Link href="/o-nas">Poznaj nas lepiej</Link><Link href="/#kontakt">Kontakt</Link></div>
+        <div><h3>Firma</h3><Link href="/dla-kogo">Doradztwo dla firm</Link><Link href="/proces">Jak pracujemy</Link><Link href="/wsparcie">Obszary wsparcia</Link><Link href="/#kontakt">Kontakt</Link></div>
         <div><h3>Zasoby</h3><Link href="/wiedza">Baza wiedzy</Link><Link href="/spolecznosc">Społeczność</Link><Link href="/podcast-pno">Podcast</Link><Link href="/faq">FAQ Hub</Link></div>
         <div><h3>Szybki kontakt</h3><a href="mailto:kontakt@coordination.pl">kontakt@coordination.pl</a><a href="tel:+48790485873">+48 790 485 873</a></div>
       </div>

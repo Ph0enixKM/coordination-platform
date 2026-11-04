@@ -1,0 +1,115 @@
+/* Sticks below the site bar floating over the page, not under it. */
+.toc {
+  position: sticky;
+  top: calc(var(--site-nav-height, 0px) + 24px);
+  max-height: calc(100vh - 48px - var(--site-nav-height, 0px));
+  overflow-y: auto;
+  padding: 22px 8px 22px 0;
+  overscroll-behavior: contain;
+}
+
+.title {
+  margin: 0 0 14px;
+  color: var(--navy);
+  font-family: "Poppins", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Wide screens show the list as it is; the toggle only exists on narrow ones. */
+.toggle { display: none; }
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  border-left: 1px solid #dce2e8;
+  list-style: none;
+  counter-reset: section;
+}
+
+.link {
+  position: relative;
+  display: flex;
+  gap: 10px;
+  margin-left: -1px;
+  padding: 7px 0 7px 16px;
+  border-left: 2px solid transparent;
+  color: var(--muted);
+  font-size: 14px;
+  line-height: 1.45;
+  transition: color 150ms ease, border-color 150ms ease;
+}
+
+.link::before {
+  flex: none;
+  min-width: 1.4em;
+  color: #9aa6b2;
+  font-variant-numeric: tabular-nums;
+  counter-increment: section;
+  content: counter(section) ".";
+}
+
+.link:hover { color: var(--navy); }
+
+.link[aria-current="location"] {
+  border-left-color: var(--orange);
+  color: var(--navy);
+  font-weight: 600;
+}
+
+.link[aria-current="location"]::before { color: var(--orange); }
+
+.link:focus-visible {
+  outline: 2px solid var(--orange);
+  outline-offset: 2px;
+}
+
+@media (max-width: 1180px) {
+  .toc {
+    position: static;
+    max-height: none;
+    overflow: visible;
+    padding: 0;
+    border: 1px solid #dce2e8;
+    border-radius: 16px;
+    background: #fff;
+  }
+
+  .title { margin: 0; }
+  .label { display: none; }
+
+  .toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 16px 20px;
+    border: 0;
+    color: inherit;
+    background: transparent;
+    font: inherit;
+    letter-spacing: inherit;
+    text-transform: inherit;
+    cursor: pointer;
+  }
+
+  .chevron { transition: transform 200ms ease; }
+  .toc[data-open] .chevron { transform: rotate(180deg); }
+
+  .list {
+    display: none;
+    margin: 0 20px 18px;
+  }
+
+  .toc[data-open] .list { display: flex; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .link,
+  .chevron { transition: none; }
+}

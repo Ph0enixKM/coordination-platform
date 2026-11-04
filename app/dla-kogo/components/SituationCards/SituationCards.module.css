@@ -1,0 +1,173 @@
+/* ---------- base (mobile): lightest chaos + drift, no hover ---------- */
+
+.cloud {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+}
+
+.card {
+  position: relative;
+  transform: translate(var(--tx, 0), var(--ty, 0)) rotate(var(--r, 0)) scale(var(--s, 1));
+  z-index: var(--z, 1);
+}
+
+/* Per-card light scatter: small offsets and rotation so the column reads as
+   an organic cluster rather than a neat stack. */
+.card:nth-child(1) { --tx: 5px;  --ty: 7px;  --r: -1deg;   --s: 0.98; --z: 3; }
+.card:nth-child(2) { --tx: -6px; --ty: -5px; --r: 1deg;    --s: 1;    --z: 5; }
+.card:nth-child(3) { --tx: 4px;  --ty: 6px;  --r: 0.8deg;  --s: 0.97; --z: 2; }
+.card:nth-child(4) { --tx: -5px; --ty: -7px; --r: -0.8deg; --s: 0.99; --z: 4; }
+.card:nth-child(5) { --tx: 6px;  --ty: 5px;  --r: 1deg;    --s: 1.01; --z: 6; }
+.card:nth-child(6) { --tx: -4px; --ty: 8px;  --r: -1deg;   --s: 0.96; --z: 1; }
+
+/* The visual card lives on .drift so its drift animation moves the whole
+   card independently of the scatter transform on .card (the two transforms
+   compose because .drift is nested inside .card). */
+.drift {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  height: 100%;
+  padding: 24px;
+  border: 1px solid #dce2e8;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 8px 24px -16px rgba(1, 33, 65, 0.16);
+  transition: box-shadow 0.4s ease, opacity 0.4s ease;
+  animation: driftA 7s ease-in-out infinite;
+  will-change: transform;
+}
+
+/* Slow, desynchronised drift on each card. The keyframes start and end at
+   rest so pausing on hover never causes a jump. */
+.card:nth-child(2) .drift { animation: driftB 8.5s ease-in-out -2s infinite; }
+.card:nth-child(3) .drift { animation: driftC 6.5s ease-in-out -4s infinite; }
+.card:nth-child(4) .drift { animation: driftB 7.5s ease-in-out -1s infinite; }
+.card:nth-child(5) .drift { animation: driftA 9s ease-in-out -3s infinite; }
+.card:nth-child(6) .drift { animation: driftC 8s ease-in-out -5s infinite; }
+
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: rgba(242, 121, 45, 0.1);
+  color: var(--orange);
+}
+
+.icon svg {
+  width: 24px;
+  height: 24px;
+}
+
+.title {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  font-size: 17px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+  color: var(--navy);
+}
+
+.description {
+  margin: 0;
+  color: #5a6675;
+  font-size: 14.5px;
+  line-height: 1.7;
+}
+
+/* ---------- tablet (>=621px): lighter chaos + hover ---------- */
+
+@media (min-width: 621px) {
+  .cloud {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+  }
+
+  .drift {
+    padding: 32px;
+  }
+
+  .title {
+    font-size: 18px;
+  }
+
+  /* Lighter scatter than desktop: smaller offsets, gentler rotation. */
+  .card:nth-child(1) { --tx: -10px; --ty: 14px;  --r: -2deg;   --s: 0.96; --z: 3; }
+  .card:nth-child(2) { --tx: 12px;  --ty: 12px;  --r: 1.5deg;  --s: 1;    --z: 5; }
+  .card:nth-child(3) { --tx: -8px;  --ty: -13px; --r: 2deg;    --s: 0.95; --z: 2; }
+  .card:nth-child(4) { --tx: 13px;  --ty: -15px; --r: -1.5deg; --s: 0.98; --z: 4; }
+  .card:nth-child(5) { --tx: -12px; --ty: 11px;  --r: 1.5deg;  --s: 1.02; --z: 6; }
+  .card:nth-child(6) { --tx: 10px;  --ty: -12px; --r: -2deg;   --s: 0.94; --z: 1; }
+
+  .card {
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), z-index 0s 0.4s;
+  }
+
+  /* Hover: the card emerges to the front, straightens and enlarges; the rest
+     dim, so the eye lands on the one being read. */
+  .card:hover {
+    transform: translate(0, 0) rotate(0) scale(1.06);
+    z-index: 50;
+    transition: transform 0.4s cubic-bezier(0.22, 1, 0.36, 1), z-index 0s 0s;
+  }
+
+  .card:hover .drift {
+    animation-play-state: paused;
+    box-shadow:
+      0 24px 48px -16px rgba(1, 33, 65, 0.34),
+      0 12px 24px -14px rgba(242, 121, 45, 0.22);
+  }
+
+  .cloud:hover .card:not(:hover) .drift {
+    opacity: 0.5;
+  }
+}
+
+/* ---------- desktop (>=900px): full chaos ---------- */
+
+@media (min-width: 900px) {
+  .cloud {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 28px;
+  }
+
+  /* Full scatter: top row drifts down, bottom row drifts up, so the two
+     rows overlap into a cluster. Larger offsets and rotation. */
+  .card:nth-child(1) { --tx: -16px; --ty: 26px;  --r: -3deg;   --s: 0.95; --z: 3; }
+  .card:nth-child(2) { --tx: 18px;  --ty: 22px;  --r: 2.5deg;  --s: 1;    --z: 5; }
+  .card:nth-child(3) { --tx: -12px; --ty: 28px;  --r: 3deg;    --s: 0.93; --z: 2; }
+  .card:nth-child(4) { --tx: 20px;  --ty: -24px; --r: -2deg;   --s: 0.97; --z: 4; }
+  .card:nth-child(5) { --tx: -18px; --ty: -20px; --r: 2deg;    --s: 1.04; --z: 6; }
+  .card:nth-child(6) { --tx: 14px;  --ty: -26px; --r: -3.5deg; --s: 0.92; --z: 1; }
+}
+
+/* ---------- drift keyframes ---------- */
+
+@keyframes driftA {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  50% { transform: translate(5px, -6px) rotate(0.8deg); }
+}
+
+@keyframes driftB {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  50% { transform: translate(-6px, 5px) rotate(-0.9deg); }
+}
+
+@keyframes driftC {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  50% { transform: translate(6px, 6px) rotate(1.1deg); }
+}
+
+/* ---------- reduced motion: keep the scatter, drop the movement ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .drift {
+    animation: none;
+    transition: none;
+  }
+}

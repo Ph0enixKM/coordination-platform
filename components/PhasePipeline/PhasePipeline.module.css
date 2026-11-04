@@ -1,0 +1,256 @@
+/* ---------- scroll-driven phase pipeline ----------
+   Desktop: the compact panel stays in normal flow and walks through the
+   stages while the section naturally passes through the viewport.
+   Mobile: no pinning - cards stack top to bottom and light up one by one
+   as they cross the middle of the screen. */
+
+.wrap {
+  --pipeline-gap: 24px;
+}
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 44px;
+}
+
+.intro > div {
+  margin-bottom: 0;
+}
+
+/* ---------- rail (desktop only) ---------- */
+
+.rail {
+  display: none;
+}
+
+/* ---------- items ---------- */
+
+.items {
+  display: flex;
+  flex-direction: column;
+}
+
+.item {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr);
+  column-gap: 18px;
+}
+
+/* Vertical timeline wire: runs from under the dot to the next card's dot. */
+.item:not(:last-child) .node::after {
+  content: "";
+  position: absolute;
+  top: 56px;
+  bottom: 0;
+  left: 50%;
+  width: 2px;
+  transform: translateX(-50%);
+  background: #dce2e8;
+  transition: background 0.4s ease;
+}
+
+.item[data-state="done"] .node::after {
+  background: var(--orange);
+}
+
+.node {
+  position: relative;
+}
+
+.nodeDot {
+  position: relative;
+  z-index: 1;
+  display: block;
+  width: 14px;
+  height: 14px;
+  margin-top: 42px;
+  border-radius: 50%;
+  background: #fff;
+  border: 2px solid #dce2e8;
+  transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+}
+
+.item[data-state="active"] .nodeDot,
+.item[data-state="done"] .nodeDot {
+  border-color: var(--orange);
+  background: var(--orange);
+  box-shadow: 0 0 0 4px rgba(242, 121, 45, 0.15);
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-bottom: 22px;
+  padding: 32px;
+  border: 1px solid #dce2e8;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 8px 24px -16px rgba(1, 33, 65, 0.16);
+  transition: opacity 0.45s ease, border-color 0.45s ease, box-shadow 0.45s ease,
+    transform 0.45s ease;
+}
+
+.item:last-child .card {
+  margin-bottom: 0;
+}
+
+.item[data-state="idle"] .card {
+  opacity: 0.38;
+  transform: translateY(10px);
+}
+
+.item[data-state="done"] .card {
+  opacity: 0.75;
+}
+
+.item[data-state="active"] .card {
+  border-color: rgba(242, 121, 45, 0.55);
+  box-shadow: 0 8px 24px -16px rgba(1, 33, 65, 0.16),
+    0 18px 40px -24px rgba(242, 121, 45, 0.35);
+}
+
+.number {
+  font-family: "Poppins", sans-serif;
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1;
+  color: var(--orange);
+}
+
+.name {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--navy);
+}
+
+.text {
+  margin: 0;
+  color: #5a6675;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+/* ---------- desktop: compact, left to right ---------- */
+
+@media (min-width: 900px) {
+  .panel {
+    gap: 36px;
+  }
+
+  .node {
+    display: none;
+  }
+
+  .items {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(0, 1fr);
+    gap: var(--pipeline-gap);
+  }
+
+  .item {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .card {
+    margin-bottom: 0;
+  }
+
+  .rail {
+    position: relative;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    align-items: center;
+    height: 14px;
+  }
+
+  .railBase,
+  .railFill {
+    position: absolute;
+    top: 50%;
+    height: 2px;
+    transform: translateY(-50%);
+    border-radius: 1px;
+  }
+
+  .railBase {
+    background: #dce2e8;
+  }
+
+  .railFill {
+    background: var(--orange);
+    transition: width 0.6s ease;
+  }
+
+  .railDot {
+    position: relative;
+    z-index: 1;
+    justify-self: center;
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #fff;
+    border: 2px solid #dce2e8;
+    transition: background 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+  }
+
+  .railDot[data-lit="true"] {
+    border-color: var(--orange);
+    background: var(--orange);
+    box-shadow: 0 0 0 4px rgba(242, 121, 45, 0.15);
+  }
+}
+
+/* ---------- small screens ---------- */
+
+@media (max-width: 620px) {
+  .panel {
+    gap: 38px;
+  }
+
+  .item:not(:last-child) .node::after {
+    top: 47px;
+  }
+
+  .nodeDot {
+    margin-top: 33px;
+  }
+
+  .card {
+    margin-bottom: 18px;
+    padding: 24px;
+  }
+
+  .number {
+    font-size: 32px;
+  }
+
+  .name {
+    font-size: 19px;
+  }
+}
+
+/* ---------- reduced motion ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .railFill,
+  .railDot,
+  .nodeDot,
+  .item .node::after {
+    transition: none;
+  }
+
+  .item[data-state="idle"] .card {
+    transform: none;
+  }
+}

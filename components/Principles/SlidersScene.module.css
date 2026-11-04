@@ -13,7 +13,7 @@
 .scene {
   --cycle: 7.2s;
   /* Skip the reveal when the slide becomes active; enter as settling begins. */
-  --entry-phase: -1.44s;
+  --entry-phase: -1.15s;
   --accent: var(--orange);
   --board: #f1f5f9;
 
@@ -53,11 +53,27 @@
 }
 
 .scene[data-play="true"] .fill {
-  animation: settle-fill var(--cycle) ease-in-out calc(var(--entry-phase) + var(--lag)) infinite;
+  animation: settle-fill-a var(--cycle) ease-in-out calc(var(--entry-phase) + var(--lag)) infinite;
 }
 
 .scene[data-play="true"] .knob {
-  animation: settle-knob var(--cycle) ease-in-out calc(var(--entry-phase) + var(--lag)) infinite;
+  animation: settle-knob-a var(--cycle) ease-in-out calc(var(--entry-phase) + var(--lag)) infinite;
+}
+
+.scene[data-play="true"] .slider:nth-child(2) .fill {
+  animation-name: settle-fill-b;
+}
+
+.scene[data-play="true"] .slider:nth-child(2) .knob {
+  animation-name: settle-knob-b;
+}
+
+.scene[data-play="true"] .slider:nth-child(3) .fill {
+  animation-name: settle-fill-c;
+}
+
+.scene[data-play="true"] .slider:nth-child(3) .knob {
+  animation-name: settle-knob-c;
 }
 
 /*
@@ -83,13 +99,21 @@
  * One goes up a little, two come right down - and each is back at the setting
  * it started from by 94% of the cycle, with nothing visible from there to the
  * turn.
+ *
+ * They are moved one after another, the way one hand would do it, each with a
+ * short drag that runs a hair past its mark and settles back onto it (the
+ * overshooting curve is set on the stop each move starts from). The
+ * stagger lives in the keyframes rather than in `--lag`: the deal is swapped
+ * in on the first slider's turn, and a longer lag would leave the last one
+ * still on screen when it happens.
  */
-@keyframes settle-fill {
+@keyframes settle-fill-a {
   0%,
-  20% {
+  18% {
     stroke-dashoffset: calc((100 - var(--from)) * 1px);
+    animation-timing-function: cubic-bezier(0.32, 1.28, 0.52, 1);
   }
-  52%,
+  36%,
   94% {
     stroke-dashoffset: calc((100 - var(--to)) * 1px);
   }
@@ -99,12 +123,77 @@
   }
 }
 
-@keyframes settle-knob {
+@keyframes settle-knob-a {
   0%,
-  20% {
+  18% {
+    transform: translateX(calc(var(--from) * 2.4px));
+    animation-timing-function: cubic-bezier(0.32, 1.28, 0.52, 1);
+  }
+  36%,
+  94% {
+    transform: translateX(calc(var(--to) * 2.4px));
+  }
+  94.01%,
+  100% {
     transform: translateX(calc(var(--from) * 2.4px));
   }
-  52%,
+}
+
+@keyframes settle-fill-b {
+  0%,
+  27% {
+    stroke-dashoffset: calc((100 - var(--from)) * 1px);
+    animation-timing-function: cubic-bezier(0.32, 1.28, 0.52, 1);
+  }
+  45%,
+  94% {
+    stroke-dashoffset: calc((100 - var(--to)) * 1px);
+  }
+  94.01%,
+  100% {
+    stroke-dashoffset: calc((100 - var(--from)) * 1px);
+  }
+}
+
+@keyframes settle-knob-b {
+  0%,
+  27% {
+    transform: translateX(calc(var(--from) * 2.4px));
+    animation-timing-function: cubic-bezier(0.32, 1.28, 0.52, 1);
+  }
+  45%,
+  94% {
+    transform: translateX(calc(var(--to) * 2.4px));
+  }
+  94.01%,
+  100% {
+    transform: translateX(calc(var(--from) * 2.4px));
+  }
+}
+
+@keyframes settle-fill-c {
+  0%,
+  36% {
+    stroke-dashoffset: calc((100 - var(--from)) * 1px);
+    animation-timing-function: cubic-bezier(0.32, 1.28, 0.52, 1);
+  }
+  54%,
+  94% {
+    stroke-dashoffset: calc((100 - var(--to)) * 1px);
+  }
+  94.01%,
+  100% {
+    stroke-dashoffset: calc((100 - var(--from)) * 1px);
+  }
+}
+
+@keyframes settle-knob-c {
+  0%,
+  36% {
+    transform: translateX(calc(var(--from) * 2.4px));
+    animation-timing-function: cubic-bezier(0.32, 1.28, 0.52, 1);
+  }
+  54%,
   94% {
     transform: translateX(calc(var(--to) * 2.4px));
   }

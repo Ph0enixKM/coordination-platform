@@ -5,6 +5,17 @@
 /.next
 /out
 
+# OpenNext / Cloudflare build output and local state
+/.open-next
+/.wrangler
+.dev.vars*
+
+# local blog database and uploaded images (next dev)
+/.data
+
+# WordPress export the blog was imported from (scripts/import-blog.mts reads it)
+/coordination wpisy/
+
 # local tooling and caches
 *.tsbuildinfo
 .DS_Store

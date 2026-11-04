@@ -2,16 +2,17 @@ import type { Metadata } from "next";
 import SubpageHeader from "@/components/SubpageHeader/SubpageHeader";
 import Prose from "@/components/Prose/Prose";
 import Footer from "@/components/Footer/Footer";
+import SiteNav from "@/components/SiteNav/SiteNav";
 
 export const metadata: Metadata = {
   title: "Polityka prywatności",
   description:
-    "Polityka prywatności serwisu coordination.pl — administrator danych, cele i podstawy prawne przetwarzania, prawa użytkownika oraz pliki cookies.",
+    "Polityka prywatności serwisu coordination.pl - administrator danych, cele i podstawy prawne przetwarzania, prawa użytkownika oraz pliki cookies.",
   alternates: { canonical: "/polityka-prywatnosci" },
   openGraph: {
     title: "Polityka prywatności | Coordination",
     description:
-      "Polityka prywatności serwisu coordination.pl — administrator danych, cele i podstawy prawne przetwarzania, prawa użytkownika oraz pliki cookies.",
+      "Polityka prywatności serwisu coordination.pl - administrator danych, cele i podstawy prawne przetwarzania, prawa użytkownika oraz pliki cookies.",
     url: "/polityka-prywatnosci",
   },
 };
@@ -19,6 +20,7 @@ export const metadata: Metadata = {
 export default function PolitykaPrywatnosciPage() {
   return (
     <>
+      <SiteNav variant="subpage" />
       <SubpageHeader
         title="Polityka prywatności"
         lead="Informacje o przetwarzaniu danych osobowych w serwisie coordination.pl."

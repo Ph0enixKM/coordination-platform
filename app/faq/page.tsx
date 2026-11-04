@@ -6,15 +6,16 @@ import FaqForm from "@/components/FaqForm/FaqForm";
 import FaqAccordion, { type FaqEntry } from "@/components/FaqAccordion/FaqAccordion";
 import CtaButton from "@/components/CtaButton/CtaButton";
 import Footer from "@/components/Footer/Footer";
+import SiteNav from "@/components/SiteNav/SiteNav";
 import styles from "./faq.module.css";
 
 export const metadata: Metadata = {
-  title: "FAQ — najczęściej zadawane pytania",
+  title: "FAQ - najczęściej zadawane pytania",
   description:
     "Najczęściej zadawane pytania właścicieli firm. Znajdź odpowiedzi na kluczowe problemy biznesowe lub zadaj własne pytanie całkowicie anonimowo.",
   alternates: { canonical: "/faq" },
   openGraph: {
-    title: "FAQ — najczęściej zadawane pytania | Coordination",
+    title: "FAQ - najczęściej zadawane pytania | Coordination",
     description:
       "Najczęściej zadawane pytania właścicieli firm. Znajdź odpowiedzi na kluczowe problemy biznesowe lub zadaj własne pytanie całkowicie anonimowo.",
     url: "/faq",
@@ -39,6 +40,7 @@ const entries: readonly FaqEntry[] = [
 export default function FaqPage() {
   return (
     <>
+      <SiteNav variant="subpage" />
       <SubpageHeader
         title="FAQ"
         lead="Najczęściej zadawane pytania przez właścicieli firm. Znajdź odpowiedzi na kluczowe problemy biznesowe lub zadaj własne pytanie całkowicie anonimowo za pomocą formularza poniżej."

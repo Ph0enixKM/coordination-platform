@@ -6,7 +6,7 @@ export type FeatureCard = {
 };
 
 /**
- * A grid of plain cards — title over a paragraph — used by the content subpages
+ * A grid of plain cards - title over a paragraph - used by the content subpages
  * (społeczność, podcast) for their "dla kogo" and "o czym" sections.
  */
 export default function FeatureCards({

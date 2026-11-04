@@ -1,0 +1,42 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "coordination",
+  "main": ".open-next/worker.js",
+  "compatibility_date": "2026-10-01",
+  "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
+  "assets": {
+    "directory": ".open-next/assets",
+    "binding": "ASSETS"
+  },
+  "services": [
+    {
+      // OpenNext calls back into the Worker itself; must match "name" above.
+      "binding": "WORKER_SELF_REFERENCE",
+      "service": "coordination"
+    }
+  ],
+  // next/image optimization through Cloudflare Images.
+  "images": {
+    "binding": "IMAGES"
+  },
+  // Blog posts. `database_id` comes from `npx wrangler d1 create coordination`.
+  // Schema lives in migrations/ (`npm run db:migrate:remote`).
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "coordination",
+      "database_id": "REPLACE_WITH_D1_DATABASE_ID",
+      "migrations_dir": "migrations"
+    }
+  ],
+  // Uploaded blog images (already converted to WebP), served by /media/[...key].
+  "r2_buckets": [
+    {
+      "binding": "MEDIA",
+      "bucket_name": "coordination-media"
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}

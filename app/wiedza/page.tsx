@@ -1,78 +1,72 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 import SubpageHeader from "@/components/SubpageHeader/SubpageHeader";
+import PostCard from "@/components/PostCard/PostCard";
 import CtaButton from "@/components/CtaButton/CtaButton";
 import Footer from "@/components/Footer/Footer";
+import SiteNav from "@/components/SiteNav/SiteNav";
+import { listPublishedPosts } from "@/lib/blog/posts";
 import styles from "./wiedza.module.css";
 
-export const metadata: Metadata = {
-  title: "Baza wiedzy",
-  description:
-    "Wpisy o strategii, sprzedaży i marketingu dla właścicieli małych firm. Klient docelowy, definicja idealnego klienta, plan pozyskiwania klientów i więcej.",
-  alternates: { canonical: "/wiedza" },
-};
+// The list follows the database, so a post published in /admin appears at once.
+export const dynamic = "force-dynamic";
 
-type Post = {
-  date: string;
-  author: string;
-  title: string;
-  excerpt: string;
-};
+const PER_PAGE = 12;
+const DESCRIPTION =
+  "Wpisy o strategii, sprzedaży i marketingu dla właścicieli małych firm. Klient docelowy, definicja idealnego klienta, plan pozyskiwania klientów i więcej.";
 
-const posts: readonly Post[] = [
-  {
-    date: "15 września, 2026",
-    author: "autorstwa Szymon Pirko",
-    title: "Klient docelowy małej firmy: jak go określić?",
-    excerpt:
-      "Klient docelowy małej firmy to nie każdy odbiorca, który może kupić, ale taki, którego warto świadomie pozyskiwać ze względu na…",
-  },
-  {
-    date: "14 września, 2026",
-    author: "autorstwa Szymon Pirko",
-    title: "Definicja idealnego klienta: przewodnik dla małych firm",
-    excerpt:
-      "Definicja idealnego klienta powinna wskazywać nie tylko, kto może kupić ofertę firmy, ale przede wszystkim z kim współpraca jest najbardziej…",
-  },
-  {
-    date: "12 września, 2026",
-    author: "autorstwa Szymon Pirko",
-    title:
-      "Plan pozyskiwania klientów krok po kroku. Jak zbudować przewidywalny system sprzedaży",
-    excerpt:
-      "Plan pozyskiwania klientów powinien zaczynać się od określenia, jakiego wyniku biznesowego firma potrzebuje i jaki typ klienta realnie ten wynik…",
-  },
-];
+type Props = { searchParams: Promise<{ strona?: string }> };
 
-export default function WiedzaPage() {
+/** Page 1 lives at /wiedza; "?strona=1" or anything that is not a page number is page 1 too. */
+async function readPage(searchParams: Props["searchParams"]) {
+  const value = Number((await searchParams).strona);
+
+  return Number.isInteger(value) && value > 1 ? value : 1;
+}
+
+const pageHref = (page: number) => (page === 1 ? "/wiedza" : `/wiedza?strona=${page}`);
+
+export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
+  const page = await readPage(searchParams);
+
+  return {
+    title: page === 1 ? "Baza wiedzy" : `Baza wiedzy - strona ${page}`,
+    description: DESCRIPTION,
+    alternates: { canonical: pageHref(page) },
+  };
+}
+
+export default async function WiedzaPage({ searchParams }: Props) {
+  const page = await readPage(searchParams);
+  const { posts, total } = await listPublishedPosts(page, PER_PAGE);
+  const pages = Math.max(1, Math.ceil(total / PER_PAGE));
+
+  if (page > pages) notFound();
+
   return (
     <>
+      <SiteNav variant="subpage" />
       <SubpageHeader
         title="Baza wiedzy"
-        lead="Wpisy o strategii, sprzedaży i marketingu dla właścicieli małych firm."
         crumbs={[{ label: "Strona główna", href: "/" }, { label: "Baza wiedzy" }]}
       />
 
       <section className={styles.section}>
         <div className={styles.inner}>
-          <ul className={styles.list}>
-            {posts.map((post) => (
-              <li key={post.title} className={styles.item}>
-                <article className={styles.card}>
-                  <div className={styles.meta}>
-                    <time>{post.date}</time>
-                    <span className={styles.dot} aria-hidden="true">·</span>
-                    <span>{post.author}</span>
-                  </div>
-                  <h3 className={styles.title}>{post.title}</h3>
-                  <p className={styles.excerpt}>{post.excerpt}</p>
-                  <span className={styles.read}>
-                    Czytaj
-                    <span className={styles.arrow} aria-hidden="true">→</span>
-                  </span>
-                </article>
-              </li>
-            ))}
-          </ul>
+          {posts.length === 0 ? (
+            <p className={styles.empty}>Wkrótce pojawią się tu pierwsze wpisy.</p>
+          ) : (
+            <ul className={styles.list}>
+              {posts.map((post) => (
+                <li key={post.id} className={styles.item}>
+                  <PostCard post={post} />
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {pages > 1 && <Pagination page={page} pages={pages} />}
         </div>
       </section>
 
@@ -88,5 +82,55 @@ export default function WiedzaPage() {
 
       <Footer />
     </>
+  );
+}
+
+/** First, last and the pages around the current one; gaps become an ellipsis. */
+function pageNumbers(page: number, pages: number) {
+  const shown = [...new Set([1, page - 1, page, page + 1, pages])].filter((n) => n >= 1 && n <= pages).sort((a, b) => a - b);
+
+  return shown.flatMap((n, index) => (index > 0 && n - shown[index - 1] > 1 ? ["gap" as const, n] : [n]));
+}
+
+function Pagination({ page, pages }: { page: number; pages: number }) {
+  return (
+    <nav className={styles.pagination} aria-label="Strony wpisów">
+      {page > 1 ? (
+        <Link className={styles.step} href={pageHref(page - 1)} rel="prev">
+          ← Nowsze
+        </Link>
+      ) : (
+        <span className={styles.step} aria-hidden="true" />
+      )}
+
+      <ol className={styles.pages}>
+        {pageNumbers(page, pages).map((item, index) =>
+          item === "gap" ? (
+            <li key={`gap-${index}`} className={styles.gap} aria-hidden="true">
+              …
+            </li>
+          ) : (
+            <li key={item}>
+              <Link
+                className={styles.page}
+                href={pageHref(item)}
+                aria-current={item === page ? "page" : undefined}
+                aria-label={`Strona ${item}`}
+              >
+                {item}
+              </Link>
+            </li>
+          ),
+        )}
+      </ol>
+
+      {page < pages ? (
+        <Link className={styles.step} href={pageHref(page + 1)} rel="next">
+          Starsze →
+        </Link>
+      ) : (
+        <span className={styles.step} aria-hidden="true" />
+      )}
+    </nav>
   );
 }

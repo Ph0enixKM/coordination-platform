@@ -1,0 +1,449 @@
+/* On wide screens the editor fills the window like an app: the window itself
+   never scrolls, the canvas and the settings panel scroll on their own. */
+.page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--paper);
+}
+
+.center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  min-height: 100vh;
+  color: var(--muted);
+}
+
+.spinner {
+  width: 28px;
+  height: 28px;
+  animation: spin 900ms linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Header */
+
+.header {
+  position: relative;
+  z-index: 40;
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 20px;
+  border-bottom: 1px solid #dce2e8;
+  background: rgba(245, 246, 248, 0.94);
+  backdrop-filter: blur(8px);
+}
+
+.headerRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 40px;
+}
+
+.back {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 4px;
+  height: 36px;
+  padding: 0 10px 0 6px;
+  border-radius: 8px;
+  color: var(--navy);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.back:hover { background: #e8ecf0; }
+
+.headerTitle {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.saveState {
+  flex: none;
+  max-width: 40%;
+  overflow: hidden;
+  color: var(--muted);
+  font-size: 13px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.saveState[data-kind="dirty"] { color: #a0590c; }
+.saveState[data-kind="error"] { color: #b3361f; }
+
+.view {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 12px;
+  border: 1px solid #dce2e8;
+  border-radius: 9px;
+  color: var(--navy);
+  background: #fff;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.view:hover { border-color: var(--navy); }
+
+.save {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  gap: 8px;
+  height: 38px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: 9px;
+  color: #fff;
+  background: var(--orange);
+  font-weight: 600;
+  cursor: pointer;
+  transition: filter 150ms ease, opacity 150ms ease;
+}
+
+.save:hover:not(:disabled) { filter: brightness(1.06); }
+
+.save:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.view[aria-pressed="true"] {
+  border-color: var(--navy);
+  color: #fff;
+  background: var(--navy);
+}
+
+/* Preview: the public post page, scrolling where the editor did. */
+.preview {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* Canvas and settings */
+
+.layout {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+
+.canvasArea {
+  flex: 1;
+  min-width: 0;
+  overflow-y: auto;
+  /* No top padding: sticky block headers stop at the scroll area's very edge. */
+  padding: 0 24px 80px;
+  overscroll-behavior: contain;
+}
+
+/* Cover and title sit above the content card, the way the post opens. */
+.main {
+  width: min(980px, 100%);
+  margin: 24px auto 0;
+}
+
+.cover { margin-bottom: 18px; }
+
+.sheet {
+  padding: 28px clamp(12px, 3vw, 36px) 36px;
+  border: 1px solid #e1e6eb;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 8px 24px -18px rgba(1, 33, 65, 0.2);
+}
+
+/* The title is written in white on the cover banner. */
+.title {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 4px 8px;
+  border: 0;
+  border-radius: 8px;
+  color: #fff;
+  background: transparent;
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(28px, 3.6vw, 44px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.18;
+  text-wrap: balance;
+  resize: none;
+  field-sizing: content;
+}
+
+.title::placeholder { color: rgba(255, 255, 255, 0.5); }
+
+.title:hover { background: rgba(255, 255, 255, 0.08); }
+
+.title:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+
+.panel {
+  display: flex;
+  flex: none;
+  flex-direction: column;
+  gap: 12px;
+  width: 380px;
+  overflow-y: auto;
+  padding: 24px 20px 32px;
+  border-left: 1px solid #dce2e8;
+  background: #eef1f4;
+  overscroll-behavior: contain;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid #e1e6eb;
+  border-radius: 14px;
+  background: #fff;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.fieldHead {
+  display: flex;
+  justify-content: space-between;
+  color: var(--muted);
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.counter { font-weight: 400; }
+.counter[data-over] { color: #b3361f; }
+
+.hint {
+  color: #8793a0;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.input,
+.textarea {
+  width: 100%;
+  border: 1px solid #cfd6de;
+  border-radius: 8px;
+  color: var(--navy);
+  background: #fff;
+  font-size: 14px;
+}
+
+.input {
+  height: 38px;
+  padding: 0 10px;
+}
+
+.textarea {
+  padding: 8px 10px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+.input:focus,
+.textarea:focus {
+  border-color: var(--navy);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(1, 33, 65, 0.1);
+}
+
+.inline {
+  display: flex;
+  gap: 6px;
+}
+
+.small {
+  flex: none;
+  height: 38px;
+  padding: 0 10px;
+  border: 1px solid #dce2e8;
+  border-radius: 8px;
+  color: var(--navy);
+  background: #fff;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.small:hover { background: var(--soft); }
+
+.segmented {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 10px;
+  background: var(--soft);
+}
+
+.segment {
+  height: 34px;
+  border: 0;
+  border-radius: 7px;
+  color: var(--muted);
+  background: transparent;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.segment[aria-checked="true"] {
+  color: var(--navy);
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(1, 33, 65, 0.15);
+}
+
+.segment[aria-checked="true"]:last-child {
+  color: #fff;
+  background: var(--orange);
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 6px;
+  border: 1px solid #cfd6de;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.chips:focus-within {
+  border-color: var(--navy);
+  box-shadow: 0 0 0 3px rgba(1, 33, 65, 0.1);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 26px;
+  padding: 0 4px 0 10px;
+  border-radius: 999px;
+  color: var(--navy);
+  background: #e8ecf0;
+  font-size: 13px;
+}
+
+.chip button {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+  border: 0;
+  border-radius: 50%;
+  color: var(--muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.chip button:hover { color: #b3361f; background: #fff; }
+
+.chipInput {
+  flex: 1 0 140px;
+  min-width: 0;
+  height: 26px;
+  border: 0;
+  color: var(--navy);
+  font-size: 13.5px;
+  outline: none;
+}
+
+.danger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: 40px;
+  border: 1px solid #f1c6bd;
+  border-radius: 10px;
+  color: #b3361f;
+  background: #fff;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.danger:hover { background: #fdecea; }
+
+/* Narrow screens scroll as one page: canvas first, settings below it. */
+@media (max-width: 1040px) {
+  .page {
+    display: block;
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
+  }
+
+  .header {
+    position: sticky;
+    top: 0;
+  }
+
+  /* Block headers stick just under the editor header, which now scrolls with the page. */
+  .page { --sticky-top: 61px; }
+
+  .layout { display: block; }
+  .preview { overflow: visible; }
+
+  .canvasArea {
+    overflow: visible;
+    padding: 24px 20px 24px;
+  }
+
+  .panel {
+    width: auto;
+    overflow: visible;
+    padding: 0 20px 80px;
+    border-left: 0;
+    background: transparent;
+  }
+}
+
+@media (max-width: 600px) {
+  .page { --sticky-top: 57px; }
+  .header { padding: 8px 12px; }
+  .headerTitle { display: none; }
+  .view { display: none; }
+  .canvasArea { padding: 12px 8px; }
+  .panel { padding: 0 8px 60px; }
+}

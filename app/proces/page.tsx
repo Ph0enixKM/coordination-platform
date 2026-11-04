@@ -1,14 +1,19 @@
+
 import type { Metadata } from "next";
+import ContactMail from "@/components/ContactMail/ContactMail";
 import SubpageHeader from "@/components/SubpageHeader/SubpageHeader";
 import SectionIntro from "@/components/SectionIntro/SectionIntro";
+import PhasePipeline from "@/components/PhasePipeline/PhasePipeline";
+import Checklist, { type ChecklistEntry } from "@/components/Checklist/Checklist";
 import CtaButton from "@/components/CtaButton/CtaButton";
 import Footer from "@/components/Footer/Footer";
+import SiteNav from "@/components/SiteNav/SiteNav";
 import styles from "./proces.module.css";
 
 export const metadata: Metadata = {
   title: "Jak pracujemy",
   description:
-    "Proces pracy z Coordination — od diagnozy, przez ustalenie kierunku i strategii sprzedaży, po wdrożenie i utrzymanie. Z nami przejdziesz cały proces.",
+    "Proces pracy z Coordination - od diagnozy, przez ustalenie kierunku i strategii sprzedaży, po wdrożenie i utrzymanie. Z nami przejdziesz cały proces.",
   alternates: { canonical: "/proces" },
 };
 
@@ -30,18 +35,14 @@ const phases: readonly { name: string; description: string }[] = [
   },
 ];
 
-const checkpoints: readonly { number: string; title: string; description: string }[] = [
+const checkpoints: readonly ChecklistEntry[] = [
   {
-    number: "01.",
-    title: "Po pierwsze",
-    description:
-      "Sprawdzamy, czy Twoja firma jest właściwym miejscem do tego typu pracy i czy możemy realnie wnieść wartość. Nie każda sytuacja wymaga doradztwa strategicznego. Czasem problem jest operacyjny, finansowy lub wymaga innego rodzaju wsparcia.",
+    id: "fit",
+    text: "Sprawdzamy, czy Twoja firma jest właściwym miejscem do tego typu pracy i czy możemy realnie wnieść wartość.",
   },
   {
-    number: "02.",
-    title: "Po drugie",
-    description:
-      "Ty sprawdzasz, czy nasz sposób pracy jest dla Ciebie właściwy. Zobaczysz, jak analizujemy firmę, jak zadajemy pytania, jak nazywamy problemy i czy ten poziom pracy nad decyzjami odpowiada temu, czego potrzebujesz.",
+    id: "you",
+    text: "Oceniasz, czy nasz sposób pracy, analizy i podejście do rozwiązywania problemów odpowiadają Twoim potrzebom.",
   },
 ];
 
@@ -81,28 +82,18 @@ const steps: readonly { number: string; title: string; description: string }[] =
 export default function ProcesPage() {
   return (
     <>
+      <SiteNav variant="subpage" />
       <SubpageHeader
         title="Jak pracujemy"
-        lead="Z nami przejdziesz cały proces — od zaprojektowania zasad działania, przez wdrożenie, po utrzymanie."
+        lead="Z nami przejdziesz cały proces - od zaprojektowania zasad działania, przez wdrożenie, po utrzymanie."
         crumbs={[{ label: "Strona główna", href: "/" }, { label: "Jak pracujemy" }]}
       />
 
       <section className={styles.phasesSection}>
         <div className={styles.container}>
-          <div className={styles.intro}>
+          <PhasePipeline phases={phases}>
             <SectionIntro title="Z nami przejdziesz cały proces" />
-          </div>
-          <div className={styles.phases}>
-            {phases.map((phase, index) => (
-              <article key={phase.name} className={styles.phase}>
-                <span className={styles.phaseNumber} aria-hidden="true">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                <h3 className={styles.phaseName}>{phase.name}</h3>
-                <p className={styles.phaseText}>{phase.description}</p>
-              </article>
-            ))}
-          </div>
+          </PhasePipeline>
         </div>
       </section>
 
@@ -113,17 +104,7 @@ export default function ProcesPage() {
               Nie zaczynamy od gotowej oferty ani deklaracji długoterminowej współpracy. Najpierw odbywamy trzy bezpłatne spotkania robocze, podczas których analizujemy Twoją firmę, sposób podejmowania decyzji, sprzedaż, ofertę, klientów i miejsca, w których pojawia się utrata marży, czasu lub kontroli.
             </SectionIntro>
           </div>
-          <div className={styles.checkpoints}>
-            {checkpoints.map((checkpoint) => (
-              <article key={checkpoint.number} className={styles.checkpoint}>
-                <span className={styles.checkpointNumber} aria-hidden="true">
-                  {checkpoint.number}
-                </span>
-                <h3 className={styles.checkpointTitle}>{checkpoint.title}</h3>
-                <p className={styles.checkpointText}>{checkpoint.description}</p>
-              </article>
-            ))}
-          </div>
+          <Checklist items={checkpoints} />
           <p className={styles.closingNote}>
             Dopiero po tych spotkaniach podejmujemy decyzję, czy wchodzimy we właściwą współpracę. Jeżeli nie ma dopasowania, nie kontynuujemy.
           </p>
@@ -151,16 +132,7 @@ export default function ProcesPage() {
         </div>
       </section>
 
-      <section className={styles.ctaSection}>
-        <div className={styles.ctaInner}>
-          <h2 className={styles.ctaTitle}>Czas porozmawiać o Twojej firmie</h2>
-          <p className={styles.ctaText}>
-            Ta rozmowa to Twój pierwszy krok do uporządkowania strategii, sprzedaży i marketingu w jeden spójny system.
-          </p>
-          <CtaButton href="/#kontakt">Bezpłatna konsultacja</CtaButton>
-        </div>
-      </section>
-
+      <ContactMail />
       <Footer />
     </>
   );

@@ -1,5 +1,7 @@
 import Image from "next/image";
 import { ArrowUpRight, Podcast } from "lucide-react";
+import { PodcastPlayer } from "@/components/Embed/Embed";
+import EpisodeRecency from "@/components/EpisodeRecency/EpisodeRecency";
 import styles from "./SocialMedia.module.css";
 
 function SpotifyIcon() {
@@ -24,10 +26,14 @@ function YouTubeIcon() {
   );
 }
 
+const SPOTIFY_SHOW = "https://open.spotify.com/show/0dlekJRAAzprqI93yYABGf";
+const APPLE_ID = "1722037002";
+const APPLE_SHOW = `https://podcasts.apple.com/us/podcast/podcast-pno-strategicznie-o-firmie/id${APPLE_ID}`;
+
 const platforms = [
   {
     name: "Spotify",
-    href: "https://open.spotify.com/show/0dlekJRAAzprqI93yYABGf",
+    href: SPOTIFY_SHOW,
     icon: SpotifyIcon,
     color: "spotify",
   },
@@ -39,7 +45,7 @@ const platforms = [
   },
   {
     name: "Apple Podcasts",
-    href: "https://podcasts.apple.com/us/podcast/podcast-pno-strategicznie-o-firmie/id1722037002",
+    href: APPLE_SHOW,
     icon: Podcast,
     color: "apple",
   },
@@ -50,10 +56,9 @@ export default function SocialMedia() {
     <section className={styles.section} id="podcast" aria-labelledby="podcast-title">
       <div className={styles.panel}>
         <div className={styles.content}>
-          <h2 id="podcast-title" className={styles.title}>Posłuchaj nas <span>na</span></h2>
+          <h2 id="podcast-title" className={styles.title}>O strategii, sprzedaży <span>i marketingu</span></h2>
           <p className={styles.description}>
-            O strategii, sprzedaży i marketingu. Dołącz do rozmów
-            Szymona i znajdź inspirację do rozwoju swojej firmy.
+            Dołącz do rozmów Szymona i znajdź inspirację do rozwoju swojej firmy.
           </p>
           <ul className={styles.platforms} aria-label="Platformy z naszymi rozmowami">
             {platforms.map(({ name, href, icon: Icon, color }) => (
@@ -67,6 +72,12 @@ export default function SocialMedia() {
               </li>
             ))}
           </ul>
+          {/* The whole show, so the player always opens on the newest episode;
+              compact, as the show's full player would outgrow the panel. */}
+          <div className={styles.player}>
+            <EpisodeRecency appleId={APPLE_ID} />
+            <PodcastPlayer spotify={SPOTIFY_SHOW} apple="" height={175} />
+          </div>
         </div>
         <figure className={styles.portrait}>
           <div className={styles.halo} aria-hidden="true" />
