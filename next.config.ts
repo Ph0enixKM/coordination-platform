@@ -20,5 +20,5 @@ export default nextConfig;
 // Gives `next dev` local versions of the Cloudflare bindings from wrangler.jsonc.
 // Kept in memory: Next loads this config twice at startup, and two emulators
 // sharing .wrangler/state race over its SQLite files ("database is locked").
-// `next dev` keeps the blog in .data/ anyway, not in the emulated D1 or R2.
+// `next dev` keeps the blog in .data/ anyway, not in the emulated D1 or KV.
 initOpenNextCloudflareForDev({ persist: false });
