@@ -1,6 +1,8 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "coordination",
+  // Client's Cloudflare account (we work on it as an invited member).
+  "account_id": "bcd7c6b524e41e2fb2a20391294089aa",
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
@@ -25,15 +27,18 @@
     {
       "binding": "DB",
       "database_name": "coordination",
-      "database_id": "REPLACE_WITH_D1_DATABASE_ID",
+      "database_id": "d499b0a7-289c-4825-a8b0-78908b173a0a",
       "migrations_dir": "migrations"
     }
   ],
   // Uploaded blog images (already converted to WebP), served by /media/[...key].
-  "r2_buckets": [
+  // KV rather than R2: R2 needs a card on the account, KV is in the free plan
+  // and its 25 MiB value limit is far above a 1920px WebP.
+  // `id` comes from `npx wrangler kv namespace create coordination-media`.
+  "kv_namespaces": [
     {
       "binding": "MEDIA",
-      "bucket_name": "coordination-media"
+      "id": "619c1e959bb841e7b37e10601b8adda6"
     }
   ],
   "observability": {

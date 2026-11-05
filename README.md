@@ -36,7 +36,7 @@ npm run deploy    # build i wdrożenie na Cloudflare
 
 ## Blog i panel `/admin`
 
-Wpisy bloga leżą w bazie: na Cloudflare w D1 (binding `DB`), a w `npm run dev` w lokalnym pliku SQLite `.data/blog.sqlite` (wbudowany `node:sqlite`, migracje z `migrations/` aplikują się same). Zdjęcia trafiają do R2 (binding `MEDIA`), lokalnie do `.data/media/`, i są serwowane pod `/media/...`.
+Wpisy bloga leżą w bazie: na Cloudflare w D1 (binding `DB`), a w `npm run dev` w lokalnym pliku SQLite `.data/blog.sqlite` (wbudowany `node:sqlite`, migracje z `migrations/` aplikują się same). Zdjęcia trafiają do Workers KV (binding `MEDIA`), lokalnie do `.data/media/`, i są serwowane pod `/media/...`. KV zamiast R2, bo R2 wymaga podpięcia karty do konta, a KV jest w darmowym planie (do 25 MiB na plik, 1 GB, 1000 zapisów dziennie).
 
 - Opublikowane wpisy są pod `/<slug>`, tak jak w WordPressie (stare adresy z `/` na końcu przekierowują 308), a lista z paginacją pod `/wiedza`. Obie strony i `sitemap.xml` renderują się przy każdym żądaniu z bazy, więc zmiana w panelu jest widoczna od razu. Wpis z datą publikacji w przyszłości pojawi się dopiero wtedy.
 - Panel jest pod `/admin`. Logowanie kodem `ADMIN_CODE` z `.env` (lokalnie) albo z sekretu Workera. Po zalogowaniu kod zostaje w `localStorage` i idzie do API jako `Authorization: Bearer <kod>`.
@@ -53,7 +53,7 @@ Pierwsze wdrożenie na Cloudflare:
 
 ```bash
 npx wrangler d1 create coordination        # database_id wpisz w wrangler.jsonc
-npx wrangler r2 bucket create coordination-media
+npx wrangler kv namespace create coordination-media   # id wpisz w wrangler.jsonc
 npm run db:migrate:remote
 npx wrangler secret put ADMIN_CODE
 ```
@@ -67,7 +67,7 @@ Do `npm run preview` potrzebne są `npm run db:migrate:local` i `ADMIN_CODE` w `
 - `app/globals.css` - reset, tokeny i lokalne fonty;
 - `app/api/contact/route.ts` - obsługa formularza kontaktowego;
 - `app/[slug]/` - strona wpisu, `app/admin/` - panel bloga, `app/api/admin/` - jego API, `app/media/` - serwowanie zdjęć;
-- `lib/db.ts`, `lib/media.ts`, `lib/blog/` - baza (D1 / SQLite), zdjęcia (R2 / dysk) i wpisy;
+- `lib/db.ts`, `lib/media.ts`, `lib/blog/` - baza (D1 / SQLite), zdjęcia (KV / dysk) i wpisy;
 - `migrations/` - schemat bazy dla D1 i lokalnego SQLite;
 - `scripts/import-blog.mts` - import wpisów z eksportu WordPressa;
 - `components/` - sekcje strony i komponenty współdzielone; każdy komponent ma swój katalog ze stylami CSS Modules;

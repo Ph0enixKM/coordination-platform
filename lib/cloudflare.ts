@@ -27,15 +27,14 @@ export interface D1Database {
   prepare(sql: string): D1PreparedStatement;
 }
 
-export interface R2Object {
-  body: ReadableStream;
-  size: number;
-  httpMetadata?: { contentType?: string };
-}
+export type MediaMetadata = { contentType: string };
 
-export interface R2Bucket {
-  get(key: string): Promise<R2Object | null>;
-  put(key: string, value: ArrayBuffer | Uint8Array, options?: { httpMetadata?: { contentType?: string } }): Promise<unknown>;
+export interface KVNamespace {
+  getWithMetadata<M>(
+    key: string,
+    options: { type: "stream"; cacheTtl?: number },
+  ): Promise<{ value: ReadableStream | null; metadata: M | null }>;
+  put(key: string, value: ArrayBuffer | Uint8Array, options?: { metadata?: MediaMetadata }): Promise<void>;
   delete(key: string): Promise<void>;
 }
 
@@ -49,7 +48,7 @@ interface ImageTransformer {
   output(options: { format: "image/webp"; quality?: number }): Promise<{ response(): Response }>;
 }
 
-type Bindings = { DB: D1Database; MEDIA: R2Bucket; IMAGES: ImagesBinding };
+type Bindings = { DB: D1Database; MEDIA: KVNamespace; IMAGES: ImagesBinding };
 
 export async function bindings(): Promise<Bindings> {
   const { env } = await getCloudflareContext({ async: true });
