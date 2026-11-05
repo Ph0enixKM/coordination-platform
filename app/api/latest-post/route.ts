@@ -1,33 +1,13 @@
-import { NextResponse, type NextRequest } from "next/server";
-import { revalidateLatestPost } from "@/lib/blog/latest";
+import { NextResponse } from "next/server";
+import { getLatestPublishedPost } from "@/lib/blog/posts";
 
 export const dynamic = "force-dynamic";
 
-const headers = { "Cache-Control": "no-store" };
-
 /**
- * Asked by the home page when the post it was rendered with came from a copy
- * older than 12 hours (see lib/blog/latest.ts). `id` and `updated` name the
- * post the page shows, none when it shows none: 204 means it is still the
- * newest, otherwise the body is `{ post }`, `null` when no post is published.
+ * The newest post for the home page, which is static and asks for it in the
+ * browser: `{ post }`, `null` while nothing is published. Answers under
+ * `next dev`; on Cloudflare worker.ts answers this route itself.
  */
-export async function GET(request: NextRequest) {
-  const params = request.nextUrl.searchParams;
-
-  let post;
-  try {
-    post = await revalidateLatestPost();
-  } catch (error) {
-    console.error("Revalidating the latest post failed:", error);
-
-    return new NextResponse(null, { status: 503, headers });
-  }
-
-  const unchanged = post
-    ? params.get("id") === String(post.id) && params.get("updated") === post.updatedAt
-    : !params.has("id");
-
-  if (unchanged) return new NextResponse(null, { status: 204, headers });
-
-  return NextResponse.json({ post }, { headers });
+export async function GET() {
+  return NextResponse.json({ post: await getLatestPublishedPost() }, { headers: { "Cache-Control": "no-store" } });
 }

@@ -1,5 +1,6 @@
-import { bindings, type MediaMetadata } from "@/lib/cloudflare";
+import { bindings } from "@/lib/cloudflare";
 import { getDb } from "@/lib/db";
+import { readMedia } from "@/lib/media-response";
 import { slugify, type ImageValue } from "@/lib/blog/content";
 
 /**
@@ -10,8 +11,6 @@ import { slugify, type ImageValue } from "@/lib/blog/content";
 export const MAX_EDGE = 1920;
 export const WEBP_QUALITY = 80;
 export const MAX_UPLOAD_BYTES = 25 * 1024 * 1024;
-/** How long KV keeps an image cached at the edge, in seconds (a week). */
-const KV_CACHE_TTL = 7 * 24 * 60 * 60;
 
 const RASTER = new Set(["image/png", "image/jpeg", "image/webp", "image/gif", "image/avif"]);
 const SVG = "image/svg+xml";
@@ -119,15 +118,9 @@ async function toWebp(bytes: Bytes): Promise<Converted> {
 
 export async function getObject(key: string): Promise<{ body: BodyInit; type: string } | null> {
   if (process.env.NODE_ENV === "production") {
-    const { MEDIA } = await bindings();
-    // Worker responses skip the CDN cache, so let KV keep hot keys at the edge
-    // instead; keys carry a content hash and never change.
-    const { value, metadata } = await MEDIA.getWithMetadata<MediaMetadata>(key, {
-      type: "stream",
-      cacheTtl: KV_CACHE_TTL,
-    });
-
-    return value && { body: value, type: metadata?.contentType ?? "application/octet-stream" };
+    // worker.ts answers /media/* itself; this branch only serves a request that
+    // got past it.
+    return readMedia((await bindings()).MEDIA, key);
   }
 
   const { path, fs } = await localStore();

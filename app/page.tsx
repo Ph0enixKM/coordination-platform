@@ -7,14 +7,11 @@ import Footer from "@/components/Footer/Footer";
 import SocialMedia from "@/components/SocialMedia/SocialMedia";
 import SiteNav from "@/components/SiteNav/SiteNav";
 import LatestPost from "@/components/LatestPost/LatestPost";
-import { readLatestPost } from "@/lib/blog/latest";
 
-// Rendered per request for the newest post, which comes from memory, not D1.
-export const dynamic = "force-dynamic";
-
-export default async function Home() {
-  const { post, check } = await readLatestPost();
-
+// Static: rendering this page per request cost ~35 ms of CPU against the free
+// Workers plan's 10 ms. The newest post, its only changing part, is fetched by
+// the browser (see LatestPost).
+export default function Home() {
   return (
     <>
       <SiteNav />
@@ -25,7 +22,7 @@ export default async function Home() {
         <SocialMedia />
         <Pricing />
         <ContactMail />
-        <LatestPost post={post} check={check} />
+        <LatestPost />
       </main>
       <Footer />
     </>

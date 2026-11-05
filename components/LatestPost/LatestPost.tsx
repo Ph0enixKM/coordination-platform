@@ -7,36 +7,42 @@ import RecencyNote from "@/components/RecencyNote/RecencyNote";
 import type { PostSummary } from "@/lib/blog/types";
 import styles from "./LatestPost.module.css";
 
-type Props = {
-  post: PostSummary | null;
-  /** The server's copy was over 12 hours old: ask /api/latest-post for a fresh one. */
-  check: boolean;
-};
+/** A failed request is tried again after these pauses, in ms. */
+const RETRIES = [400, 1200];
 
-/** The newest blog post on the home page; hidden while nothing is published. */
-export default function LatestPost({ post: rendered, check }: Props) {
-  const [post, setPost] = useState(rendered);
+async function fetchLatestPost(signal: AbortSignal): Promise<PostSummary | null> {
+  for (let attempt = 0; ; attempt++) {
+    try {
+      const response = await fetch("/api/latest-post", { cache: "no-store", signal });
 
-  useEffect(() => {
-    if (!check) return;
-
-    const params = new URLSearchParams();
-    if (rendered) {
-      params.set("id", String(rendered.id));
-      params.set("updated", rendered.updatedAt);
+      if (response.ok) return ((await response.json()) as { post: PostSummary | null }).post;
+    } catch (error) {
+      if (signal.aborted) throw error;
     }
 
+    if (attempt === RETRIES.length) return null;
+
+    await new Promise((resolve) => setTimeout(resolve, RETRIES[attempt]));
+  }
+}
+
+/**
+ * The newest blog post on the home page. The page itself is static, so the
+ * browser asks for the post; the section stays hidden until it arrives, and
+ * while nothing is published.
+ */
+export default function LatestPost() {
+  const [post, setPost] = useState<PostSummary | null>(null);
+
+  useEffect(() => {
     const controller = new AbortController();
 
-    fetch(`/api/latest-post?${params}`, { cache: "no-store", signal: controller.signal })
-      .then(async (response) => {
-        // 204: still the newest. Anything but 200: keep what the page has.
-        if (response.status === 200) setPost(((await response.json()) as { post: PostSummary | null }).post);
-      })
+    fetchLatestPost(controller.signal)
+      .then(setPost)
       .catch(() => {});
 
     return () => controller.abort();
-  }, [check, rendered]);
+  }, []);
 
   if (!post) return null;
 

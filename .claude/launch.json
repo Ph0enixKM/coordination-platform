@@ -20,6 +20,20 @@
       ],
       "port": 3000,
       "autoPort": true
+    },
+    {
+      "name": "worker-local",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "wrangler",
+        "dev",
+        "--port",
+        "8787",
+        "--test-scheduled",
+        "--var",
+        "ADMIN_CODE:local-test-code"
+      ],
+      "port": 8787
     }
   ]
 }

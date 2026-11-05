@@ -1,4 +1,5 @@
 import { getCloudflareContext } from "@opennextjs/cloudflare";
+import type { MediaMetadata, MediaStore } from "@/lib/media-response";
 
 /**
  * Production runs on Cloudflare and talks to the Worker's bindings; everything
@@ -27,13 +28,7 @@ export interface D1Database {
   prepare(sql: string): D1PreparedStatement;
 }
 
-export type MediaMetadata = { contentType: string };
-
-export interface KVNamespace {
-  getWithMetadata<M>(
-    key: string,
-    options: { type: "stream"; cacheTtl?: number },
-  ): Promise<{ value: ReadableStream | null; metadata: M | null }>;
+export interface KVNamespace extends MediaStore {
   put(key: string, value: ArrayBuffer | Uint8Array, options?: { metadata?: MediaMetadata }): Promise<void>;
   delete(key: string): Promise<void>;
 }

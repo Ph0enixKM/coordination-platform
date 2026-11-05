@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import SubpageHeader from "@/components/SubpageHeader/SubpageHeader";
 import PostCard from "@/components/PostCard/PostCard";
 import CtaButton from "@/components/CtaButton/CtaButton";
@@ -9,26 +9,40 @@ import SiteNav from "@/components/SiteNav/SiteNav";
 import { listPublishedPosts } from "@/lib/blog/posts";
 import styles from "./wiedza.module.css";
 
-// The list follows the database, so a post published in /admin appears at once.
-export const dynamic = "force-dynamic";
+// Each page of the list is rendered on its first visit, then served from the
+// page cache until a change in /admin marks it stale (lib/blog/cache.ts). The
+// build renders none: it has no database to read them from. Pages live in the
+// path, not in "?strona=", because the cache is keyed by path.
+export function generateStaticParams(): { page?: string[] }[] {
+  return [];
+}
 
 const PER_PAGE = 12;
 const DESCRIPTION =
   "Wpisy o strategii, sprzedaży i marketingu dla właścicieli małych firm. Klient docelowy, definicja idealnego klienta, plan pozyskiwania klientów i więcej.";
 
-type Props = { searchParams: Promise<{ strona?: string }> };
+type Props = { params: Promise<{ page?: string[] }> };
 
-/** Page 1 lives at /wiedza; "?strona=1" or anything that is not a page number is page 1 too. */
-async function readPage(searchParams: Props["searchParams"]) {
-  const value = Number((await searchParams).strona);
+/** Page 1 is /wiedza and page n is /wiedza/strona/n; any other path is not a page. */
+async function readPage(params: Props["params"]) {
+  const segments = (await params).page;
 
-  return Number.isInteger(value) && value > 1 ? value : 1;
+  if (!segments) return 1;
+
+  const [prefix, number, ...rest] = segments;
+  const value = Number(number);
+
+  if (prefix !== "strona" || rest.length > 0 || !/^\d+$/.test(number ?? "")) notFound();
+  if (value === 1) permanentRedirect("/wiedza");
+  if (value < 1) notFound();
+
+  return value;
 }
 
-const pageHref = (page: number) => (page === 1 ? "/wiedza" : `/wiedza?strona=${page}`);
+const pageHref = (page: number) => (page === 1 ? "/wiedza" : `/wiedza/strona/${page}`);
 
-export async function generateMetadata({ searchParams }: Props): Promise<Metadata> {
-  const page = await readPage(searchParams);
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const page = await readPage(params);
 
   return {
     title: page === 1 ? "Baza wiedzy" : `Baza wiedzy - strona ${page}`,
@@ -37,8 +51,8 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
   };
 }
 
-export default async function WiedzaPage({ searchParams }: Props) {
-  const page = await readPage(searchParams);
+export default async function WiedzaPage({ params }: Props) {
+  const page = await readPage(params);
   const { posts, total } = await listPublishedPosts(page, PER_PAGE);
   const pages = Math.max(1, Math.ceil(total / PER_PAGE));
 

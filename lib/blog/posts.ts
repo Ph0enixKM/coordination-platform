@@ -1,51 +1,16 @@
 import { getDb } from "@/lib/db";
-import { refreshLatestPost } from "@/lib/blog/latest";
+import { revalidateBlog } from "@/lib/blog/cache";
 import { parseContent, slugify, summarize, type ImageValue, type PostContent } from "@/lib/blog/content";
+import {
+  LATEST_POST_SQL,
+  SUMMARY_COLUMNS,
+  VISIBLE,
+  isVisible,
+  parseJson,
+  toSummary,
+  type PostRow,
+} from "@/lib/blog/rows";
 import type { Post, PostInput, PostStatus, PostSummary } from "@/lib/blog/types";
-
-type PostRow = {
-  id: number;
-  slug: string;
-  title: string;
-  status: PostStatus;
-  excerpt: string;
-  author: string;
-  categories: string;
-  tags: string;
-  cover: string | null;
-  summary: string;
-  seo_title: string;
-  seo_description: string;
-  focus_keyword: string;
-  content: string;
-  published_at: string | null;
-  updated_at: string;
-};
-
-const SUMMARY_COLUMNS = "id, slug, title, status, author, categories, cover, summary, published_at, updated_at";
-
-function parseJson<T>(json: string | null, fallback: T): T {
-  try {
-    return json ? (JSON.parse(json) as T) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-function toSummary(row: PostRow): PostSummary {
-  return {
-    id: row.id,
-    slug: row.slug,
-    title: row.title,
-    status: row.status,
-    author: row.author,
-    categories: parseJson<string[]>(row.categories, []),
-    cover: parseJson<ImageValue | null>(row.cover, null),
-    summary: row.summary,
-    publishedAt: row.published_at,
-    updatedAt: row.updated_at,
-  };
-}
 
 function toPost(row: PostRow): Post {
   return {
@@ -165,6 +130,8 @@ function normalise(input: Partial<PostInput>) {
   };
 }
 
+type Visibility = Pick<PostRow, "status" | "published_at">;
+
 const isUniqueSlug = (error: unknown) => String(error).includes("UNIQUE constraint failed: posts.slug");
 
 const now = () => new Date().toISOString();
@@ -180,7 +147,8 @@ export async function createPost(input: Partial<PostInput>): Promise<Post> {
       ...Object.values(values),
     );
 
-    await refreshLatestPost();
+    // A post dated in the future reaches the pages through the cron in worker.ts.
+    if (isVisible(values)) revalidateBlog();
 
     return (await getPost(lastRowId))!;
   } catch (error) {
@@ -193,6 +161,7 @@ export async function updatePost(id: number, input: Partial<PostInput>): Promise
   const { wp_id: _, ...values } = normalise(input);
   const db = await getDb();
   const columns = Object.keys(values);
+  const before = await db.first<Visibility>("SELECT status, published_at FROM posts WHERE id = ?", id);
 
   try {
     const { changes } = await db.run(
@@ -204,7 +173,8 @@ export async function updatePost(id: number, input: Partial<PostInput>): Promise
 
     if (!changes) return null;
 
-    await refreshLatestPost();
+    // Edits to a draft or a post scheduled for later change nothing visitors see.
+    if (isVisible(before) || isVisible(values)) revalidateBlog();
 
     return getPost(id);
   } catch (error) {
@@ -230,17 +200,15 @@ export async function upsertImportedPost(input: Partial<PostInput> & { wpId: num
 
 export async function deletePost(id: number) {
   const db = await getDb();
+  const before = await db.first<Visibility>("SELECT status, published_at FROM posts WHERE id = ?", id);
   const { changes } = await db.run("DELETE FROM posts WHERE id = ?", id);
 
   if (!changes) return false;
 
-  await refreshLatestPost();
+  if (isVisible(before)) revalidateBlog();
 
   return true;
 }
-
-/** Published and not scheduled for later: what visitors may see. */
-const VISIBLE = "status = 'publish' AND published_at IS NOT NULL AND published_at <= ?";
 
 export async function listPublishedPosts(page: number, perPage: number) {
   const db = await getDb();
@@ -258,13 +226,13 @@ export async function listPublishedPosts(page: number, perPage: number) {
   return { posts: rows.map(toSummary), total: count?.total ?? 0 };
 }
 
-/** The newest visible post, for the home page; read through `lib/blog/latest.ts`. */
+/**
+ * The newest visible post, for /api/latest-post under `next dev`. On
+ * Cloudflare worker.ts answers that route with the same query.
+ */
 export async function getLatestPublishedPost(): Promise<PostSummary | null> {
   const db = await getDb();
-  const row = await db.first<PostRow>(
-    `SELECT ${SUMMARY_COLUMNS} FROM posts WHERE ${VISIBLE} ORDER BY published_at DESC, id DESC LIMIT 1`,
-    new Date().toISOString(),
-  );
+  const row = await db.first<PostRow>(LATEST_POST_SQL, new Date().toISOString());
 
   return row && toSummary(row);
 }

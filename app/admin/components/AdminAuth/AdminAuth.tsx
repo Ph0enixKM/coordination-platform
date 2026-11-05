@@ -19,6 +19,37 @@ export function useAdmin() {
   return context;
 }
 
+/** A request the Worker dropped is tried again after these pauses, in ms. */
+const RETRIES = [400, 1200];
+
+/**
+ * On the free Workers plan Cloudflare now and then stops a request that used
+ * too much CPU (503), and the next one on that instance can fail too (500).
+ * Retrying cannot do harm when the request means the same thing sent twice:
+ * reads, PUT, PATCH and DELETE, the code check, and uploads, which skip files
+ * already stored. Creating a post is not retried: the first try may have saved it.
+ */
+const REPEATABLE_POSTS = new Set(["/api/admin/media", "/api/admin/session"]);
+
+async function fetchWithRetry(path: string, init: RequestInit) {
+  const method = (init.method ?? "GET").toUpperCase();
+  const repeatable = method !== "POST" || REPEATABLE_POSTS.has(path);
+
+  for (let attempt = 0; ; attempt++) {
+    const last = !repeatable || attempt === RETRIES.length;
+
+    try {
+      const response = await fetch(path, init);
+
+      if (last || ![500, 502, 503, 504].includes(response.status)) return response;
+    } catch (error) {
+      if (last) throw error;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, RETRIES[attempt]));
+  }
+}
+
 function readStored() {
   try {
     return localStorage.getItem(STORAGE_KEY);
@@ -37,7 +68,7 @@ function store(code: string | null) {
 }
 
 async function checkCode(code: string) {
-  const response = await fetch("/api/admin/session", {
+  const response = await fetchWithRetry("/api/admin/session", {
     method: "POST",
     headers: { Authorization: `Bearer ${code}` },
   });
@@ -78,7 +109,7 @@ export default function AdminAuth({ children }: { children: React.ReactNode }) {
 
       if (init?.body && !(init.body instanceof FormData)) headers.set("Content-Type", "application/json");
 
-      const response = await fetch(path, { ...init, headers });
+      const response = await fetchWithRetry(path, { ...init, headers });
       const data = (await response.json().catch(() => ({}))) as { error?: string };
 
       if (response.status === 401) logout();

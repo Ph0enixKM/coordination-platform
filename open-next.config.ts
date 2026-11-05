@@ -1,12 +1,16 @@
 import { defineCloudflareConfig } from "@opennextjs/cloudflare";
-import staticAssetsIncrementalCache from "@opennextjs/cloudflare/overrides/incremental-cache/static-assets-incremental-cache";
+import kvIncrementalCache from "@opennextjs/cloudflare/overrides/incremental-cache/kv-incremental-cache";
+import d1NextTagCache from "@opennextjs/cloudflare/overrides/tag-cache/d1-next-tag-cache";
 
-// Static pages are prerendered at build time; the blog (/wiedza, posts, the
-// sitemap) renders on every request from D1 and is never cached, and the home
-// page on every request from the in-memory copy in lib/blog/latest.ts. Nothing
-// revalidates, so the cache can live in the Worker's static assets. Adding ISR
-// (`revalidate`) later means switching this to an R2 cache.
+// The free Workers plan gives a request 10 ms of CPU and rendering a page
+// with React takes 20-80 ms, so visitors are served rendered pages from KV:
+// - static pages are rendered by the build and put in KV on deploy;
+// - posts and the /wiedza pages are rendered on their first visit and kept
+//   until a save in /admin marks them stale (lib/blog/cache.ts), which is
+//   recorded in D1 so every location sees it at once.
+// Nothing revalidates on a timer, so no queue is needed.
 export default defineCloudflareConfig({
-  incrementalCache: staticAssetsIncrementalCache,
+  incrementalCache: kvIncrementalCache,
+  tagCache: d1NextTagCache,
   enableCacheInterception: true,
 });

@@ -10,9 +10,12 @@ import { getPublishedPost, listPublishedPosts } from "@/lib/blog/posts";
 import { siteUrl } from "@/lib/site";
 import styles from "./post.module.css";
 
-// Posts come from the database on every request: an edit in /admin shows up
-// at once, with no rebuild.
-export const dynamic = "force-dynamic";
+// Rendered on a post's first visit, then served from the page cache until a
+// change in /admin marks it stale (lib/blog/cache.ts). The build renders none:
+// it has no database to read them from.
+export function generateStaticParams(): { slug: string }[] {
+  return [];
+}
 
 type Props = { params: Promise<{ slug: string }> };
 

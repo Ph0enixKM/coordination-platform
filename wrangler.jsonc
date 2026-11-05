@@ -6,7 +6,9 @@
   // CONTACT_EMAIL and RESEND_FROM_EMAIL are set in the dashboard; without this
   // every deploy would delete variables that are not listed here.
   "keep_vars": true,
-  "main": ".open-next/worker.js",
+  // Serves /media and /api/latest-post without Next.js, then hands the rest to
+  // the OpenNext Worker in .open-next/worker.js.
+  "main": "worker.ts",
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
   "assets": {
@@ -32,6 +34,14 @@
       "database_name": "coordination",
       "database_id": "d499b0a7-289c-4825-a8b0-78908b173a0a",
       "migrations_dir": "migrations"
+    },
+    {
+      // The same database, for OpenNext's page cache tags: a save in /admin
+      // records there which cached pages went stale. OpenNext creates its
+      // `revalidations` table on deploy.
+      "binding": "NEXT_TAG_CACHE_D1",
+      "database_name": "coordination",
+      "database_id": "d499b0a7-289c-4825-a8b0-78908b173a0a"
     }
   ],
   // Uploaded blog images (already converted to WebP), served by /media/[...key].
@@ -42,8 +52,19 @@
     {
       "binding": "MEDIA",
       "id": "619c1e959bb841e7b37e10601b8adda6"
+    },
+    {
+      // Rendered pages (HTML and RSC payload), see open-next.config.ts.
+      // `id` comes from `npx wrangler kv namespace create coordination-page-cache`.
+      "binding": "NEXT_INC_CACHE_KV",
+      "id": "33bb3cadffe74ba2b2118eda9c7f42e0"
     }
   ],
+  // Brings posts dated in the future onto the cached pages once they are out
+  // (`scheduled` in worker.ts).
+  "triggers": {
+    "crons": ["0 * * * *"]
+  },
   "observability": {
     "enabled": true
   }
