@@ -115,13 +115,32 @@
  * In from the right, held long enough to be read, out through the bottom. The
  * frame clips its own edges, so the glass is off-screen at both ends of the
  * loop and needs no fade to cover the wrap.
+ *
+ * While it is held it is not pinned: a hand holding a glass drifts by a few
+ * pixels as the eye moves over what it shows. The drift is small enough that
+ * the cell under the middle never leaves it.
  */
 @keyframes look {
   0%,
   6% {
     transform: translate(280px, 0);
   }
-  30%,
+  30% {
+    transform: translate(0, 0);
+    animation-timing-function: ease-in-out;
+  }
+  44% {
+    transform: translate(5px, -3px);
+    animation-timing-function: ease-in-out;
+  }
+  58% {
+    transform: translate(-3px, 3px);
+    animation-timing-function: ease-in-out;
+  }
+  72% {
+    transform: translate(3px, 2px);
+    animation-timing-function: ease-in-out;
+  }
   84% {
     transform: translate(0, 0);
   }
@@ -137,7 +156,22 @@
   6% {
     transform: translate(-280px, 0);
   }
-  30%,
+  30% {
+    transform: translate(0, 0);
+    animation-timing-function: ease-in-out;
+  }
+  44% {
+    transform: translate(-5px, 3px);
+    animation-timing-function: ease-in-out;
+  }
+  58% {
+    transform: translate(3px, -3px);
+    animation-timing-function: ease-in-out;
+  }
+  72% {
+    transform: translate(-3px, -2px);
+    animation-timing-function: ease-in-out;
+  }
   84% {
     transform: translate(0, 0);
   }

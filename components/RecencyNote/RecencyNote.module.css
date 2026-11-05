@@ -1,0 +1,76 @@
+/* Opens from nothing to the label's height, so the player below slides down
+   instead of jumping, while the label fades and rises into place. */
+.reveal {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 420ms cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.reveal[data-shown] { grid-template-rows: 1fr; }
+
+.clip {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+  color: #c1cddd;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  line-height: 1.4;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 500ms ease 180ms, transform 500ms ease 180ms;
+}
+
+.label[data-gap="bottom"] { padding-bottom: 10px; }
+.label[data-gap="top"] { padding-top: 10px; }
+
+/* Grey on the page background, centred under a section title. */
+.label[data-tone="light"] {
+  justify-content: center;
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.reveal[data-shown] .label {
+  opacity: 1;
+  transform: none;
+}
+
+/* Pings a few times when it appears, then stays still. */
+.dot {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--orange);
+}
+
+.dot::after {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: inherit;
+  content: "";
+  animation: ping 1.4s ease-out 600ms 3;
+  opacity: 0;
+}
+
+@keyframes ping {
+  0% { opacity: 0.7; transform: scale(1); }
+  100% { opacity: 0; transform: scale(2.6); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .label { transition: none; }
+  .dot::after { animation: none; }
+}

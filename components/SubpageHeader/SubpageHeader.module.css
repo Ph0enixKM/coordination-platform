@@ -1,0 +1,198 @@
+/* The site bar floats over the top of the header (its logo is the page's
+   logo), so the navy runs up under it and the content starts below it. */
+.header {
+  position: relative;
+  margin-top: calc(-1 * var(--site-nav-height, 0px));
+  padding: calc(var(--site-nav-height, 0px) + clamp(32px, 5vw, 60px)) 24px clamp(40px, 5vw, 64px);
+  color: #fff;
+  background: var(--navy);
+  overflow: hidden;
+}
+
+.inner {
+  position: relative;
+  z-index: 1;
+  width: min(1180px, 100%);
+  margin: 0 auto;
+}
+
+.crumbs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  margin: 0 0 18px;
+  font-size: 13px;
+  color: #9fb2c8;
+}
+
+.crumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.crumb a {
+  transition: color 150ms ease;
+}
+
+.crumb a:hover { color: #f4aa79; }
+
+.separator {
+  margin: 0 8px;
+  opacity: 0.5;
+}
+
+.title {
+  margin: 0;
+  max-width: 18ch;
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(34px, 5vw, 56px);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.12;
+  text-wrap: balance;
+}
+
+.lead {
+  max-width: 60ch;
+  margin: 22px 0 0;
+  color: #c1cddd;
+  font-size: clamp(16px, 1.6vw, 18px);
+  line-height: 1.65;
+}
+
+.header[data-variant="article"] .title {
+  max-width: 28ch;
+  font-size: clamp(28px, 3.6vw, 44px);
+  letter-spacing: -0.03em;
+  line-height: 1.18;
+}
+
+/* With a photo: it fills the right of the header and fades out of the navy on
+   the left, under a gradient that keeps the white title readable. */
+
+.header[data-image] {
+  display: flex;
+  flex-direction: column;
+  min-height: clamp(380px, 38vw, 520px);
+}
+
+/* Breadcrumbs, title and meta settle at the bottom, over the photo's fade. */
+.header[data-image] .inner {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: flex-end;
+}
+
+.backdrop {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: min(100%, 1280px);
+  height: 100%;
+  object-fit: cover;
+  -webkit-mask-image: linear-gradient(90deg, transparent 0%, #000 45%);
+  mask-image: linear-gradient(90deg, transparent 0%, #000 45%);
+}
+
+.shade {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(0deg, rgba(1, 33, 65, 0.85) 0%, rgba(1, 33, 65, 0) 55%),
+    linear-gradient(90deg, rgba(1, 33, 65, 0.96) 0%, rgba(1, 33, 65, 0.82) 40%, rgba(1, 33, 65, 0.45) 75%, rgba(1, 33, 65, 0.2) 100%);
+}
+
+/* With a cover, as Apple Music shows an album: the cover blurred into a
+   wash of its colours fills the header, dimmed so the white text stays
+   legible, and the cover itself sits on it as a plain tile with a soft,
+   wide shadow. */
+.wash {
+  position: absolute;
+  inset: -20%;
+  width: 140%;
+  height: 140%;
+  object-fit: cover;
+  filter: blur(90px) saturate(1.4);
+  transform: translateZ(0);
+}
+
+.washShade {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(1, 33, 65, 0.78) 0%, rgba(1, 33, 65, 0.55) 55%, rgba(1, 33, 65, 0.35) 100%);
+}
+
+/* A page's own mark, blurred into a glow that spills in from the top-right
+   corner - the same soft light the podcast cover gives its header. */
+.glow {
+  position: absolute;
+  top: -30%;
+  right: -10%;
+  width: clamp(380px, 48vw, 680px);
+  aspect-ratio: 1;
+  opacity: 0.5;
+  filter: blur(90px) saturate(1.3);
+  transform: translateZ(0);
+  pointer-events: none;
+}
+
+.glow > svg,
+.glow > img {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Room under the content for the torn edge to rise into. */
+.header[data-torn] { padding-bottom: calc(clamp(40px, 5vw, 64px) + clamp(40px, 5vw, 80px)); }
+
+.inner[data-aside] {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 48px;
+  align-items: center;
+}
+
+.artwork {
+  width: clamp(220px, 24vw, 320px);
+  margin: 0;
+}
+
+.artwork img {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  border-radius: 14px;
+  box-shadow:
+    0 2px 6px rgba(0, 0, 0, 0.12),
+    0 24px 60px -12px rgba(0, 0, 0, 0.45);
+}
+
+@media (max-width: 760px) {
+  .inner[data-aside] {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  .artwork { width: 180px; }
+}
+
+@media (max-width: 620px) {
+  .title { font-size: 32px; }
+  .header[data-variant="article"] .title { font-size: 27px; }
+  .header[data-image] { min-height: 400px; }
+
+  .backdrop {
+    width: 100%;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .shade {
+    background: linear-gradient(180deg, rgba(1, 33, 65, 0.55) 0%, rgba(1, 33, 65, 0.8) 45%, var(--navy) 100%);
+  }
+  .lead { font-size: 15px; }
+}

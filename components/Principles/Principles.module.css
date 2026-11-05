@@ -20,7 +20,13 @@
   position: relative;
   display: flex;
   gap: clamp(16px, 2vw, 28px);
-  padding: 4px clamp(16px, 5vw, 72px) 8px;
+  /*
+   * The side padding has to be at least half of what the lane leaves around a
+   * card, or the first and last card can never be scrolled to the middle: the
+   * track then reads the second card as the current one on load and stops one
+   * short at the end. 500px is half of the card's 1000px.
+   */
+  padding: 4px max(clamp(16px, 5vw, 72px), calc(50% - 500px)) 8px;
   overflow-x: auto;
   overscroll-behavior-x: contain;
   scroll-snap-type: x mandatory;

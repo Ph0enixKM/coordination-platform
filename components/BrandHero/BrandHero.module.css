@@ -6,6 +6,7 @@
 }
 
 .viewport {
+  --mark-size: clamp(58px, 8.6vw, 84px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -36,7 +37,6 @@
 }
 
 .row {
-  --mark-size: clamp(58px, 8.6vw, 84px);
   display: flex;
   align-items: center;
   gap: calc(var(--mark-size) * 0.094);
@@ -222,13 +222,19 @@
   }
 }
 
+/* Where the site bar is just a burger on the right, the logo moves up into
+   the bar's row and sits on the same line as the burger. */
+@media (max-width: 1040px) {
+  .hero { margin-top: calc(-1 * var(--site-nav-height, 0px)); }
+
+  .viewport {
+    margin-top: 0;
+    padding-top: max(0px, calc(var(--site-nav-center, 42px) - var(--mark-size) / 2));
+  }
+}
+
 @media (max-width: 560px) {
   .viewport {
-    margin-top: clamp(14px, 4svh, 32px);
-    padding-top: clamp(16px, 2.8svh, 24px);
-  }
-
-  .row {
     --mark-size: clamp(52px, 15vw, 72px);
   }
 

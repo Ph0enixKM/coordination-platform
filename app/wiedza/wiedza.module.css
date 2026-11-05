@@ -1,0 +1,132 @@
+.section {
+  padding: clamp(48px, 6vw, 80px) 24px;
+  background: var(--paper);
+}
+
+.inner {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+}
+
+.list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.item {
+  display: flex;
+}
+
+.empty {
+  margin: 0;
+  padding: 48px 16px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: clamp(36px, 5vw, 56px);
+}
+
+.step {
+  min-width: 110px;
+  color: var(--navy);
+  font-family: "Poppins", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  transition: color 150ms ease;
+}
+
+a.step:hover { color: var(--orange); }
+.step:last-child { text-align: right; }
+
+.pages {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.page {
+  display: grid;
+  min-width: 42px;
+  height: 42px;
+  padding: 0 10px;
+  place-items: center;
+  border: 1px solid #dce2e8;
+  border-radius: 12px;
+  color: var(--navy);
+  background: #fff;
+  font-weight: 600;
+  transition: border-color 150ms ease, color 150ms ease;
+}
+
+.page:hover { border-color: var(--orange); color: var(--orange); }
+
+.page[aria-current="page"] {
+  border-color: var(--navy);
+  color: #fff;
+  background: var(--navy);
+}
+
+.gap {
+  display: grid;
+  width: 24px;
+  place-items: center;
+  color: var(--muted);
+}
+
+.ctaSection {
+  padding: clamp(56px, 7vw, 96px) 24px;
+  background: var(--navy);
+}
+
+.ctaInner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: min(720px, 100%);
+  margin: 0 auto;
+  text-align: center;
+}
+
+.ctaTitle {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(26px, 3.5vw, 38px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  color: #fff;
+}
+
+.ctaText {
+  max-width: 54ch;
+  margin: 0 0 24px;
+  color: #c1cddd;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+@media (max-width: 960px) {
+  .list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 620px) {
+  .list { grid-template-columns: 1fr; }
+  .pagination { flex-wrap: wrap; justify-content: center; }
+  .pages { order: -1; width: 100%; }
+  .step { min-width: 0; }
+}

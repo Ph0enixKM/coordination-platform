@@ -1,0 +1,421 @@
+/* Under the header's title: the three subjects, parted by red dots as on the
+   group's Facebook banner. */
+.pillars {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 14px;
+  margin: 26px 0 0;
+  padding: 0;
+  list-style: none;
+  font-family: "Poppins", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #fff;
+}
+
+.pillars li {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.pillars li + li::before {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #e30b17;
+  box-shadow: 0 0 0 3px rgba(227, 11, 23, 0.22);
+  content: "";
+}
+
+.lead {
+  padding: clamp(48px, 6vw, 80px) 24px;
+  background: var(--paper);
+}
+
+.leadInner {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 48px;
+  align-items: center;
+  width: min(1180px, 100%);
+  margin: 0 auto;
+}
+
+.leadCopy {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.leadText {
+  margin: 0;
+  color: #414c5a;
+  font-size: clamp(15px, 1.6vw, 17px);
+  line-height: 1.75;
+}
+
+.leadText strong { color: var(--navy); }
+
+.leadCta {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.section {
+  padding: clamp(48px, 6vw, 80px) 24px;
+  background: var(--paper);
+}
+
+.sectionAlt {
+  padding: clamp(48px, 6vw, 80px) 24px;
+  background: linear-gradient(180deg, #edf0f3, #f5f6f8);
+}
+
+.inner {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+}
+
+.intro {
+  margin-bottom: 48px;
+}
+
+/* "Dla kogo": a pinned heading beside a numbered list, ruled rather than boxed. */
+.audience {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.4fr);
+  gap: clamp(32px, 6vw, 88px);
+  align-items: start;
+  width: min(1180px, 100%);
+  margin: 0 auto;
+}
+
+.audienceAside {
+  position: sticky;
+  top: 110px;
+}
+
+.audienceTitle {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(32px, 3.6vw, 46px);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1.1;
+  color: var(--navy);
+}
+
+.audienceLead {
+  max-width: 34ch;
+  margin: 20px 0 0;
+  color: var(--muted);
+  font-size: 17px;
+  line-height: 1.65;
+}
+
+.audienceList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid #dce2e8;
+}
+
+.audienceItem {
+  display: grid;
+  grid-template-columns: 64px minmax(0, 1fr);
+  gap: 20px;
+  padding: 28px 0;
+  border-bottom: 1px solid #dce2e8;
+}
+
+.audienceNumber {
+  font-family: "Poppins", sans-serif;
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.04em;
+  line-height: 1.1;
+  color: #e30b17;
+  font-variant-numeric: tabular-nums;
+}
+
+.audienceItemTitle {
+  margin: 0 0 8px;
+  font-family: "Poppins", sans-serif;
+  font-size: 19px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.35;
+  color: var(--navy);
+}
+
+.audienceItemText {
+  margin: 0;
+  color: #5a6675;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+/* "O czym": the three pillars on one rail, on the page's only dark band before the CTA. */
+.system {
+  padding: clamp(56px, 7vw, 96px) 24px;
+  color: #fff;
+  background:
+    radial-gradient(60% 80% at 50% 0%, rgba(227, 11, 23, 0.14), transparent 70%),
+    linear-gradient(180deg, #021a33, var(--navy));
+}
+
+.systemIntro {
+  margin-bottom: 56px;
+}
+
+.pillarsGrid {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 40px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* The rail joining the three nodes. */
+.pillarsGrid::before {
+  position: absolute;
+  top: 28px;
+  left: calc(100% / 6);
+  right: calc(100% / 6);
+  height: 2px;
+  background: linear-gradient(90deg, rgba(227, 11, 23, 0.7), rgba(242, 121, 45, 0.7), rgba(227, 11, 23, 0.7));
+  content: "";
+}
+
+.pillar {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.pillarNode {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  border: 2px solid rgba(255, 255, 255, 0.16);
+  border-radius: 50%;
+  color: #fff;
+  background: #0a2d52;
+  box-shadow: 0 0 0 6px var(--navy), 0 0 28px rgba(227, 11, 23, 0.35);
+}
+
+.pillarNode svg {
+  width: 24px;
+  height: 24px;
+  stroke-width: 1.7;
+}
+
+.pillarName {
+  margin-top: 22px;
+  font-family: "Poppins", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--orange);
+}
+
+.pillarTitle {
+  margin: 10px 0 12px;
+  font-family: "Poppins", sans-serif;
+  font-size: 20px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+}
+
+.pillarText {
+  max-width: 36ch;
+  margin: 0;
+  color: #c1cddd;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+/* "Jak działa": editorial rows, heading on the left, copy on the right. */
+.rows {
+  border-top: 1px solid #dce2e8;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.4fr);
+  gap: clamp(24px, 6vw, 88px);
+  padding: 40px 0;
+  border-bottom: 1px solid #dce2e8;
+}
+
+.rowTitle {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(22px, 2.4vw, 28px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  color: var(--navy);
+}
+
+.rowBody {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  color: #414c5a;
+  font-size: 16px;
+  line-height: 1.75;
+}
+
+.rowBody p { margin: 0; }
+
+.rowPoints {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.rowPoints li {
+  position: relative;
+  padding-left: 26px;
+}
+
+.rowPoints li::before {
+  position: absolute;
+  top: 0.62em;
+  left: 4px;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #e30b17;
+  box-shadow: 0 0 0 3px rgba(227, 11, 23, 0.16);
+  content: "";
+}
+
+.path {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.pathStep {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: "Poppins", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--navy);
+}
+
+.pathIndex {
+  display: grid;
+  width: 26px;
+  height: 26px;
+  place-items: center;
+  border: 1px solid #cfd7e0;
+  border-radius: 50%;
+  font-size: 12px;
+  color: var(--muted);
+  background: #fff;
+}
+
+.pathStep[data-current] .pathIndex {
+  border-color: #e30b17;
+  color: #fff;
+  background: #e30b17;
+}
+
+.pathArrow {
+  width: 16px;
+  height: 16px;
+  margin-left: 2px;
+  color: #9aa6b4;
+}
+
+.ctaSection {
+  padding: clamp(56px, 7vw, 96px) 24px;
+  background: var(--navy);
+}
+
+.ctaInner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: min(720px, 100%);
+  margin: 0 auto;
+  text-align: center;
+}
+
+.ctaTitle {
+  margin: 6px 0 4px;
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(26px, 3.5vw, 38px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  color: #fff;
+}
+
+.ctaText {
+  max-width: 54ch;
+  margin: 0 0 24px;
+  color: #c1cddd;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+@media (max-width: 900px) {
+  .audience { grid-template-columns: 1fr; }
+  .audienceAside { position: static; }
+  .pillarsGrid { grid-template-columns: 1fr; gap: 36px; }
+  /* Rail turns vertical down the left, nodes on it and copy beside them. */
+  .pillarsGrid::before {
+    top: 28px;
+    bottom: 28px;
+    left: 28px;
+    right: auto;
+    width: 2px;
+    height: auto;
+    transform: translateX(-1px);
+    background: linear-gradient(180deg, rgba(227, 11, 23, 0.7), rgba(242, 121, 45, 0.4));
+  }
+  .pillar {
+    display: grid;
+    grid-template-columns: 58px minmax(0, 1fr);
+    column-gap: 20px;
+    align-items: start;
+    text-align: left;
+  }
+  .pillarNode { grid-row: 1 / span 3; }
+  .pillarName { margin-top: 4px; }
+  .pillarTitle, .pillarName, .pillarText { grid-column: 2; }
+  .row { grid-template-columns: 1fr; gap: 16px; padding: 32px 0; }
+}
+
+@media (max-width: 760px) {
+  .leadInner { grid-template-columns: 1fr; gap: 28px; }
+  .leadCta { justify-content: flex-start; }
+}
+
+@media (max-width: 620px) {
+  .audienceItem { grid-template-columns: 44px minmax(0, 1fr); gap: 14px; padding: 24px 0; }
+  .audienceNumber { font-size: 24px; }
+}

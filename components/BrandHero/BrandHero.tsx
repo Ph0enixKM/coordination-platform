@@ -178,7 +178,7 @@ export default function BrandHero() {
         <h2 className={styles.subheading}>Porządkujemy strategię, sprzedaż i procesy, żeby Twoja firma rosła bez chaosu.</h2>
 
         <div className={styles.ctaRow}>
-          <CtaButton href="#kontakt">Wypełnij formularz</CtaButton>
+          <CtaButton href="#kontakt">Umów bezpłatną konsultację</CtaButton>
         </div>
 
         <ParcelScene play={flying} />

@@ -22,22 +22,25 @@
 /* --- the cards ------------------------------------------------------------ */
 
 /*
- * The ring under each card does the separating; this only softens where it
- * ends. No offset, because every card is swung to its own angle and a
- * directional shadow would swing with it.
+ * Set on the group outside the swing, so both shadows fall straight down
+ * whatever angle the card is held at: a tight one where the paper nearly
+ * touches what is under it, and a wide soft one for the height of the hand.
  */
+.lift {
+  filter: drop-shadow(0 1px 1.5px rgb(1 33 65 / 0.12))
+    drop-shadow(0 6px 10px rgb(1 33 65 / 0.09));
+}
+
 .card {
   transform-box: fill-box;
   transform-origin: center;
-  filter: drop-shadow(0 0 5px var(--board));
 }
 
+/* A hairline edge, the way a sheet of paper catches the light. */
 .paper {
   fill: #ffffff;
-}
-
-.halo {
-  fill: var(--board);
+  stroke: rgb(1 33 65 / 0.07);
+  stroke-width: 0.75;
 }
 
 /* --- what is on each side ------------------------------------------------- */
@@ -89,29 +92,33 @@
   animation: face-back var(--cycle) var(--lag) infinite;
 }
 
-/* Over at the front of the loop, back again at the end of it. */
+/*
+ * Over at the front of the loop, back again at the end of it. A card is not
+ * turned flat against the table: it comes up off the fan a little on the way
+ * over and drops back into its slot as it lands.
+ */
 @keyframes turn {
   0%,
   14% {
-    transform: scaleX(1);
+    transform: translateY(0) scaleX(1);
     animation-timing-function: cubic-bezier(0.5, 0, 0.9, 0.3);
   }
   22% {
-    transform: scaleX(0.03);
+    transform: translateY(-7px) scaleX(0.03);
     animation-timing-function: cubic-bezier(0.1, 0.7, 0.5, 1);
   }
   30%,
   70% {
-    transform: scaleX(1);
+    transform: translateY(0) scaleX(1);
     animation-timing-function: cubic-bezier(0.5, 0, 0.9, 0.3);
   }
   78% {
-    transform: scaleX(0.03);
+    transform: translateY(-7px) scaleX(0.03);
     animation-timing-function: cubic-bezier(0.1, 0.7, 0.5, 1);
   }
   86%,
   100% {
-    transform: scaleX(1);
+    transform: translateY(0) scaleX(1);
   }
 }
 

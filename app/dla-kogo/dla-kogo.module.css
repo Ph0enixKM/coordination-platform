@@ -1,0 +1,113 @@
+/* ---------- shared layout ---------- */
+
+.inner {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+}
+
+.intro {
+  margin-bottom: 54px;
+}
+
+/* ---------- lead section ---------- */
+
+.lead {
+  padding: clamp(48px, 6vw, 80px) 24px;
+  background: var(--paper);
+}
+
+.leadInner {
+  width: min(880px, 100%);
+  margin: 0 auto;
+}
+
+.leadText {
+  max-width: 780px;
+  margin: 0 auto;
+  color: var(--muted);
+  font-size: 18px;
+  line-height: 1.7;
+  text-align: center;
+}
+
+.leadText .strong {
+  color: var(--navy);
+  font-weight: 600;
+}
+
+.leadText .mark {
+  color: var(--orange);
+  font-weight: 600;
+  background: none;
+  padding: 0;
+}
+
+/* ---------- sections (alternating backgrounds for rhythm) ---------- */
+
+.situations {
+  padding: clamp(48px, 6vw, 80px) 24px;
+  background: linear-gradient(180deg, #edf0f3, #f5f6f8);
+}
+
+.stages {
+  padding: clamp(48px, 6vw, 80px) 24px;
+  background: var(--paper);
+}
+
+.notForYou {
+  padding: clamp(48px, 6vw, 80px) 24px;
+  background: linear-gradient(180deg, #edf0f3, #f5f6f8);
+}
+
+.firmTypes {
+  padding: clamp(48px, 6vw, 80px) 24px;
+  background: var(--paper);
+}
+
+
+/* ---------- CTA ---------- */
+
+.ctaSection {
+  padding: clamp(56px, 7vw, 96px) 24px;
+  background: var(--navy);
+}
+
+.ctaInner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+  width: min(720px, 100%);
+  margin: 0 auto;
+  text-align: center;
+}
+
+.ctaTitle {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(26px, 3.5vw, 38px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+  color: #fff;
+}
+
+.ctaText {
+  max-width: 54ch;
+  margin: 0 0 24px;
+  color: #c1cddd;
+  font-size: 16px;
+  line-height: 1.7;
+}
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 620px) {
+  .intro {
+    margin-bottom: 38px;
+  }
+
+  .leadText {
+    font-size: 16px;
+  }
+}

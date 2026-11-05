@@ -1,0 +1,18 @@
+/* Laid across the bottom of its section, which must be position: relative. */
+.edge {
+  position: absolute;
+  right: 0;
+  bottom: -1px;
+  left: 0;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: clamp(56px, 7.5vw, 110px);
+  pointer-events: none;
+}
+
+/* The torn paper's grey rim, as on the cover. */
+.rim { fill: #aeb7bf; }
+
+/* The sheet itself: the background of the section below, so it runs on into it. */
+.sheet { fill: var(--paper); }

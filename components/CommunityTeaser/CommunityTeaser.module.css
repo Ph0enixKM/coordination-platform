@@ -1,0 +1,124 @@
+.teaser {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: clamp(20px, 3vw, 36px);
+  padding: clamp(24px, 3.5vw, 40px);
+  border-radius: 20px;
+  color: #fff;
+  background: var(--navy);
+  overflow: hidden;
+  isolation: isolate;
+  transition: transform 200ms ease, box-shadow 200ms ease;
+}
+
+.teaser:hover {
+  box-shadow: 0 24px 44px -28px rgba(1, 33, 65, 0.7);
+  transform: translateY(-2px);
+}
+
+/* The community mark blurred into a red glow from the right, the same light
+   the community page's header has. */
+.glow {
+  position: absolute;
+  top: -40%;
+  right: -8%;
+  z-index: -1;
+  width: clamp(260px, 34vw, 420px);
+  aspect-ratio: 1;
+  opacity: 0.45;
+  filter: blur(70px) saturate(1.3);
+  transform: translateZ(0);
+  pointer-events: none;
+}
+
+.glow > svg,
+.mark > svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.mark {
+  flex: none;
+  width: clamp(56px, 7vw, 76px);
+  aspect-ratio: 520 / 624;
+}
+
+.copy {
+  min-width: 0;
+}
+
+.title {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(22px, 2.6vw, 28px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+}
+
+.text {
+  max-width: 58ch;
+  margin: 10px 0 18px;
+  color: #c1cddd;
+  font-size: 15.5px;
+  line-height: 1.65;
+}
+
+/* Inline, not flex: when the label wraps on a phone, the arrow stays after
+   its last word instead of drifting to the card's edge. */
+.link {
+  color: #fff;
+  font-family: "Poppins", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.link svg {
+  display: inline-block;
+  margin-left: 8px;
+  color: #ff5a5f;
+  vertical-align: -3px;
+  transition: transform 200ms ease;
+}
+
+.teaser:hover .link svg {
+  transform: translateX(4px);
+}
+
+/* The whole card is the link. */
+.link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+}
+
+.link:focus-visible {
+  outline: none;
+}
+
+.link:focus-visible::after {
+  outline: 2px solid #ff5a5f;
+  outline-offset: 3px;
+}
+
+@media (max-width: 560px) {
+  .teaser {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .teaser,
+  .link svg {
+    transition: none;
+  }
+
+  .teaser:hover {
+    transform: none;
+  }
+}

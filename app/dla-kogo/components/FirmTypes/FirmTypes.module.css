@@ -1,0 +1,80 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 32px;
+  border: 1px solid #dce2e8;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 8px 24px -16px rgba(1, 33, 65, 0.16);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+}
+
+.card:hover {
+  border-color: #b6c3d0;
+  box-shadow: 0 16px 32px -20px rgba(1, 33, 65, 0.24);
+  transform: translateY(-2px);
+}
+
+.title {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  font-size: 22px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  color: var(--navy);
+}
+
+.symptom {
+  margin: 0;
+  padding: 14px 16px;
+  border-left: 3px solid var(--orange);
+  background: rgba(242, 121, 45, 0.06);
+  border-radius: 0 10px 10px 0;
+  font-family: "Poppins", sans-serif;
+  font-size: 14.5px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.5;
+  color: var(--navy);
+}
+
+.description {
+  margin: 0;
+  color: #5a6675;
+  font-size: 15px;
+  line-height: 1.75;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 620px) {
+  .card {
+    padding: 24px;
+  }
+
+  .title {
+    font-size: 20px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+
+  .card:hover {
+    transform: none;
+  }
+}
