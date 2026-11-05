@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "coordination",
+  "name": "coordination-website",
   // Client's Cloudflare account (we work on it as an invited member).
   "account_id": "bcd7c6b524e41e2fb2a20391294089aa",
   "main": ".open-next/worker.js",
@@ -14,7 +14,7 @@
     {
       // OpenNext calls back into the Worker itself; must match "name" above.
       "binding": "WORKER_SELF_REFERENCE",
-      "service": "coordination"
+      "service": "coordination-website"
     }
   ],
   // next/image optimization through Cloudflare Images.
