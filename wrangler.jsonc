@@ -3,6 +3,9 @@
   "name": "coordination-website",
   // Client's Cloudflare account (we work on it as an invited member).
   "account_id": "bcd7c6b524e41e2fb2a20391294089aa",
+  // CONTACT_EMAIL and RESEND_FROM_EMAIL are set in the dashboard; without this
+  // every deploy would delete variables that are not listed here.
+  "keep_vars": true,
   "main": ".open-next/worker.js",
   "compatibility_date": "2026-10-01",
   "compatibility_flags": ["nodejs_compat", "global_fetch_strictly_public"],
