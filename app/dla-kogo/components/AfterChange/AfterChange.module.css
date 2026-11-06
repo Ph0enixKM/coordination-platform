@@ -1,0 +1,239 @@
+.shell {
+  max-width: 1040px;
+  margin: 0 auto;
+}
+
+/* The column headings and every row share one track layout, so "Dziś" and
+   "Po doradztwie" sit straight above their columns. */
+.head,
+.row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 56px minmax(0, 1.2fr);
+}
+
+.head {
+  margin-bottom: 14px;
+  font-family: "Poppins", sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.headBefore {
+  padding-left: 24px;
+  color: var(--muted);
+}
+
+.headAfter {
+  padding-left: 24px;
+  color: var(--orange);
+}
+
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.row {
+  align-items: stretch;
+}
+
+.before,
+.after {
+  margin: 0;
+  padding: 22px 24px;
+  border-radius: 16px;
+  font-family: "Poppins", sans-serif;
+  font-size: 15.5px;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  line-height: 1.5;
+}
+
+.before {
+  display: flex;
+  align-items: center;
+  background: #e9edf1;
+  color: #66717f;
+}
+
+/* The old state is struck through with a drawn line rather than
+   text-decoration, so the line can sweep across it, line by line. */
+.strike {
+  background: linear-gradient(#97a2b0, #97a2b0) no-repeat 0 58% / 100% 1.5px;
+}
+
+.arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: center;
+  justify-self: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(242, 121, 45, 0.1);
+  color: var(--orange);
+}
+
+.arrow svg {
+  width: 18px;
+  height: 18px;
+}
+
+.after {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  border: 1px solid #dce2e8;
+  border-left: 3px solid var(--orange);
+  background: #fff;
+  box-shadow: 0 8px 24px -16px rgba(1, 33, 65, 0.16);
+  color: var(--navy);
+}
+
+.check {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+  border-radius: 50%;
+  background: var(--orange);
+  color: #fff;
+}
+
+.check svg {
+  width: 14px;
+  height: 14px;
+  stroke-width: 3;
+}
+
+/* Spoken before each half, since the column headings are only visual. On
+   narrow screens the label shows, but its colon stays for screen readers. */
+.label,
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.note {
+  max-width: 64ch;
+  margin: 32px auto 0;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14.5px;
+  font-style: italic;
+  line-height: 1.65;
+}
+
+/* ---------- reveal: only once the script is there to finish it ---------- */
+
+.shell[data-armed] .strike {
+  background-size: 0 1.5px;
+  transition: background-size 0.7s cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.shell[data-armed] .arrow,
+.shell[data-armed] .after {
+  opacity: 0;
+  transform: translateX(-12px);
+  transition:
+    opacity 0.45s ease 0.45s,
+    transform 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.45s;
+}
+
+.shell[data-armed] .arrow {
+  transition-delay: 0.3s;
+}
+
+.shell[data-armed] .row[data-shown] .strike {
+  background-size: 100% 1.5px;
+}
+
+.shell[data-armed] .row[data-shown] .arrow,
+.shell[data-armed] .row[data-shown] .after {
+  opacity: 1;
+  transform: none;
+}
+
+/* ---------- narrow: the two halves stack, each one labelled ---------- */
+
+@media (max-width: 720px) {
+  .head {
+    display: none;
+  }
+
+  .row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  .arrow {
+    justify-self: start;
+    margin-left: 20px;
+    transform: rotate(90deg);
+  }
+
+  .shell[data-armed] .arrow {
+    transform: rotate(90deg) translateX(-8px);
+  }
+
+  .shell[data-armed] .row[data-shown] .arrow {
+    transform: rotate(90deg);
+  }
+
+  .shell[data-armed] .after {
+    transform: translateY(-8px);
+  }
+
+  .label {
+    position: static;
+    display: block;
+    width: auto;
+    height: auto;
+    margin-bottom: 4px;
+    overflow: visible;
+    clip: auto;
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    white-space: normal;
+  }
+
+  .before .label {
+    color: var(--muted);
+  }
+
+  .after .label {
+    color: var(--orange);
+  }
+
+  .list {
+    gap: 22px;
+  }
+}
+
+@media (max-width: 620px) {
+  .before,
+  .after {
+    padding: 18px 20px;
+    font-size: 15px;
+  }
+
+  .note {
+    margin-top: 26px;
+  }
+}

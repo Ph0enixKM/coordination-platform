@@ -8,6 +8,8 @@ import SituationCards from "./components/SituationCards/SituationCards";
 import StageMatrix from "./components/StageMatrix/StageMatrix";
 import NotForYou from "./components/NotForYou/NotForYou";
 import FirmTypes from "./components/FirmTypes/FirmTypes";
+import Approach from "./components/Approach/Approach";
+import AfterChange from "./components/AfterChange/AfterChange";
 import styles from "./dla-kogo.module.css";
 
 export const metadata: Metadata = {
@@ -36,6 +38,21 @@ export default function DlaKogoPage() {
             ograniczamy się do branży, bo problem rzadko leży w rodzaju działalności, lecz w tym,
             że firma <mark className={styles.mark}>przestaje działać jako spójny system</mark>.
           </p>
+        </div>
+      </section>
+
+      <section className={styles.approach}>
+        <div className={styles.inner}>
+          <div className={styles.intro}>
+            <SectionIntro title="Na czym polega doradztwo dla małych firm">
+              To wspólna praca z właścicielem nad tym, jak firma podejmuje decyzje, komu i co
+              sprzedaje oraz jak łączy strategię, sprzedaż, marketing i codzienną realizację. Nie
+              przynosimy gotowego szablonu ani raportu do szuflady - pracujemy na Twojej firmie i
+              Twoich decyzjach.
+            </SectionIntro>
+          </div>
+
+          <Approach />
         </div>
       </section>
 
@@ -88,6 +105,20 @@ export default function DlaKogoPage() {
           </div>
 
           <FirmTypes />
+        </div>
+      </section>
+
+      <section className={styles.afterChange}>
+        <div className={styles.inner}>
+          <div className={styles.intro}>
+            <SectionIntro title="Co ma się zmienić po doradztwie?">
+              Te same sytuacje, od których zaczynaliśmy, po zakończonej pracy. Doradztwo nie kończy
+              się na rekomendacjach - jego efekt ma być widoczny w tym, jak firma działa na co
+              dzień.
+            </SectionIntro>
+          </div>
+
+          <AfterChange />
         </div>
       </section>
 

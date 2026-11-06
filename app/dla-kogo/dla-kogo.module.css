@@ -44,22 +44,16 @@
 
 /* ---------- sections (alternating backgrounds for rhythm) ---------- */
 
-.situations {
-  padding: clamp(48px, 6vw, 80px) 24px;
-  background: linear-gradient(180deg, #edf0f3, #f5f6f8);
-}
-
-.stages {
-  padding: clamp(48px, 6vw, 80px) 24px;
-  background: var(--paper);
-}
-
-.notForYou {
-  padding: clamp(48px, 6vw, 80px) 24px;
-  background: linear-gradient(180deg, #edf0f3, #f5f6f8);
-}
-
+.approach,
+.stages,
 .firmTypes {
+  padding: clamp(48px, 6vw, 80px) 24px;
+  background: linear-gradient(180deg, #edf0f3, #f5f6f8);
+}
+
+.situations,
+.notForYou,
+.afterChange {
   padding: clamp(48px, 6vw, 80px) 24px;
   background: var(--paper);
 }
