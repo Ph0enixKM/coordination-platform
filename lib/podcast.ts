@@ -8,22 +8,6 @@ export const PODCAST_SPOTIFY = "https://open.spotify.com/show/0dlekJRAAzprqI93yY
 export const PODCAST_APPLE = `https://podcasts.apple.com/pl/podcast/podcast-pno-strategicznie-o-firmie/id${PODCAST_APPLE_ID}`;
 export const PODCAST_YOUTUBE = "https://www.youtube.com/@szymon_pirko";
 
-/**
- * Spreaker, which hosts the episodes, plays every one of them in its own
- * player: the whole show as the playlist, newest on top, back to the first.
- * The same player the old coordination.pl embedded, without its loader
- * script, which only swaps a link for this iframe.
- */
-export const PODCAST_SPREAKER_PLAYER = `https://widget.spreaker.com/player?${new URLSearchParams({
-  show_id: "5938738",
-  theme: "light",
-  playlist: "show",
-  "playlist-continuous": "false",
-  "chapters-image": "true",
-  episode_image_position: "right",
-  "hide-download": "true",
-})}`;
-
 /** The show's cover, 1200 px square. */
 export async function fetchPodcastArtwork(init?: RequestInit): Promise<string | null> {
   const response = await fetch(`https://itunes.apple.com/lookup?id=${PODCAST_APPLE_ID}&country=pl`, init);
@@ -34,4 +18,15 @@ export async function fetchPodcastArtwork(init?: RequestInit): Promise<string | 
 
   // Apple's image server scales on request: .../600x600bb.jpg names the size.
   return results[0]?.artworkUrl600?.replace(/\/\d+x\d+bb\.(jpg|png|webp)$/, "/1200x1200bb.$1") ?? null;
+}
+
+/** The show's cover, or null when Apple does not answer in time; a page renders without it. */
+export async function podcastArtworkOrNull(): Promise<string | null> {
+  try {
+    return await fetchPodcastArtwork({ signal: AbortSignal.timeout(8000) });
+  } catch (error) {
+    console.error("Fetching the podcast cover failed:", error);
+
+    return null;
+  }
 }

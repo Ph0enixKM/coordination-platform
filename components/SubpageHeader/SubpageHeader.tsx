@@ -20,6 +20,9 @@ type SubpageHeaderProps = {
   artwork?: { src: string; alt: string };
   /** Ends the header in the torn paper from the podcast cover's corner. */
   torn?: boolean;
+  /** A lower header with a smaller cover, for pages under a section that
+      has the full one, e.g. the podcast's episode pages under /podcast-pno. */
+  compact?: boolean;
   /** Something of the page's own beside the title, e.g. an emblem. */
   aside?: React.ReactNode;
   /** A mark blurred into a soft glow in the header's corner, the way the
@@ -27,7 +30,7 @@ type SubpageHeaderProps = {
   glow?: React.ReactNode;
 };
 
-export default function SubpageHeader({ title, lead, crumbs, variant = "page", children, image, artwork, torn, aside, glow }: SubpageHeaderProps) {
+export default function SubpageHeader({ title, lead, crumbs, variant = "page", children, image, artwork, torn, compact, aside, glow }: SubpageHeaderProps) {
   const content = (
     <>
       {crumbs && crumbs.length > 0 && (
@@ -52,7 +55,7 @@ export default function SubpageHeader({ title, lead, crumbs, variant = "page", c
   );
 
   return (
-    <header className={styles.header} data-variant={variant} data-image={image ? "" : undefined} data-artwork={artwork ? "" : undefined} data-torn={torn ? "" : undefined}>
+    <header className={styles.header} data-variant={variant} data-image={image ? "" : undefined} data-artwork={artwork ? "" : undefined} data-torn={torn ? "" : undefined} data-compact={compact ? "" : undefined}>
       {artwork && (
         <>
           {/* The cover blurred into a wash of its own colours, as Apple Music

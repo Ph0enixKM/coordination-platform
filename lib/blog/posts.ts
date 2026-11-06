@@ -2,6 +2,7 @@ import { getDb } from "@/lib/db";
 import { revalidateBlog } from "@/lib/blog/cache";
 import { parseContent, slugify, summarize, type ImageValue, type PostContent } from "@/lib/blog/content";
 import {
+  IN_SECTION,
   LATEST_POST_SQL,
   SUMMARY_COLUMNS,
   VISIBLE,
@@ -9,6 +10,7 @@ import {
   parseJson,
   toSummary,
   type PostRow,
+  type Section,
 } from "@/lib/blog/rows";
 import type { Post, PostInput, PostStatus, PostSummary } from "@/lib/blog/types";
 
@@ -55,7 +57,7 @@ export class PostError extends Error {
  */
 const RESERVED_SLUGS = new Set([
   "admin", "api", "media", "wiedza", "faq", "o-nas", "dla-kogo", "proces", "wsparcie", "spolecznosc",
-  "podcast-pno", "regulamin", "polityka-prywatnosci", "assets", "fonts", "images",
+  "podcast-pno", "podcasty", "odcinek-podcastu", "regulamin", "polityka-prywatnosci", "assets", "fonts", "images",
 ]);
 
 const text = (value: unknown, max = 1000) => (typeof value === "string" ? value.trim().slice(0, max) : "");
@@ -210,17 +212,19 @@ export async function deletePost(id: number) {
   return true;
 }
 
-export async function listPublishedPosts(page: number, perPage: number) {
+/** A page of one section's visible posts, newest first: /wiedza lists the blog, /podcasty the podcast entries. */
+export async function listPublishedPosts(page: number, perPage: number, section: Section = "blog") {
   const db = await getDb();
   const now = new Date().toISOString();
+  const where = `${VISIBLE} AND ${IN_SECTION[section]}`;
   const [rows, count] = await Promise.all([
     db.all<PostRow>(
-      `SELECT ${SUMMARY_COLUMNS} FROM posts WHERE ${VISIBLE} ORDER BY published_at DESC, id DESC LIMIT ? OFFSET ?`,
+      `SELECT ${SUMMARY_COLUMNS} FROM posts WHERE ${where} ORDER BY published_at DESC, id DESC LIMIT ? OFFSET ?`,
       now,
       perPage,
       (page - 1) * perPage,
     ),
-    db.first<{ total: number }>(`SELECT COUNT(*) AS total FROM posts WHERE ${VISIBLE}`, now),
+    db.first<{ total: number }>(`SELECT COUNT(*) AS total FROM posts WHERE ${where}`, now),
   ]);
 
   return { posts: rows.map(toSummary), total: count?.total ?? 0 };

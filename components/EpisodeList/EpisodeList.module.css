@@ -1,0 +1,115 @@
+.list {
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #dce2e8;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 8px 24px -16px rgba(1, 33, 65, 0.16);
+  list-style: none;
+}
+
+.row {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: clamp(16px, 2.5vw, 28px);
+  align-items: center;
+  padding: clamp(16px, 2.2vw, 24px) clamp(16px, 2.6vw, 32px);
+  transition: background-color 150ms ease;
+}
+
+.row + .row { border-top: 1px solid #e6eaee; }
+
+.row:hover { background: var(--soft); }
+
+.row:focus-within {
+  outline: 2px solid var(--orange);
+  outline-offset: -2px;
+}
+
+.cover {
+  display: block;
+  width: clamp(72px, 9vw, 104px);
+  height: auto;
+  aspect-ratio: 1;
+  border-radius: 12px;
+  object-fit: cover;
+  box-shadow: 0 4px 12px -6px rgba(1, 33, 65, 0.3);
+}
+
+.body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.date {
+  color: var(--muted);
+  font-size: 13.5px;
+}
+
+.title {
+  margin: 0;
+  font-family: "Poppins", sans-serif;
+  font-size: clamp(17px, 1.8vw, 20px);
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  line-height: 1.3;
+  color: var(--navy);
+  transition: color 150ms ease;
+}
+
+.row:hover .title { color: var(--orange); }
+
+.link { outline: none; }
+
+.link::after {
+  position: absolute;
+  inset: 0;
+  content: "";
+}
+
+.summary {
+  display: -webkit-box;
+  margin: 0;
+  overflow: hidden;
+  color: #414c5a;
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+.arrow {
+  width: 22px;
+  height: 22px;
+  color: #9aa7b5;
+  transition: color 150ms ease, transform 150ms ease;
+}
+
+.row:hover .arrow {
+  color: var(--orange);
+  transform: translateX(3px);
+}
+
+@media (max-width: 620px) {
+  .row {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .cover { width: 64px; }
+  .title { font-size: 16.5px; }
+  .summary { font-size: 14.5px; }
+  .arrow { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .row,
+  .title,
+  .arrow { transition: none; }
+  .row:hover .arrow { transform: none; }
+}

@@ -31,8 +31,25 @@ export const SUMMARY_COLUMNS = "id, slug, title, status, author, categories, cov
 /** Published and not scheduled for later: what visitors may see. Takes the current time as an ISO string. */
 export const VISIBLE = "status = 'publish' AND published_at IS NOT NULL AND published_at <= ?";
 
-/** The newest visible post, for the home page. Takes the current time as an ISO string. */
-export const LATEST_POST_SQL = `SELECT ${SUMMARY_COLUMNS} FROM posts WHERE ${VISIBLE} ORDER BY published_at DESC, id DESC LIMIT 1`;
+/**
+ * Posts in this category are written from podcast episodes: they are listed
+ * at /podcasty instead of /wiedza. Their address stays /<slug> like any post.
+ */
+export const PODCAST_CATEGORY = "Podcast";
+
+/** Where a post is listed: the knowledge base or the podcast entries. */
+export type Section = "blog" | "podcast";
+
+const IN_PODCAST = `EXISTS (SELECT 1 FROM json_each(posts.categories) WHERE value = '${PODCAST_CATEGORY}')`;
+
+/** SQL condition matching the posts of a section. */
+export const IN_SECTION: Record<Section, string> = { blog: `NOT ${IN_PODCAST}`, podcast: IN_PODCAST };
+
+export const sectionOf = (post: { categories: string[] }): Section =>
+  post.categories.includes(PODCAST_CATEGORY) ? "podcast" : "blog";
+
+/** The newest visible knowledge-base post, for the home page. Takes the current time as an ISO string. */
+export const LATEST_POST_SQL = `SELECT ${SUMMARY_COLUMNS} FROM posts WHERE ${VISIBLE} AND ${IN_SECTION.blog} ORDER BY published_at DESC, id DESC LIMIT 1`;
 
 /** Whether visitors can see a post with these values right now. */
 export const isVisible = (row: { status: PostStatus; published_at: string | null } | null | undefined) =>

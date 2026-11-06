@@ -7,6 +7,8 @@ import Footer from "@/components/Footer/Footer";
 import SiteNav from "@/components/SiteNav/SiteNav";
 import CommunityTeaser from "@/components/CommunityTeaser/CommunityTeaser";
 import { getPublishedPost, listPublishedPosts } from "@/lib/blog/posts";
+import { sectionOf } from "@/lib/blog/rows";
+import { podcastArtworkOrNull } from "@/lib/podcast";
 import { siteUrl } from "@/lib/site";
 import styles from "./post.module.css";
 
@@ -60,7 +62,13 @@ export default async function PostPage({ params }: Props) {
 
   if (!post) notFound();
 
-  const { posts: latest } = await listPublishedPosts(1, 4);
+  // The newest posts of the same list: other episodes under an episode.
+  const section = sectionOf(post);
+  const [{ posts: latest }, showArtwork] = await Promise.all([
+    listPublishedPosts(1, 4, section),
+    // An episode without a cover of its own shows the show's.
+    section === "podcast" && !post.cover ? podcastArtworkOrNull() : null,
+  ]);
   const related = latest.filter((item) => item.id !== post.id).slice(0, 3);
 
   const hero = heroImage(post);
@@ -81,7 +89,7 @@ export default async function PostPage({ params }: Props) {
   return (
     <>
       <SiteNav variant="subpage" />
-      <PostArticle post={post} />
+      <PostArticle post={post} showArtwork={showArtwork} />
 
       <div className={styles.community}>
         <div className={styles.communityInner}>
@@ -93,7 +101,7 @@ export default async function PostPage({ params }: Props) {
         <section className={styles.related} aria-labelledby="related-title">
           <div className={styles.relatedInner}>
             <h2 id="related-title" className={styles.relatedTitle}>
-              Najnowsze wpisy
+              {section === "podcast" ? "Najnowsze odcinki" : "Najnowsze wpisy"}
             </h2>
             <ul className={styles.relatedList}>
               {related.map((item) => (

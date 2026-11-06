@@ -14,6 +14,7 @@
     "db:migrate:local": "wrangler d1 migrations apply coordination --local",
     "db:migrate:remote": "wrangler d1 migrations apply coordination --remote",
     "blog:import": "node --env-file-if-exists=.env scripts/import-blog.mts",
+    "podcasts:import": "node --env-file-if-exists=.env scripts/import-podcasts.mts",
     "lint": "tsc --noEmit"
   },
   "dependencies": {

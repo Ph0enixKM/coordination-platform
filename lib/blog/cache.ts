@@ -1,7 +1,7 @@
 import { revalidatePath } from "next/cache";
 
 /**
- * Posts and the /wiedza pages are rendered once and then served from the page
+ * Posts and the /wiedza, /podcasty and /podcast-pno pages are rendered once and then served from the page
  * cache (KV, see open-next.config.ts) until this marks them stale; each is
  * rendered again on its next visit. Every post page lists the newest posts,
  * so a change to any visible post reaches all of them.
@@ -12,4 +12,7 @@ import { revalidatePath } from "next/cache";
 export function revalidateBlog() {
   revalidatePath("/[slug]", "page");
   revalidatePath("/wiedza/[[...page]]", "page");
+  revalidatePath("/podcasty/[[...page]]", "page");
+  // Shows the newest podcast entries.
+  revalidatePath("/podcast-pno/[[...rest]]", "page");
 }

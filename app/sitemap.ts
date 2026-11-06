@@ -16,6 +16,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${siteUrl}/wiedza` },
     { url: `${siteUrl}/spolecznosc` },
     { url: `${siteUrl}/podcast-pno` },
+    { url: `${siteUrl}/podcasty` },
     { url: `${siteUrl}/faq` },
     { url: `${siteUrl}/regulamin` },
     { url: `${siteUrl}/polityka-prywatnosci` },

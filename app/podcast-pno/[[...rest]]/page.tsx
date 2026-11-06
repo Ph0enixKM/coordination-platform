@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { notFound } from "next/navigation";
 import { ArrowUpRight, Podcast } from "lucide-react";
 import SubpageHeader from "@/components/SubpageHeader/SubpageHeader";
 import SectionIntro from "@/components/SectionIntro/SectionIntro";
@@ -8,15 +10,28 @@ import Footer from "@/components/Footer/Footer";
 import SiteNav from "@/components/SiteNav/SiteNav";
 import { ApplePodcastsLogo, PodcastPlayer, SpotifyLogo } from "@/components/Embed/Embed";
 import EpisodeRecency from "@/components/EpisodeRecency/EpisodeRecency";
+import EpisodeList from "@/components/EpisodeList/EpisodeList";
+import { listPublishedPosts } from "@/lib/blog/posts";
 import {
-  fetchPodcastArtwork,
   PODCAST_APPLE,
   PODCAST_APPLE_ID,
   PODCAST_SPOTIFY,
-  PODCAST_SPREAKER_PLAYER,
   PODCAST_YOUTUBE,
+  podcastArtworkOrNull,
 } from "@/lib/podcast";
 import styles from "./podcast-pno.module.css";
+
+// The newest podcast entries come from the database, which the build cannot
+// read, so the page is rendered on its first visit and then served from the
+// page cache until a change in /admin marks it stale (lib/blog/cache.ts), as
+// /wiedza is. Only /podcast-pno itself is a page: the catch-all exists for
+// that and nothing else.
+export function generateStaticParams(): { rest?: string[] }[] {
+  return [];
+}
+
+/** Episode entries shown on the page; /podcasty lists them all. */
+const LATEST_EPISODES = 6;
 
 export const metadata: Metadata = {
   title: "Podcast PNO - Pozytywny Networking Online",
@@ -81,19 +96,17 @@ const platforms = [
   { name: "YouTube", href: PODCAST_YOUTUBE, logo: YouTubeLogo, tone: "youtube" },
 ] as const;
 
-/** Read once, when the page is prerendered; without it the banner shows no cover. */
-async function buildTimeArtwork() {
-  try {
-    return await fetchPodcastArtwork({ signal: AbortSignal.timeout(8000) });
-  } catch (error) {
-    console.error("Fetching the podcast cover failed:", error);
+type Props = { params: Promise<{ rest?: string[] }> };
 
-    return null;
-  }
-}
+export default async function PodcastPage({ params }: Props) {
+  if ((await params).rest) notFound();
 
-export default async function PodcastPage() {
-  const artwork = await buildTimeArtwork();
+  const [fetched, { posts: episodes }] = await Promise.all([
+    podcastArtworkOrNull(),
+    listPublishedPosts(1, LATEST_EPISODES, "podcast"),
+  ]);
+  // Without Apple's answer the banner shows the entries' cover, or none.
+  const artwork = fetched ?? episodes.find((post) => post.cover)?.cover?.src;
 
   return (
     <>
@@ -146,20 +159,19 @@ export default async function PodcastPage() {
         </div>
       </section>
 
-      <section className={styles.sectionAlt} aria-labelledby="episodes-title">
-        <div className={styles.inner}>
-          <h2 id="episodes-title" className={styles.episodesTitle}>Wszystkie odcinki</h2>
-          {/* Spreaker's player with the whole show, so any episode, the
-              oldest too, plays right here. */}
-          <iframe
-            className={styles.spreaker}
-            src={PODCAST_SPREAKER_PLAYER}
-            title="Odtwarzacz Spreaker: wszystkie odcinki Podcastu PNO"
-            loading="lazy"
-            allow="autoplay; clipboard-write; encrypted-media"
-          />
-        </div>
-      </section>
+      {episodes.length > 0 && (
+        <section className={styles.sectionAlt} aria-labelledby="episodes-title">
+          <div className={styles.inner}>
+            <h2 id="episodes-title" className={styles.episodesTitle}>Najnowsze odcinki</h2>
+            <EpisodeList posts={episodes} />
+            <p className={styles.episodesMore}>
+              <Link className={styles.entriesLink} href="/podcasty">
+                Wszystkie odcinki
+              </Link>
+            </p>
+          </div>
+        </section>
+      )}
 
       <section className={styles.section}>
         <div className={styles.inner}>

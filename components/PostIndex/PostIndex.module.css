@@ -33,10 +33,15 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-top: clamp(36px, 5vw, 56px);
 }
 
+.pagination[data-position="top"] { margin-bottom: clamp(24px, 3.5vw, 36px); }
+.pagination[data-position="bottom"] { margin-top: clamp(36px, 5vw, 56px); }
+
 .step {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   min-width: 110px;
   color: var(--navy);
   font-family: "Poppins", sans-serif;
@@ -46,7 +51,13 @@
 }
 
 a.step:hover { color: var(--orange); }
-.step:last-child { text-align: right; }
+.step:last-child { justify-content: flex-end; }
+
+.step svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
 
 .pages {
   display: flex;

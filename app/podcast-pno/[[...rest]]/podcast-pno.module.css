@@ -125,6 +125,24 @@
   white-space: nowrap;
 }
 
+/* Under the newest episodes, the way to the rest of them. */
+.episodesMore {
+  display: flex;
+  justify-content: center;
+  margin: 28px 0 0;
+}
+
+/* To /podcasty, every episode entry. */
+.entriesLink {
+  color: var(--navy);
+  font-family: "Poppins", sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  transition: color 150ms ease;
+}
+
+.entriesLink:hover { color: var(--orange); }
+
 .episodesTitle {
   margin: 0 0 32px;
   font-family: "Poppins", sans-serif;
@@ -133,18 +151,6 @@
   letter-spacing: -0.03em;
   line-height: 1.15;
   color: var(--navy);
-}
-
-/* Spreaker's player: the current episode on top, the whole show listed
-   below it, scrolling inside the frame. */
-.spreaker {
-  display: block;
-  width: 100%;
-  height: clamp(480px, 60vh, 620px);
-  border: 1px solid #dce2e8;
-  border-radius: 20px;
-  background: #fff;
-  box-shadow: 0 8px 24px -16px rgba(1, 33, 65, 0.16);
 }
 
 .section {

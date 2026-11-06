@@ -11,7 +11,13 @@ const nextConfig: NextConfig = {
   // Pages the old coordination.pl had that this site no longer does: their
   // addresses are indexed, so they lead somewhere instead of a 404.
   async redirects() {
-    return [{ source: "/o-nas", destination: "/", permanent: true }];
+    return [
+      { source: "/o-nas", destination: "/", permanent: true },
+      // WordPress kept podcast entries under their own prefix; here they are
+      // posts at /<slug>, listed at /podcasty.
+      { source: "/odcinek-podcastu", destination: "/podcasty", permanent: true },
+      { source: "/odcinek-podcastu/:slug", destination: "/:slug", permanent: true },
+    ];
   },
 };
 

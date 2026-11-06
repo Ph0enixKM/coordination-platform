@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Trash2, X } from "lucide-react";
 import { slugify } from "@/lib/blog/content";
+import { PODCAST_CATEGORY } from "@/lib/blog/rows";
 import type { Post } from "@/lib/blog/types";
 import styles from "./PostEditor.module.css";
 
@@ -71,7 +72,10 @@ export default function MetaPanel({ post, knownCategories, onChange, onDelete }:
             </button>
           </div>
         </Field>
-        <Field label="Kategorie">
+        <Field
+          label="Kategorie"
+          hint={`Wpis z kategorią „${PODCAST_CATEGORY}” trafia do /podcasty (odcinki podcastu) zamiast do bazy wiedzy.`}
+        >
           <Categories value={post.categories} known={knownCategories} onChange={(categories) => onChange({ categories })} />
         </Field>
       </Section>
