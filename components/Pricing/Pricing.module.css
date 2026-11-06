@@ -1,7 +1,23 @@
 .pricing {
+  position: relative;
+  isolation: isolate;
   padding: clamp(64px, 7vw, 104px) 0;
   background: linear-gradient(180deg, #edf0f3, #f5f6f8);
   scroll-margin-top: 24px;
+}
+
+/* A faint dot grid behind the heading and the tops of the cards. */
+.pricing::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0 0 auto;
+  height: 760px;
+  background-image: radial-gradient(rgb(1 33 65 / 0.1) 1px, transparent 1.5px);
+  background-size: 24px 24px;
+  -webkit-mask-image: radial-gradient(60% 70% at 50% 0%, #000 25%, transparent 78%);
+  mask-image: radial-gradient(60% 70% at 50% 0%, #000 25%, transparent 78%);
+  pointer-events: none;
 }
 
 .intro {
@@ -21,22 +37,33 @@
   align-items: stretch;
 }
 
+/* ---- Group cards ------------------------------------------------------- */
+
 .card {
+  position: relative;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 26px;
   min-width: 0;
   padding: 32px;
   border: 1px solid #dce2e8;
-  border-radius: 20px;
-  background: #fff;
-  box-shadow: 0 8px 24px -16px rgba(1, 33, 65, 0.16);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 22px;
+  background: linear-gradient(180deg, #fff 55%, #fbfcfd);
+  box-shadow:
+    0 1px 2px rgb(1 33 65 / 0.04),
+    0 14px 34px -22px rgb(1 33 65 / 0.22);
+  transition:
+    transform 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.25s ease,
+    box-shadow 0.35s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .card:hover {
-  border-color: #b6c3d0;
-  box-shadow: 0 16px 32px -20px rgba(1, 33, 65, 0.24);
+  transform: translateY(-4px);
+  border-color: #c8d2dc;
+  box-shadow:
+    0 2px 4px rgb(1 33 65 / 0.05),
+    0 28px 52px -28px rgb(1 33 65 / 0.34);
 }
 
 @supports (grid-template-rows: subgrid) {
@@ -45,6 +72,46 @@
     grid-row: span 4;
     grid-template-rows: subgrid;
   }
+}
+
+/*
+ * The card's decoration lives in its own clipped layer, so the card itself
+ * needs no overflow: hidden and the CTA's light pool can still spill below
+ * the button.
+ */
+.decor {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  border-radius: inherit;
+  pointer-events: none;
+}
+
+/* The group's icon again, oversized and barely there, in the top corner. */
+.watermark {
+  position: absolute;
+  top: -22px;
+  right: -26px;
+  width: 168px;
+  height: 168px;
+  color: var(--navy);
+  opacity: 0.08;
+  transition:
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.3s ease;
+}
+
+.card:hover .watermark {
+  opacity: 0.12;
+  transform: rotate(-8deg) scale(1.05);
+}
+
+.head,
+.price,
+.benefits,
+.ask {
+  position: relative;
+  z-index: 1;
 }
 
 .head {
@@ -56,18 +123,19 @@
 
 .icon {
   display: grid;
-  width: 44px;
-  height: 44px;
+  width: 48px;
+  height: 48px;
   place-items: center;
-  border: 1px solid #f3dece;
-  border-radius: 12px;
+  border: 1px solid #f5d8c2;
+  border-radius: 14px;
   color: #bd5a20;
-  background: #fff6ee;
+  background: linear-gradient(180deg, #fff9f4, #ffefe2);
+  box-shadow: 0 8px 16px -10px rgb(242 121 45 / 0.55);
 }
 
 .icon svg {
-  width: 22px;
-  height: 22px;
+  width: 23px;
+  height: 23px;
   stroke-width: 1.6;
 }
 
@@ -83,65 +151,92 @@
   text-wrap: balance;
 }
 
+/* The amount sits on its own tinted plate, the card's focal point. */
 .price {
-  padding: 4px 0 26px;
-  border-bottom: 1px solid #e7ebef;
+  display: flex;
+  flex-direction: column;
+  align-self: start;
+  padding: 18px 22px 20px;
+  border: 1px solid #e6ebf0;
+  border-radius: 16px;
+  background: linear-gradient(140deg, #f7f9fb, #eef2f6);
+}
+
+.prefix {
+  color: #bd5a20;
+  font-family: "Poppins", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  line-height: 1.6;
+  text-transform: uppercase;
 }
 
 .amount {
   display: flex;
   align-items: baseline;
-  gap: 9px;
-  margin: 0 0 8px;
-}
-
-.prefix {
-  color: var(--muted);
-  font-size: 14px;
-}
-
-.price strong {
+  gap: 7px;
+  margin: 2px 0 6px;
   color: var(--navy);
   font-family: "Poppins", sans-serif;
-  font-size: clamp(32px, 3vw, 42px);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.amount strong {
+  font-size: clamp(40px, 3.6vw, 52px);
   font-weight: 600;
   letter-spacing: -0.055em;
-  line-height: 1.2;
-  white-space: nowrap;
+  line-height: 1.05;
+}
+
+.currency {
+  color: #2b4766;
+  font-size: clamp(20px, 1.7vw, 24px);
+  letter-spacing: -0.03em;
 }
 
 .suffix {
   color: var(--muted);
   font-size: 13px;
+  line-height: 1.5;
 }
 
 .benefits {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 14px;
   margin: 0 0 4px;
   padding: 0;
   list-style: none;
 }
 
-.benefits li,
-.shared li {
+.benefits li {
   display: grid;
-  grid-template-columns: 18px 1fr;
-  gap: 10px;
+  grid-template-columns: 22px 1fr;
+  gap: 12px;
   align-items: start;
-  color: #4d5a68;
-  font-size: 14px;
-  line-height: 1.65;
+  color: #44515f;
+  font-size: 14.5px;
+  line-height: 1.6;
 }
 
-.benefits li svg,
-.shared li svg {
-  width: 17px;
-  height: 17px;
-  margin-top: 3px;
-  color: #bb652f;
-  stroke-width: 1.8;
+.tick {
+  display: grid;
+  width: 22px;
+  height: 22px;
+  margin-top: 1px;
+  place-items: center;
+  border-radius: 50%;
+  color: #bd5a20;
+  background: #fff0e4;
+  box-shadow: inset 0 0 0 1px #f7dcc7;
+}
+
+.tick svg {
+  width: 13px;
+  height: 13px;
+  stroke-width: 2.6;
 }
 
 .ask {
@@ -156,56 +251,125 @@
   opacity: 0.35;
 }
 
+/* ---- What every cooperation includes ----------------------------------- */
+
 .shared {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.9fr);
+  align-items: center;
+  gap: 48px;
   margin-top: 24px;
+  overflow: hidden;
+  padding: 44px;
+  border-radius: 24px;
+  color: #fff;
+  background:
+    radial-gradient(90% 120% at var(--glow-at, 0% 100%), rgb(242 121 45 / 0.1), rgb(242 121 45 / 0) 60%),
+    var(--navy);
 }
 
-.sharedInner {
-  display: grid;
-  grid-template-columns: 0.9fr 2fr;
-  align-items: start;
-  gap: 40px;
-  padding: 36px;
-  border-radius: 20px;
-  background: var(--navy);
+/* Echo of the orange halo behind Szymon in the podcast panel. */
+.halo {
+  position: absolute;
+  z-index: -1;
+  bottom: -215px;
+  left: -165px;
+  width: 360px;
+  aspect-ratio: 1;
+  border: 1px solid rgb(242 121 45 / 0.4);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.halo::after {
+  content: "";
+  position: absolute;
+  inset: 44px;
+  border: 1px solid rgb(242 121 45 / 0.22);
+  border-radius: inherit;
 }
 
 .shared h3 {
   margin: 0;
-  color: #fff;
   font-family: "Poppins", sans-serif;
-  font-size: 22px;
-  font-weight: 500;
-  letter-spacing: -0.025em;
-  line-height: 1.4;
+  font-size: clamp(24px, 2.3vw, 30px);
+  font-weight: 600;
+  letter-spacing: -0.04em;
+  line-height: 1.22;
+  text-wrap: balance;
+}
+
+.shared h3 > span {
+  display: block;
+  color: var(--orange);
 }
 
 .shared ul {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 22px 32px;
+  gap: 12px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
 .shared li {
+  display: grid;
+  grid-template-columns: 40px 1fr;
+  gap: 14px;
+  align-items: center;
+  padding: 16px 18px;
+  border: 1px solid rgb(255 255 255 / 0.13);
+  border-radius: 14px;
   color: #dae2eb;
-  font-size: 13px;
+  /* Opaque (navy + 4.5% white), so the halo rings pass behind the tiles. */
+  background: #0c2b4a;
+  font-size: 14px;
+  line-height: 1.55;
 }
 
-.shared li svg {
-  color: #f4aa79;
+.sharedIcon {
+  display: grid;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border: 1px solid rgb(255 172 117 / 0.28);
+  border-radius: 11px;
+  color: #ffac75;
+  background: rgb(242 121 45 / 0.13);
 }
+
+.sharedIcon svg {
+  width: 20px;
+  height: 20px;
+  stroke-width: 1.7;
+}
+
+/* ---- Footnote ---------------------------------------------------------- */
 
 .note {
-  max-width: 830px;
-  margin: 26px auto 0;
-  text-align: center;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  max-width: 860px;
+  margin: 28px auto 0;
   color: var(--muted);
-  font-size: 12px;
-  line-height: 1.8;
+  font-size: 13px;
+  line-height: 1.75;
 }
+
+.note svg {
+  flex: none;
+  width: 16px;
+  height: 16px;
+  margin-top: 4px;
+  color: #8592a1;
+  stroke-width: 1.8;
+}
+
+/* ---- Responsive -------------------------------------------------------- */
 
 @media (max-width: 1050px) {
   .cards,
@@ -216,7 +380,9 @@
   .cards { gap: 14px; }
   .card { padding: 24px; }
   .card h3 { font-size: 18px; }
-  .sharedInner { grid-template-columns: 1fr; gap: 24px; }
+  .price { padding: 16px 18px 18px; }
+  .shared { grid-template-columns: 1fr; gap: 28px; padding: 36px; }
+  .shared h3 > span { display: inline; }
 }
 
 @media (max-width: 800px) {
@@ -230,13 +396,25 @@
   .head { flex-direction: row; align-items: center; gap: 16px; }
   .icon { flex: none; }
   .card h3 { font-size: 20px; }
-  .price strong { font-size: 38px; }
+  .price { align-self: stretch; }
+  .amount strong { font-size: 46px; }
   .ask { align-self: stretch; }
-  .sharedInner { padding: 28px; }
-  .shared ul { grid-template-columns: 1fr; gap: 20px; }
-  .note { text-align: left; padding: 0 6px; }
+  .shared { --glow-at: 100% 100%; padding: 30px 26px; }
+  .shared ul { grid-template-columns: 1fr; gap: 10px; }
+  .halo { bottom: -220px; left: auto; right: -170px; }
+  .watermark { top: -18px; right: -22px; width: 128px; height: 128px; }
+}
+
+@media (max-width: 420px) {
+  .card { padding: 24px 20px; }
+  .shared { padding: 28px 20px; }
+  .shared li { padding: 14px; gap: 12px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .card { transition: none; }
+  .card,
+  .watermark { transition: none; }
+
+  .card:hover,
+  .card:hover .watermark { transform: none; }
 }

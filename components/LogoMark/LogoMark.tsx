@@ -45,8 +45,8 @@ export default function LogoMark({ tone = "light" }: { tone?: LogoTone }) {
     let renderer: THREE.WebGLRenderer;
 
     try {
-      // No powerPreference on purpose - see ParcelScene: asking for the discrete
-      // GPU costs every context already on the page.
+      // No powerPreference on purpose: asking for the discrete GPU costs every
+      // context already on the page.
       renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
     } catch {
       setModelFailed(true);

@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import Image from "next/image";
 import LogoMark from "@/components/LogoMark/LogoMark";
 import type { LogoTone } from "@/components/LogoMark/LogoMark";
-import ParcelScene from "@/components/ParcelScene/ParcelScene";
 import CtaButton from "@/components/CtaButton/CtaButton";
 import styles from "./BrandHero.module.css";
 
@@ -17,13 +17,6 @@ const SPLASH_WIDTH_RATIO = 0.86;
 
 /** Splash size of the logo box, matching the original full-screen intro. */
 const SPLASH_MARK_SIZE = 224;
-
-/**
- * How long after the page settles the camera flight is armed. The splash needs
- * the black to be off the screen first; a refresh only waits for the fade.
- */
-const FLIGHT_CUE = 1000;
-const FLIGHT_CUE_FADE = 650;
 
 type Phase = "pending" | "intro" | "settled";
 
@@ -46,7 +39,6 @@ const markPlayed = () => {
 export default function BrandHero() {
   const [phase, setPhase] = useState<Phase>("pending");
   const [introPlayed, setIntroPlayed] = useState(false);
-  const [flying, setFlying] = useState(false);
   const brandRef = useRef<HTMLDivElement>(null);
   const flightRef = useRef<HTMLDivElement>(null);
   const rowRef = useRef<HTMLDivElement>(null);
@@ -133,18 +125,6 @@ export default function BrandHero() {
     };
   }, [phase, measureSplash]);
 
-  // The sorter takes over the moment the opening is done with the screen.
-  useEffect(() => {
-    if (phase !== "settled") return;
-
-    const timer = window.setTimeout(
-      () => setFlying(true),
-      introPlayed ? FLIGHT_CUE : FLIGHT_CUE_FADE,
-    );
-
-    return () => window.clearTimeout(timer);
-  }, [phase, introPlayed]);
-
   return (
     <section
       className={styles.hero}
@@ -152,7 +132,7 @@ export default function BrandHero() {
       data-intro={introPlayed ? "true" : undefined}
     >
       <noscript>
-        <style>{`.${styles.backdrop}{opacity:0}.${styles.brand},.${styles.headline},.${styles.ctaRow}{opacity:1}.${styles.wordmark}{-webkit-text-fill-color:#012141}`}</style>
+        <style>{`.${styles.backdrop}{opacity:0}.${styles.brand},.${styles.headline},.${styles.ctaRow},.${styles.people}{opacity:1}.${styles.wordmark}{-webkit-text-fill-color:#012141}`}</style>
       </noscript>
 
       <div className={styles.viewport}>
@@ -181,7 +161,29 @@ export default function BrandHero() {
           <CtaButton href="#kontakt">Umów bezpłatną konsultację</CtaButton>
         </div>
 
-        <ParcelScene play={flying} />
+        {/* The team either side of the headline, as on the old coordination.pl:
+            she points at it, he looks up at it. Cut from one photo on white,
+            which the multiply blend lets the page's own paper show through. */}
+        <div className={styles.people} aria-hidden="true">
+          <Image
+            className={styles.person}
+            src="/assets/team-left.png"
+            alt=""
+            width={465}
+            height={491}
+            sizes="(max-width: 900px) 48vw, 560px"
+            priority
+          />
+          <Image
+            className={styles.person}
+            src="/assets/team-right.png"
+            alt=""
+            width={530}
+            height={610}
+            sizes="(max-width: 900px) 48vw, 560px"
+            priority
+          />
+        </div>
       </div>
     </section>
   );

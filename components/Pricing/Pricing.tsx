@@ -1,7 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { Check, Factory, Handshake, Store } from "lucide-react";
+import {
+  Check,
+  Factory,
+  Handshake,
+  Info,
+  PencilRuler,
+  RefreshCw,
+  Scale,
+  ScanSearch,
+  Store,
+} from "lucide-react";
 import CtaButton from "@/components/CtaButton/CtaButton";
 import MailModal from "@/components/MailModal/MailModal";
 import SectionIntro from "@/components/SectionIntro/SectionIntro";
@@ -23,8 +33,8 @@ const groups = [
     title: "Firmy produkcyjne",
     business: "firmą produkcyjną",
     prefix: "Od",
-    amount: "2300 zł",
-    suffix: "netto miesięcznie",
+    amount: "2300",
+    suffix: "netto / miesięcznie",
     benefits: [
       "Uporządkowana droga od zapytania do gotowego zlecenia",
       "Kryteria, które zlecenia przyjmować, a których nie",
@@ -37,8 +47,8 @@ const groups = [
     title: "Firmy usługowe i eksperckie",
     business: "firmą ekspercką / usługową",
     prefix: "Od",
-    amount: "1800 zł",
-    suffix: "netto miesięcznie",
+    amount: "1800",
+    suffix: "netto / miesięcznie",
     benefits: [
       "Jasna oferta i powód, dla którego klient wybiera właśnie Was",
       "Kwalifikacja klientów, zanim pochłoną czas ekspertów",
@@ -51,8 +61,8 @@ const groups = [
     title: "Firmy handlowe, techniczne i projektowe",
     business: "firmą handlową / techniczną / projektową",
     prefix: "Od",
-    amount: "2300 zł",
-    suffix: "netto miesięcznie",
+    amount: "2300",
+    suffix: "netto / miesięcznie",
     benefits: [
       "Klienci i produkty poukładani według rzeczywistej rentowności",
       "Zasady rabatowania zamiast negocjacji od przypadku do przypadku",
@@ -64,10 +74,22 @@ const groups = [
 
 /** What every company gets, niezależnie od grupy i kwoty. */
 const shared = [
-  "Diagnozę tego, co naprawdę nie działa - zanim cokolwiek wdrożymy",
-  "Zasady decyzji, które zostają w firmie po zakończeniu współpracy",
-  "Stały rytm pracy: decyzje, wdrożenie, obserwacja efektów, korekta",
-  "Zakres ustalony po poznaniu firmy, a nie wybrany z gotowego pakietu",
+  {
+    Icon: ScanSearch,
+    text: "Diagnozę tego, co naprawdę nie działa - zanim cokolwiek wdrożymy",
+  },
+  {
+    Icon: Scale,
+    text: "Zasady decyzji, które zostają w firmie po zakończeniu współpracy",
+  },
+  {
+    Icon: RefreshCw,
+    text: "Stały rytm pracy: decyzje, wdrożenie, obserwacja efektów, korekta",
+  },
+  {
+    Icon: PencilRuler,
+    text: "Zakres ustalony po poznaniu firmy, a nie wybrany z gotowego pakietu",
+  },
 ] as const;
 
 type CardProps = {
@@ -80,6 +102,16 @@ function PricingCard({ group, onAsk }: CardProps) {
 
   return (
     <article className={styles.card}>
+      {/* Positioned, so it sits outside the card's subgrid rows. */}
+      <span className={styles.decor} aria-hidden="true">
+        <Icon
+          className={styles.watermark}
+          size={168}
+          strokeWidth={1.25}
+          absoluteStrokeWidth
+        />
+      </span>
+
       <header className={styles.head}>
         <div className={styles.icon}>
           <Icon aria-hidden="true" />
@@ -88,9 +120,10 @@ function PricingCard({ group, onAsk }: CardProps) {
       </header>
 
       <div className={styles.price}>
+        <span className={styles.prefix}>{prefix}</span>
         <p className={styles.amount}>
-          <span className={styles.prefix}>{prefix}</span>
           <strong>{amount}</strong>
+          <span className={styles.currency}>zł</span>
         </p>
         <span className={styles.suffix}>{suffix}</span>
       </div>
@@ -98,7 +131,9 @@ function PricingCard({ group, onAsk }: CardProps) {
       <ul className={styles.benefits}>
         {benefits.map((benefit) => (
           <li key={benefit}>
-            <Check aria-hidden="true" />
+            <span className={styles.tick}>
+              <Check aria-hidden="true" />
+            </span>
             <span>{benefit}</span>
           </li>
         ))}
@@ -139,24 +174,31 @@ export default function Pricing() {
 
       <div className={styles.tail}>
         <div className={styles.shared}>
-          <div className={styles.sharedInner}>
-            <h3>W każdej współpracy,<br />niezależnie od kwoty.</h3>
-            <ul>
-              {shared.map((item) => (
-                <li key={item}>
-                  <Check aria-hidden="true" />
-                  <span>{item}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+          <span className={styles.halo} aria-hidden="true" />
+          <h3>
+            W każdej współpracy,{" "}
+            <span>niezależnie od kwoty.</span>
+          </h3>
+          <ul>
+            {shared.map(({ Icon, text }) => (
+              <li key={text}>
+                <span className={styles.sharedIcon}>
+                  <Icon aria-hidden="true" />
+                </span>
+                <span>{text}</span>
+              </li>
+            ))}
+          </ul>
         </div>
 
         <p className={styles.note}>
-          Podane kwoty nie są sztywnym cennikiem pakietów. Pokazują, ile
-          przeważnie zostawiają u nas firmy podobnej wielkości i o podobnym
-          poziomie złożoności. Dokładny zakres współpracy ustalamy dopiero po
-          poznaniu firmy.
+          <Info aria-hidden="true" />
+          <span>
+            Podane kwoty nie są sztywnym cennikiem pakietów. Pokazują, ile
+            przeważnie zostawiają u nas firmy podobnej wielkości i o podobnym
+            poziomie złożoności. Dokładny zakres współpracy ustalamy dopiero po
+            poznaniu firmy.
+          </span>
         </p>
       </div>
 

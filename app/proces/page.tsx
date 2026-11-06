@@ -8,6 +8,7 @@ import Checklist, { type ChecklistEntry } from "@/components/Checklist/Checklist
 import CtaButton from "@/components/CtaButton/CtaButton";
 import Footer from "@/components/Footer/Footer";
 import SiteNav from "@/components/SiteNav/SiteNav";
+import { PROCESS_STEPS, stepNumber } from "@/lib/content/process";
 import styles from "./proces.module.css";
 
 export const metadata: Metadata = {
@@ -46,38 +47,11 @@ const checkpoints: readonly ChecklistEntry[] = [
   },
 ];
 
-const steps: readonly { number: string; title: string; description: string }[] = [
-  {
-    number: "01.",
-    title: "Diagnoza i wspólne zrozumienie sytuacji",
-    description:
-      "Współpracę zaczynamy od uporządkowania faktów. Analizujemy, jak firma działa dziś na poziomie strategii, sprzedaży, marketingu i decyzji właścicielskich. Celem nie jest szybka ocena, lecz wspólne zrozumienie realnych przyczyn problemów. To etap, w którym porządkujemy obraz firmy i ustalamy, co naprawdę wymaga zmiany, a co jest tylko objawem.",
-  },
-  {
-    number: "02.",
-    title: "Ustalenie kierunku i priorytetów",
-    description:
-      "Na podstawie diagnozy wyznaczamy jasny kierunek działania firmy. Określamy priorytety, które mają największy wpływ na stabilność sprzedaży, produkcji i finansów. Eliminujemy działania poboczne. Właściciel zyskuje punkt odniesienia do każdej decyzji.",
-  },
-  {
-    number: "03.",
-    title: "Strategia na sprzedaż i marketing",
-    description:
-      "Ustalone decyzje strategiczne przekładamy na spójny sposób działania sprzedaży i marketingu. Sprawdzamy, czy oferta i komunikacja wspierają ten sam cel biznesowy. Porządkujemy to, co już funkcjonuje, tak aby zaczęło pracować jako jeden system.",
-  },
-  {
-    number: "04.",
-    title: "Wsparcie we wdrożeniu decyzji",
-    description:
-      "Pomagamy właścicielowi i zespołowi wdrażać ustalone kierunki w codziennym działaniu, bez zatrzymywania operacji bieżących. Celem jest realna zmiana sposobu działania, a nie stosy dokumentów.",
-  },
-  {
-    number: "05.",
-    title: "Uporządkowanie i poprawianie",
-    description:
-      "Porządkujemy wypracowane rozwiązania w jasny model działania firmy. Właściciel otrzymuje system, który może dalej rozwijać samodzielnie. Efektem jest firma, która działa przewidywalnie, a nie reaktywnie.",
-  },
-];
+const steps = PROCESS_STEPS.map((step, index) => ({
+  number: stepNumber(index),
+  title: step.title,
+  description: `${step.description} ${step.outcome}`,
+}));
 
 export default function ProcesPage() {
   return (

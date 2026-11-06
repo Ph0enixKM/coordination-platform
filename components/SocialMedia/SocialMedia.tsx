@@ -83,7 +83,7 @@ export default function SocialMedia() {
           <div className={styles.halo} aria-hidden="true" />
           <Image
             className={styles.photo}
-            src="/assets/szymon.png"
+            src="/assets/szymon-pointing.png"
             alt="Szymon Pirko wskazujący na platformy z rozmowami"
             width={2560}
             height={1707}

@@ -1,5 +1,5 @@
-/* The camera now runs on its own clock, so the hero is just as tall as what it
- * holds - no scroll chapter to pin. */
+/* As tall as what it holds: the brand, the headline, and the team below and
+ * beside them. */
 .hero {
   position: relative;
   background-color: var(--paper);
@@ -7,12 +7,15 @@
 
 .viewport {
   --mark-size: clamp(58px, 8.6vw, 84px);
+  --person-height: clamp(300px, 50svh, 540px);
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
   width: 100%;
   margin-top: clamp(18px, 5svh, 48px);
-  padding: clamp(20px, 3.5svh, 38px) clamp(16px, 3vw, 48px) 0;
+  /* Room under the button for the team, whose heads rise beside the text. */
+  padding: clamp(20px, 3.5svh, 38px) clamp(16px, 3vw, 48px) calc(var(--person-height) * 0.55);
   overflow: hidden;
 }
 
@@ -113,6 +116,31 @@
   isolation: isolate;
 }
 
+/* The team stands at the foot of the hero, one in each corner. The photo is
+   on white: multiplied onto the paper, the white takes the paper's colour.
+   The blend sits on the group, so it holds while the group fades in. */
+.people {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 0;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  width: min(100%, 1600px);
+  margin: 0 auto;
+  opacity: 0;
+  mix-blend-mode: multiply;
+  pointer-events: none;
+}
+
+.person {
+  display: block;
+  width: auto;
+  height: var(--person-height);
+}
+
 /* --- intro: the mark owns the whole viewport --- */
 
 .hero[data-phase="intro"] .brand,
@@ -171,6 +199,14 @@
 
 .hero[data-phase="settled"][data-intro] .ctaRow {
   animation-delay: 0.67s;
+}
+
+.hero[data-phase="settled"] .people {
+  animation: headline-rise 0.95s 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.hero[data-phase="settled"][data-intro] .people {
+  animation-delay: 0.8s;
 }
 
 @keyframes mark-arrive {
@@ -233,6 +269,22 @@
   }
 }
 
+/* Too narrow to stand beside the text: the two stand side by side under it. */
+@media (max-width: 900px) {
+  .viewport { padding-bottom: 0; }
+
+  .people {
+    position: relative;
+    margin-top: clamp(16px, 4vw, 32px);
+  }
+
+  .person {
+    width: 48%;
+    max-width: 320px;
+    height: auto;
+  }
+}
+
 @media (max-width: 560px) {
   .viewport {
     --mark-size: clamp(52px, 15vw, 72px);
@@ -255,7 +307,8 @@
 
   .hero .brand,
   .hero .headline,
-  .hero .ctaRow {
+  .hero .ctaRow,
+  .hero .people {
     animation-duration: 0.01ms;
     animation-delay: 0ms;
   }

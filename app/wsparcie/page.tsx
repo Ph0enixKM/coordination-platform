@@ -5,6 +5,7 @@ import FeatureCards from "@/components/FeatureCards/FeatureCards";
 import CtaButton from "@/components/CtaButton/CtaButton";
 import Footer from "@/components/Footer/Footer";
 import SiteNav from "@/components/SiteNav/SiteNav";
+import { SUPPORT_AREAS } from "@/lib/content/support";
 import styles from "./wsparcie.module.css";
 
 export const metadata: Metadata = {
@@ -14,53 +15,7 @@ export const metadata: Metadata = {
   alternates: { canonical: "/wsparcie" },
 };
 
-const areas: readonly { title: string; description: string }[] = [
-  {
-    title: "Strategia firmy i kierunek rozwoju",
-    description:
-      "Porządkujemy kierunek działania firmy, priorytety i decyzje, które mają największy wpływ na wynik. Strategia nie zostaje dokumentem, tylko staje się filtrem do codziennych wyborów właściciela i zespołu.",
-  },
-  {
-    title: "Model biznesowy i rentowność",
-    description:
-      "Sprawdzamy, na czym firma naprawdę zarabia, które zlecenia i klienci budują wynik, a które tylko generują obrót, chaos i przeciążenie. Dzięki temu łatwiej podejmować decyzje o ofercie, cenach i kierunku rozwoju.",
-  },
-  {
-    title: "Oferta i propozycja wartości",
-    description:
-      "Porządkujemy sposób mówienia o tym, co firma robi, dla kogo jest właściwym wyborem i dlaczego klient miałby wybrać właśnie ją. Dzięki temu sprzedaż nie opiera się wyłącznie na cenie ani przypadkowych rozmowach.",
-  },
-  {
-    title: "Proces sprzedaży i pozyskiwanie klientów",
-    description:
-      "Analizujemy lejek sprzedaży, źródła zapytań, sposób kwalifikacji klientów, argumentację i ofertowanie. Celem jest bardziej przewidywalny proces sprzedaży, a nie ciągłe liczenie na polecenia, przypadkowe zapytania lub aktywność jednego handlowca.",
-  },
-  {
-    title: "Marketing wspierający sprzedaż",
-    description:
-      "Ustawiamy komunikację, treści i stronę internetową tak, aby wspierały realny proces zakupu klienta. Marketing ma wzmacniać sprzedaż i budować zaufanie do firmy, a nie być zbiorem przypadkowych publikacji.",
-  },
-  {
-    title: "Decyzje właścicielskie i odciążenie właściciela",
-    description:
-      "Pomagamy właścicielowi przestać być jedynym punktem kontroli w firmie. Ustalamy zasady podejmowania decyzji, odpowiedzialności i priorytety, dzięki którym firma może działać bardziej przewidywalnie bez ciągłego angażowania właściciela w każdy temat.",
-  },
-  {
-    title: "Procesy i organizacja pracy",
-    description:
-      "Porządkujemy sposób realizacji zleceń, przepływ informacji, odpowiedzialności i momenty decyzyjne. Chodzi nie o biurokrację, lecz o to, aby firma nie rozwiązywała tych samych problemów od nowa przy każdym kliencie.",
-  },
-  {
-    title: "Współpraca sprzedaży, marketingu i realizacji",
-    description:
-      "Łączymy działania handlowe, marketingowe i operacyjne w jeden spójny sposób pracy. Dzięki temu firma nie obiecuje klientom rzeczy, których nie może dowieźć, a sprzedaż nie generuje problemów dla realizacji.",
-  },
-  {
-    title: "Planowanie, kontrola i poprawianie działania firmy",
-    description:
-      "Wprowadzamy prosty rytm pracy nad firmą: diagnozę sytuacji, decyzje, wdrożenie, obserwację efektów i korektę. Dzięki temu firma uczy się działać na podstawie faktów, a nie tylko intuicji i reakcji na bieżące problemy.",
-  },
-];
+const areas = SUPPORT_AREAS;
 
 export default function WsparciePage() {
   return (
